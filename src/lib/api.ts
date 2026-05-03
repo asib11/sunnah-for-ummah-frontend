@@ -178,3 +178,59 @@ export const authApi = {
     return response.json();
   },
 };
+
+export const storeApi = {
+  /**
+   * Fetch product categories
+   */
+  async getCategories() {
+    const response = await fetch(`${BASE_URL}/store/product-categories`, {
+      method: "GET",
+      headers: getDefaultHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to fetch categories.");
+    }
+
+    return response.json();
+  },
+
+  /**
+   * Fetch a category by its handle
+   */
+  async getCategoryByHandle(handle: string) {
+    const response = await fetch(`${BASE_URL}/store/product-categories?handle=${handle}`, {
+      method: "GET",
+      headers: getDefaultHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to fetch category.");
+    }
+
+    const data = await response.json();
+    return data.product_categories && data.product_categories.length > 0 
+      ? data.product_categories[0] 
+      : null;
+  },
+
+  /**
+   * Fetch products by category ID
+   */
+  async getProductsByCategory(categoryId: string) {
+    const response = await fetch(`${BASE_URL}/store/products?category_id[]=${categoryId}&fields=+metadata`, {
+      method: "GET",
+      headers: getDefaultHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to fetch products.");
+    }
+
+    return response.json();
+  },
+};

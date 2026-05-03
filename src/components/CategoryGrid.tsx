@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { storeApi } from "@/lib/api";
 import catPanjabi from "@/assets/cat-panjabi.jpg";
 import catThobe from "@/assets/cat-thobe.jpg";
 import catTshirt from "@/assets/cat-tshirt.jpg";
@@ -9,7 +11,8 @@ import catAttar from "@/assets/cat-attar.jpg";
 import catAccessories from "@/assets/cat-accessories.jpg";
 import catWomens from "@/assets/cat-womens.jpg";
 
-const categories = [
+// Static fallback data while loading or if API fails
+const fallbackCategories = [
   { name: "Premium Panjabi", image: catPanjabi, desc: "Handcrafted elegance" },
   { name: "Thobe", image: catThobe, desc: "Classic & refined" },
   { name: "Dawah T-Shirt", image: catTshirt, desc: "Wear your message" },
@@ -19,8 +22,33 @@ const categories = [
   { name: "Accessories", image: catAccessories, desc: "Complete your look" },
 ];
 
+const getImageForCategory = (handle: string, index: number) => {
+  const imageMap: Record<string, any> = {
+    shirts: catPanjabi,
+    sweatshirts: catThobe,
+    pants: catTshirt,
+    merch: catAccessories,
+    womens: catWomens,
+    attar: catAttar,
+  };
+  return imageMap[handle] || fallbackCategories[index % fallbackCategories.length].image;
+};
+
 const CategoryGrid = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  const { data: categoriesData, isLoading } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => storeApi.getCategories(),
+  });
+
+  // Use API categories if available, otherwise fallback
+  const displayCategories = categoriesData?.product_categories?.map((cat: any, index: number) => ({
+    name: cat.name,
+    desc: cat.description || "View Collection",
+    image: cat.metadata?.image_url ? { src: cat.metadata.image_url } : getImageForCategory(cat.handle, index),
+    handle: cat.handle,
+  })) || fallbackCategories;
 
   return (
     <section className="py-16 md:py-24 overflow-hidden">
@@ -37,17 +65,19 @@ const CategoryGrid = () => {
 
         {/* Bento-style asymmetric grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-12 gap-3 md:gap-4 auto-rows-[180px] md:auto-rows-[220px]">
-          {categories.map((cat, index) => {
-            // Unique span patterns for visual interest
+          {displayCategories.map((cat: any, index: number) => {
+            // Unique span patterns for visual interest (repeating every 7 items)
             const spanClasses = [
-              "lg:col-span-4 lg:row-span-1", // Premium Panjabi - smaller
-              "lg:col-span-4 lg:row-span-1", // Thobe
-              "lg:col-span-4 lg:row-span-1", // Dawah T-Shirt
-              "lg:col-span-3 lg:row-span-2", // Kifaya - tall
-              "lg:col-span-4 lg:row-span-2", // Women's - tall
-              "lg:col-span-5 lg:row-span-1", // Attar - wide
-              "lg:col-span-5 lg:row-span-1", // Accessories
+              "lg:col-span-4 lg:row-span-1", // 1
+              "lg:col-span-4 lg:row-span-1", // 2
+              "lg:col-span-4 lg:row-span-1", // 3
+              "lg:col-span-6 lg:row-span-2", // 4 - changed to 6 so it fills nicely if 4 items
+              "lg:col-span-6 lg:row-span-2", // 5
+              "lg:col-span-6 lg:row-span-1", // 6
+              "lg:col-span-6 lg:row-span-1", // 7
             ];
+            
+            const currentSpan = spanClasses[index % spanClasses.length];
 
             const isHovered = hoveredIndex === index;
             const isSiblingHovered = hoveredIndex !== null && hoveredIndex !== index;
@@ -55,9 +85,9 @@ const CategoryGrid = () => {
             return (
               <a
                 key={cat.name}
-                href="#"
+                href={`/categories/${cat.handle || cat.name.toLowerCase().replace(/ /g, '-')}`}
                 className={`group relative overflow-hidden rounded-2xl cursor-pointer
-                  ${spanClasses[index]}
+                  ${currentSpan}
                   transition-all duration-700 ease-out
                   ${isSiblingHovered ? "opacity-60 scale-[0.98]" : "opacity-100 scale-100"}
                   ${isHovered ? "shadow-2xl z-10" : "shadow-md"}
