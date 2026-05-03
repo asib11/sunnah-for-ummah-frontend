@@ -3,6 +3,18 @@
 import { Search, ShoppingCart, Heart, User, Menu, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { authApi } from "@/lib/api";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 import logoSfu from "@/assets/logo-sfu.png";
 
 const searchProducts = [
@@ -68,6 +80,26 @@ const useTypingPlaceholder = (words: string[], typingSpeed = 80, deleteSpeed = 4
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const typingText = useTypingPlaceholder(searchProducts);
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const { data: customerData } = useQuery({
+    queryKey: ["customer"],
+    queryFn: () => authApi.getCustomer().then((res) => res.customer || res),
+    retry: false,
+  });
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      queryClient.invalidateQueries({ queryKey: ["customer"] });
+      toast.success("Logged out successfully");
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      toast.error("Failed to logout");
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
@@ -121,9 +153,33 @@ const Header = () => {
               0
             </span>
           </button>
-          <Link href="/login" className="p-2 hover:text-primary transition-colors hidden md:block">
-            <User className="w-5 h-5" />
-          </Link>
+          {customerData ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="p-2 hover:text-primary transition-colors hidden md:flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  <span className="text-sm font-medium font-body truncate max-w-[100px]">
+                    {customerData.first_name || customerData.email?.split("@")[0] || "Profile"}
+                  </span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 font-body">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href="/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link href="/login" className="p-2 hover:text-primary transition-colors hidden md:block">
+              <User className="w-5 h-5" />
+            </Link>
+          )}
         </div>
       </div>
 
