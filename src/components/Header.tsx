@@ -2,6 +2,7 @@
 
 import { Search, ShoppingCart, Heart, User, Menu, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import logoSfu from "@/assets/logo-sfu.png";
 
 const searchProducts = [
@@ -120,9 +121,9 @@ const Header = () => {
               0
             </span>
           </button>
-          <button className="p-2 hover:text-primary transition-colors hidden md:block">
+          <Link href="/login" className="p-2 hover:text-primary transition-colors hidden md:block">
             <User className="w-5 h-5" />
-          </button>
+          </Link>
         </div>
       </div>
 
