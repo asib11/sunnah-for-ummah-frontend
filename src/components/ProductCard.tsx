@@ -1,6 +1,7 @@
 import { ShoppingCart, Loader2 } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { toast } from "sonner";
+import Link from "next/link";
 
 interface ProductCardProps {
   name: string;
@@ -9,9 +10,10 @@ interface ProductCardProps {
   image: string;
   badge?: string;
   variantId?: string;
+  handle?: string;
 }
 
-const ProductCard = ({ name, price, originalPrice, image, badge, variantId }: ProductCardProps) => {
+const ProductCard = ({ name, price, originalPrice, image, badge, variantId, handle }: ProductCardProps) => {
   const { addToCart, isAdding } = useCart();
 
   const discount = originalPrice
@@ -52,7 +54,7 @@ const ProductCard = ({ name, price, originalPrice, image, badge, variantId }: Pr
       )}
 
       {/* Image */}
-      <div className="aspect-[4/5] overflow-hidden">
+      <Link href={handle ? `/products/${handle}` : "#"} className="block aspect-[4/5] overflow-hidden">
         <img
           src={image}
           alt={name}
@@ -61,13 +63,15 @@ const ProductCard = ({ name, price, originalPrice, image, badge, variantId }: Pr
           height={800}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-      </div>
+      </Link>
 
       {/* Info */}
       <div className="p-4">
-        <h3 className="font-body text-sm font-medium text-foreground line-clamp-2 mb-2 min-h-[2.5rem]">
-          {name}
-        </h3>
+        <Link href={handle ? `/products/${handle}` : "#"}>
+          <h3 className="font-body text-sm font-medium text-foreground line-clamp-2 mb-2 min-h-[2.5rem] hover:text-primary transition-colors">
+            {name}
+          </h3>
+        </Link>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="font-body font-bold text-primary text-lg">৳ {price}</span>

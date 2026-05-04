@@ -35,6 +35,7 @@ const navItems = [
   { label: "Women's", href: "#" },
   { label: "Accessories", href: "#" },
   { label: "Perfume Oil (Attar)", href: "#" },
+  { label: "Hajj Kit", href: "/hajj-kit" },
 ];
 
 const useTypingPlaceholder = (words: string[], typingSpeed = 80, deleteSpeed = 40, pauseMs = 1500) => {
@@ -83,7 +84,7 @@ const Header = () => {
   const typingText = useTypingPlaceholder(searchProducts);
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { totalItems } = useCart();
+  const { totalItems, totalPrice } = useCart();
 
   const { data: customerData } = useQuery({
     queryKey: ["customer"],
@@ -119,21 +120,21 @@ const Header = () => {
         </div>
 
         {/* Logo */}
-        <div className="flex items-center gap-2 md:gap-3 min-w-0">
+        <Link href="/" className="flex items-center gap-2 md:gap-3 min-w-0 hover:opacity-90 transition-opacity">
           <img
             src={logoSfu.src}
             alt="Sunnah For Ummah logo"
             className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover shadow-md ring-1 ring-primary/20"
           />
-          <div className="flex flex-col items-start">
-            <h1 className="font-display text-xl md:text-2xl font-bold text-primary tracking-wide">
+          <div className="flex flex-col items-start text-left">
+            <h1 className="font-display text-xl md:text-2xl font-bold text-primary tracking-wide leading-none">
               Sunnah For Ummah
             </h1>
-            <span className="uppercase tracking-[0.3em] font-body text-[10px] md:text-xs font-bold text-emerald-light">
+            <span className="uppercase tracking-[0.2em] md:tracking-[0.3em] font-body text-[8px] md:text-xs font-bold text-emerald-light mt-1">
               SUNNAH: THE LEGACY OF THE BEST.
             </span>
           </div>
-        </div>
+        </Link>
 
         {/* Icons */}
         <div className="flex items-center gap-3">
@@ -142,7 +143,7 @@ const Header = () => {
           </button>
           <div className="hidden md:flex items-center gap-1 text-sm text-muted-foreground font-body">
             <span>৳</span>
-            <span>0.00</span>
+            <span>{totalPrice.toLocaleString()}</span>
           </div>
           <Link href="/cart" className="relative p-2 hover:text-primary transition-colors">
             <ShoppingCart className="w-5 h-5" />

@@ -1,7 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import ProductCard from "./ProductCard";
+import { storeApi } from "@/lib/api";
+import { getProductPrices } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
+
+// Fallback local images (used only when a product has no thumbnail)
 import product1 from "@/assets/product-1.jpg";
 import product2 from "@/assets/product-2.jpg";
 import product3 from "@/assets/product-3.jpg";
@@ -11,46 +17,35 @@ import product6 from "@/assets/product-6.jpg";
 import product7 from "@/assets/product-7.jpg";
 import product8 from "@/assets/product-8.jpg";
 
-const products = [
-  { name: "Premium Black Embroidered Panjabi", price: 2490, image: product1.src, badge: "New" as const },
-  { name: "Classic White Thobe - Premium Cotton", price: 1990, image: product2.src },
-  { name: "Dawah T-Shirt - Calligraphy Edition", price: 590, image: product3.src, badge: "New" as const },
-  { name: "Navy Blue Embroidered Panjabi", price: 2290, originalPrice: 2790, image: product4.src },
-  { name: "Premium Attar Perfume Oil Set", price: 1250, image: product5.src, badge: "Bestseller" as const },
-  { name: "Beige Cotton Panjabi - Classic Fit", price: 1690, originalPrice: 1990, image: product6.src },
-  { name: "Olive Green Chino Pants", price: 890, image: product7.src },
-  { name: "Solid Premium T-Shirt - Gray", price: 490, originalPrice: 590, image: product8.src },
+const fallbackImages = [
+  product1.src, product2.src, product3.src, product4.src,
+  product5.src, product6.src, product7.src, product8.src,
 ];
 
-function shuffleArray<T>(arr: T[]): T[] {
-  const shuffled = [...arr];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
-
 const NewArrivals = () => {
-  const [displayProducts, setDisplayProducts] = useState(products);
+  const router = useRouter();
 
-  const shuffle = useCallback(() => {
-    setDisplayProducts(prev => {
-      const shuffled = [...prev];
-      // Shuffle only images among the products
-      const images = shuffled.map(p => p.image);
-      for (let i = images.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [images[i], images[j]] = [images[j], images[i]];
-      }
-      return shuffled.map((p, idx) => ({ ...p, image: images[idx] }));
-    });
-  }, []);
+  // Uses the same BASE_URL, API key, and headers as every other API call
+  const { data, isLoading } = useQuery({
+    queryKey: ["new_arrivals"],
+    queryFn:  () => storeApi.getProducts(8),
+    staleTime: 1000 * 60 * 5,
+  });
 
-  useEffect(() => {
-    const interval = setInterval(shuffle, 3000);
-    return () => clearInterval(interval);
-  }, [shuffle]);
+  const apiProducts: any[] = data?.products ?? [];
+
+  const displayProducts = apiProducts.map((p, i) => {
+    const { price, oldPrice } = getProductPrices(p);
+    return {
+      id:            p.id,
+      name:          p.title,
+      price:         price,
+      originalPrice: oldPrice,
+      image:         p.thumbnail || fallbackImages[i % fallbackImages.length],
+      variantId:     p.variants?.[0]?.id,
+      handle:        p.handle,
+    };
+  });
 
   return (
     <section className="container mx-auto px-4 py-12">
@@ -65,13 +60,30 @@ const NewArrivals = () => {
           View All
         </a>
       </div>
-      <div
-        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6"
-      >
-        {displayProducts.map((product, i) => (
-          <ProductCard key={product.name} {...product} />
-        ))}
-      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center items-center h-48">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      ) : displayProducts.length === 0 ? (
+        <p className="text-center text-muted-foreground py-12">
+          No products found. Add products in your Medusa Admin.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          {displayProducts.map((product) => (
+            <ProductCard 
+              key={product.id}
+              name={product.name}
+              price={product.price}
+              originalPrice={product.originalPrice}
+              image={product.image}
+              variantId={product.variantId}
+              handle={product.handle}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 };

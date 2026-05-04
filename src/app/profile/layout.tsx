@@ -6,6 +6,11 @@ import { useQuery } from "@tanstack/react-query";
 import { authApi } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 
+/**
+ * ProfileLayout handles the authentication check for all routes 
+ * under /profile. It ensures only logged-in customers can access
+ * their dashboard and order history.
+ */
 export default function ProfileLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   
@@ -13,6 +18,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
     queryKey: ["customer"],
     queryFn: () => authApi.getCustomer().then(res => res.customer || res),
     retry: false,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   useEffect(() => {
@@ -21,23 +27,22 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
     }
   }, [customer, isLoading, isError, router]);
 
-  if (isLoading || !customer) {
+  if (isLoading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-sm font-body text-muted-foreground animate-pulse">Verifying your session...</p>
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="container mx-auto px-4 py-8 md:py-12 max-w-5xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-display font-bold text-primary">My Account</h1>
-        <p className="text-muted-foreground font-body mt-2">
-          Welcome back, {customer.first_name || "Guest"}!
-        </p>
-      </div>
-      {children}
-    </div>
-  );
+  if (!customer) {
+    return null; // Will redirect in useEffect
+  }
+
+  // We return children directly. Headers and Footers are handled 
+  // by the individual pages to allow for unique layouts.
+  return <>{children}</>;
 }

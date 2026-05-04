@@ -110,11 +110,15 @@ export function useCart() {
   // Calculate total items in the cart
   const totalItems = cart?.items?.reduce((acc: number, item: any) => acc + item.quantity, 0) || 0;
 
+  // Calculate total price in the cart
+  const totalPrice = cart?.items?.reduce((acc: number, item: any) => acc + (item.unit_price * item.quantity), 0) || 0;
+
   return {
     cart,
     isLoading,
     isError,
     totalItems,
+    totalPrice,
     addToCart: addToCartMutation.mutate,
     isAdding: addToCartMutation.isPending,
     updateItem: updateItemMutation.mutate,

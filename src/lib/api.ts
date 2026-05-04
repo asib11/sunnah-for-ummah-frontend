@@ -239,7 +239,7 @@ export const storeApi = {
    * Fetch products by category ID
    */
   async getProductsByCategory(categoryId: string) {
-    const response = await fetch(`${BASE_URL}/store/products?category_id[]=${categoryId}&fields=*variants.prices`, {
+    const response = await fetch(`${BASE_URL}/store/products?category_id[]=${categoryId}&fields=id,title,handle,thumbnail,metadata,*variants.prices`, {
       method: "GET",
       headers: getDefaultHeaders(),
     });
@@ -247,6 +247,77 @@ export const storeApi = {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || "Failed to fetch products.");
+    }
+
+    return response.json();
+  },
+
+  /**
+   * Fetch all products (for home page / new arrivals)
+   */
+  async getProducts(limit = 8) {
+    const response = await fetch(
+      `${BASE_URL}/store/products?fields=id,title,handle,thumbnail,metadata,*variants.prices&limit=${limit}`,
+      { method: "GET", headers: getDefaultHeaders() }
+    );
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to fetch products.");
+    }
+    return response.json();
+  },
+
+  async getProductByHandle(handle: string) {
+    const response = await fetch(
+      `${BASE_URL}/store/products?handle=${handle}&fields=id,title,handle,description,thumbnail,metadata,*variants.prices,*variants.options,*options`,
+      { method: "GET", headers: getDefaultHeaders() }
+    );
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to fetch product.");
+    }
+    const data = await response.json();
+    return data.products?.[0] || null;
+  },
+
+  /**
+   * Fetch products by category HANDLE (not ID) so it survives category recreation
+   */
+  async getProductsByCategoryHandle(handle: string) {
+    // Step 1: resolve handle → category ID
+    const cat = await storeApi.getCategoryByHandle(handle);
+    if (!cat?.id) throw new Error(`Category not found: ${handle}`);
+    // Step 2: fetch products
+    return storeApi.getProductsByCategory(cat.id);
+  },
+  /**
+   * Fetch orders for the logged-in customer
+   */
+  async getCustomerOrders() {
+    const response = await fetch(`${BASE_URL}/store/orders?fields=*items,*shipping_address,*summary`, {
+      method: "GET",
+      headers: getDefaultHeaders(),
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to fetch orders.");
+    }
+
+    return response.json();
+  },
+
+  async getOrder(id: string) {
+    const response = await fetch(`${BASE_URL}/store/orders/${id}?fields=*items,*shipping_address,*summary,*shipping_methods,*payment_collections,*payment_collections.payments`, {
+      method: "GET",
+      headers: getDefaultHeaders(),
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to fetch order.");
     }
 
     return response.json();
