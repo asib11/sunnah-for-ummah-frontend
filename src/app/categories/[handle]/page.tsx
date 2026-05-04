@@ -43,9 +43,11 @@ export default function CategoryPage({ params }: { params: Promise<{ handle: str
     ? fallbackProducts 
     : (productsData?.products?.map((p: any) => ({
         name: p.title,
-        price: p.metadata?.price || p.variants?.[0]?.prices?.[0]?.amount || 0,
-        originalPrice: p.metadata?.originalPrice,
+        price: p.variants?.[0]?.prices?.find((pr: any) => pr.currency_code === "bdt")?.amount || 
+               p.variants?.[0]?.prices?.[0]?.amount || 0,
+        originalPrice: null,
         image: p.thumbnail || product1.src,
+        variantId: p.variants?.[0]?.id,
       })) || fallbackProducts);
 
   return (

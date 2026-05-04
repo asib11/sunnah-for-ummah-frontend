@@ -143,6 +143,24 @@ export const authApi = {
   },
 
   /**
+   * Get current authenticated customer
+   */
+  async getCurrentCustomer() {
+    const response = await fetch(`${BASE_URL}/store/customers/me`, {
+      method: "GET",
+      headers: getDefaultHeaders(),
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    return data.customer;
+  },
+
+  /**
    * Get current logged-in customer profile
    */
   async getCustomer() {
@@ -221,7 +239,7 @@ export const storeApi = {
    * Fetch products by category ID
    */
   async getProductsByCategory(categoryId: string) {
-    const response = await fetch(`${BASE_URL}/store/products?category_id[]=${categoryId}&fields=+metadata`, {
+    const response = await fetch(`${BASE_URL}/store/products?category_id[]=${categoryId}&fields=*variants.prices`, {
       method: "GET",
       headers: getDefaultHeaders(),
     });
@@ -229,6 +247,199 @@ export const storeApi = {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || "Failed to fetch products.");
+    }
+
+    return response.json();
+  },
+
+  // ==========================================
+  // CART API
+  // ==========================================
+
+  async createCart() {
+    const response = await fetch(`${BASE_URL}/store/carts`, {
+      method: "POST",
+      headers: getDefaultHeaders(),
+      body: JSON.stringify({}),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to create cart.");
+    }
+
+    return response.json();
+  },
+
+  async getCart(cartId: string) {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}`, {
+      method: "GET",
+      headers: getDefaultHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to fetch cart.");
+    }
+
+    return response.json();
+  },
+
+  async addToCart(cartId: string, variantId: string, quantity: number) {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/line-items`, {
+      method: "POST",
+      headers: getDefaultHeaders(),
+      body: JSON.stringify({ variant_id: variantId, quantity }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to add item to cart.");
+    }
+
+    return response.json();
+  },
+
+  async updateLineItem(cartId: string, lineId: string, quantity: number) {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/line-items/${lineId}`, {
+      method: "POST",
+      headers: getDefaultHeaders(),
+      body: JSON.stringify({ quantity }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to update line item.");
+    }
+
+    return response.json();
+  },
+
+  async removeLineItem(cartId: string, lineId: string) {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/line-items/${lineId}`, {
+      method: "DELETE",
+      headers: getDefaultHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to remove line item.");
+    }
+
+    return response.json();
+  },
+
+  async addCustomerToCart(cartId: string) {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/customer`, {
+      method: "POST",
+      headers: getDefaultHeaders(),
+      credentials: "include", // Essential to pick up the session cookie
+      body: JSON.stringify({}),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to add customer to cart.");
+    }
+
+    return response.json();
+  },
+
+  async updateCart(cartId: string, data: any) {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}`, {
+      method: "POST",
+      headers: getDefaultHeaders(),
+      credentials: "include",
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to update cart.");
+    }
+
+    return response.json();
+  },
+
+  async getShippingMethods(cartId: string) {
+    const response = await fetch(`${BASE_URL}/store/shipping-options?cart_id=${cartId}`, {
+      method: "GET",
+      headers: getDefaultHeaders(),
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to fetch shipping methods.");
+    }
+
+    return response.json();
+  },
+
+  async addShippingMethod(cartId: string, optionId: string) {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/shipping-methods`, {
+      method: "POST",
+      headers: getDefaultHeaders(),
+      credentials: "include",
+      body: JSON.stringify({ option_id: optionId }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to add shipping method.");
+    }
+
+    return response.json();
+  },
+
+  async createPaymentCollection(cartId: string) {
+    // Step 1: Create payment collection with cart_id in the body
+    const collectionRes = await fetch(`${BASE_URL}/store/payment-collections`, {
+      method: "POST",
+      headers: getDefaultHeaders(),
+      credentials: "include",
+      body: JSON.stringify({ cart_id: cartId }),
+    });
+
+    if (!collectionRes.ok) {
+      const errorData = await collectionRes.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to create payment collection.");
+    }
+
+    const collectionData = await collectionRes.json();
+    const paymentCollectionId = collectionData.payment_collection?.id;
+
+    if (!paymentCollectionId) {
+      throw new Error("Payment collection ID not found.");
+    }
+
+    // Step 2: Initialize a payment session with the system default provider
+    const sessionRes = await fetch(`${BASE_URL}/store/payment-collections/${paymentCollectionId}/payment-sessions`, {
+      method: "POST",
+      headers: getDefaultHeaders(),
+      credentials: "include",
+      body: JSON.stringify({ provider_id: "pp_system_default" }),
+    });
+
+    if (!sessionRes.ok) {
+      const errorData = await sessionRes.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to create payment session.");
+    }
+
+    return sessionRes.json();
+  },
+
+  async completeCart(cartId: string) {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/complete`, {
+      method: "POST",
+      headers: getDefaultHeaders(),
+      credentials: "include",
+      body: JSON.stringify({}),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to complete cart.");
     }
 
     return response.json();

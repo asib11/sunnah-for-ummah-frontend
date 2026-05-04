@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import logoSfu from "@/assets/logo-sfu.png";
+import { useCart } from "@/hooks/useCart";
 
 const searchProducts = [
   "Premium Black Embroidered Panjabi",
@@ -82,6 +83,7 @@ const Header = () => {
   const typingText = useTypingPlaceholder(searchProducts);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { totalItems } = useCart();
 
   const { data: customerData } = useQuery({
     queryKey: ["customer"],
@@ -141,12 +143,14 @@ const Header = () => {
             <span>৳</span>
             <span>0.00</span>
           </div>
-          <button className="relative p-2 hover:text-primary transition-colors">
+          <Link href="/cart" className="relative p-2 hover:text-primary transition-colors">
             <ShoppingCart className="w-5 h-5" />
-            <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-body">
-              0
-            </span>
-          </button>
+            {totalItems > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-body">
+                {totalItems}
+              </span>
+            )}
+          </Link>
           <button className="relative p-2 hover:text-primary transition-colors hidden md:block">
             <Heart className="w-5 h-5" />
             <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-body">
