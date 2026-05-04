@@ -30,7 +30,18 @@ export function useCart() {
     refetch,
   } = useQuery({
     queryKey: ["cart", cartId],
-    queryFn: () => storeApi.getCart(cartId as string).then(res => res.cart),
+    queryFn: async () => {
+      const res = await storeApi.getCart(cartId as string);
+      const fetchedCart = res.cart;
+      // If the cart was already completed (i.e. an order was placed), clear it automatically
+      if (fetchedCart?.completed_at) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(CART_KEY);
+        }
+        return null;
+      }
+      return fetchedCart;
+    },
     enabled: !!cartId,
   });
 

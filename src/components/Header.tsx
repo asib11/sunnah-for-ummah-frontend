@@ -94,7 +94,8 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       await authApi.logout();
-      queryClient.invalidateQueries({ queryKey: ["customer"] });
+      // removeQueries wipes the cache immediately so the name disappears instantly
+      queryClient.removeQueries({ queryKey: ["customer"] });
       toast.success("Logged out successfully");
       router.push("/");
       router.refresh();
