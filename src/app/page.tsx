@@ -4,6 +4,7 @@ import TrustBadges from "@/components/TrustBadges";
 import CategoryGrid from "@/components/CategoryGrid";
 import NewArrivals from "@/components/NewArrivals";
 import Footer from "@/components/Footer";
+import WhatsAppFloat from "@/components/WhatsAppFloat";
 
 export default function Home() {
   return (
@@ -16,6 +17,7 @@ export default function Home() {
         <NewArrivals />
       </main>
       <Footer />
+      <WhatsAppFloat />
     </div>
   );
 }

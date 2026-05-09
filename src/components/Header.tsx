@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, ShoppingCart, Heart, User, Menu, X } from "lucide-react";
+import { Search, ShoppingCart, Heart, User, Menu, X, Star } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -137,15 +137,29 @@ const Header = () => {
         </Link>
 
         {/* Icons */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 md:gap-2">
           <button className="md:hidden p-2" onClick={() => setMobileOpen(!mobileOpen)}>
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-          <div className="hidden md:flex items-center gap-1 text-sm text-muted-foreground font-body">
-            <span>৳</span>
-            <span>{totalPrice.toLocaleString()}</span>
-          </div>
-          <Link href="/cart" className="relative p-2 hover:text-primary transition-colors">
+
+          {/* Animated cart pill with live total */}
+          <Link href="/cart" className="hidden md:flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border border-accent/30 hover:border-accent transition-all group shadow-sm hover:shadow-[0_0_20px_-4px_hsl(var(--accent)/0.5)]">
+            <div className="flex flex-col leading-none">
+              <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-body font-semibold">Your Bag</span>
+              <span className="text-sm font-display font-bold text-primary tabular-nums">৳ {totalPrice.toLocaleString()}</span>
+            </div>
+            <div className="relative p-2 rounded-full bg-primary text-primary-foreground group-hover:bg-accent group-hover:text-accent-foreground transition-all group-hover:rotate-12 group-hover:scale-110">
+              <ShoppingCart className="w-4 h-4" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold ring-2 ring-background animate-pulse">
+                  {totalItems}
+                </span>
+              )}
+            </div>
+          </Link>
+
+          {/* Mobile cart */}
+          <Link href="/cart" className="md:hidden relative p-2 hover:text-primary transition-colors">
             <ShoppingCart className="w-5 h-5" />
             {totalItems > 0 && (
               <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-body">
@@ -153,16 +167,18 @@ const Header = () => {
               </span>
             )}
           </Link>
-          <button className="relative p-2 hover:text-primary transition-colors hidden md:block">
-            <Heart className="w-5 h-5" />
-            <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-body">
+
+          <button className="relative p-2 rounded-full hover:bg-accent/10 hover:text-accent transition-all hover:scale-110 hidden md:block group" aria-label="Wishlist">
+            <Heart className="w-5 h-5 group-hover:fill-accent transition-all" />
+            <span className="absolute top-0 right-0 bg-accent text-accent-foreground text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-body ring-2 ring-background">
               0
             </span>
           </button>
+
           {customerData ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="p-2 hover:text-primary transition-colors hidden md:flex items-center gap-2">
+                <button className="p-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all hover:scale-110 hidden md:flex items-center gap-2">
                   <User className="w-5 h-5" />
                   <span className="text-sm font-medium font-body truncate max-w-[100px]">
                     {customerData.first_name || customerData.email?.split("@")[0] || "Profile"}
@@ -182,7 +198,7 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link href="/login" className="p-2 hover:text-primary transition-colors hidden md:block">
+            <Link href="/login" className="p-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all hover:scale-110 hidden md:block" aria-label="Account">
               <User className="w-5 h-5" />
             </Link>
           )}
@@ -202,17 +218,37 @@ const Header = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="hidden md:block border-t border-border">
-        <div className="container mx-auto flex items-center justify-center gap-8 px-4 py-2.5">
+      <nav className="hidden md:block relative border-t border-primary/20 overflow-hidden bg-gradient-to-r from-primary/10 via-emerald-light/15 to-primary/10">
+        {/* Decorative glow shimmer */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(var(--primary)/0.18),_transparent_70%)]" />
+        <div className="pointer-events-none absolute -top-1/2 left-0 right-0 h-[200%] bg-[linear-gradient(110deg,transparent_30%,hsl(var(--accent)/0.15)_50%,transparent_70%)] animate-[shimmer_6s_linear_infinite] bg-[length:200%_100%]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+
+        <div className="container relative mx-auto flex items-center justify-center gap-8 px-4 py-2.5">
           {navItems.map((item) => (
             <a
               key={item.label}
               href={item.href}
-              className="text-sm font-body font-medium text-foreground hover:text-primary transition-colors"
+              className="group relative text-sm font-body font-medium text-foreground hover:text-primary transition-colors"
             >
               {item.label}
+              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-px w-0 bg-gradient-to-r from-primary via-accent to-primary group-hover:w-full transition-all duration-300" />
             </a>
           ))}
+          <button
+            type="button"
+            onClick={() =>
+              document
+                .getElementById("whats-inside-kit")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
+            className="relative inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 bg-gradient-to-r from-primary/90 via-emerald-light/90 to-primary/90 text-primary-foreground font-body text-xs font-semibold shadow-md shadow-primary/30 hover:shadow-lg hover:shadow-primary/40 hover:-translate-y-0.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background ring-1 ring-accent/40"
+          >
+            <Star className="w-3 h-3 fill-accent text-accent animate-pulse" />
+            <span>সম্পূর্ণ হজ্জ ও উমরাহ সামগ্রী</span>
+            <span className="ml-1 px-1.5 py-px rounded-full bg-accent/90 text-[9px] uppercase tracking-wider text-accent-foreground font-bold">New</span>
+          </button>
         </div>
       </nav>
 
@@ -237,6 +273,19 @@ const Header = () => {
                 {item.label}
               </a>
             ))}
+            <button
+              type="button"
+              onClick={() => {
+                setMobileOpen(false);
+                document
+                  .getElementById("whats-inside-kit")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-accent/15 border border-accent/50 text-accent font-body text-xs font-semibold hover:bg-accent/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background w-fit"
+            >
+              <Star className="w-3 h-3 fill-accent" />
+              <span>সম্পূর্ণ হজ্জ ও উমরাহ সামগ্রী</span>
+            </button>
           </div>
         </nav>
       )}

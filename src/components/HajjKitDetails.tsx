@@ -2,14 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Circle, Shirt, Droplets, Backpack, Sparkles, BedDouble, Crown, Loader2 } from "lucide-react";
+import { CheckCircle2, Circle, Shirt, Droplets, Backpack, Sparkles, BedDouble, Crown, Loader2, ArrowRight } from "lucide-react";
 import { storeApi } from "@/lib/api";
 import { useCart } from "@/hooks/useCart";
 import { toast } from "sonner";
 
 // ── Shared constants (must match hajj-kit/page.tsx) ─────────────────────────
-// Both this component and /hajj-kit page use the SAME query key so React Query
-// returns cached data instantly on the second render — no duplicate network call.
 export const HAJJ_KIT_QUERY_KEY = ["hajj_kit_products", "hajj-kit"] as const;
 export const HAJJ_KIT_HANDLE = "hajj-kit";
 
@@ -49,12 +47,10 @@ const HajjKitDetails = () => {
 
   const { addToCart, removeItem, cart } = useCart();
 
-  // Shared query key — if /hajj-kit page already loaded this, it's instant from cache
   const { data, isLoading, isError } = useQuery({
     queryKey: HAJJ_KIT_QUERY_KEY,
     queryFn:  () => storeApi.getProductsByCategoryHandle(HAJJ_KIT_HANDLE),
-    staleTime: 1000 * 60 * 5,   // 5 min — don't refetch unless stale
-    gcTime:    1000 * 60 * 15,  // keep in memory for 15 min
+    staleTime: 1000 * 60 * 5,
   });
 
   const allProducts: any[] = data?.products ?? [];
@@ -85,7 +81,6 @@ const HajjKitDetails = () => {
   const countFor = (cat: string) =>
     cat === "All" ? kitItems.length : kitItems.filter((i) => i.category === cat).length;
 
-  // ── Cart toggle ────────────────────────────────────────────────────────────
   const handleToggle = (item: (typeof allItems)[number]) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -105,25 +100,26 @@ const HajjKitDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-48 mt-12">
+      <div className="flex flex-col justify-center items-center h-48 mt-12 gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-xs font-body text-muted-foreground animate-pulse tracking-widest uppercase">Loading Components...</p>
       </div>
     );
   }
 
   if (isError || allItems.length === 0) {
     return (
-      <p className="text-center text-muted-foreground py-12 mt-12">
-        No kit items found. Add products to the <strong>Hajj Kit</strong> category in Medusa Admin.
-      </p>
+      <div className="text-center py-20 bg-white/40 backdrop-blur-sm rounded-3xl border border-dashed border-neutral-300 mt-12">
+        <p className="text-sm font-body text-neutral-400">No kit items found. Check Medusa Category: <strong>hajj-kit</strong></p>
+      </div>
     );
   }
 
   return (
-    <div className="mt-12 max-w-6xl mx-auto">
+    <div className="mt-12 max-w-6xl mx-auto px-4">
       {/* Kit toggle */}
       <div className="flex justify-center">
-        <div className="inline-flex flex-wrap p-1.5 rounded-full bg-background/95 backdrop-blur-sm shadow-lg border border-border gap-1">
+        <div className="inline-flex flex-wrap p-1.5 rounded-full bg-white shadow-xl shadow-primary/5 border border-primary/10 gap-1">
           {kitOptions.map((opt) => {
             const Icon = opt.icon;
             const active = kit === opt.key;
@@ -131,13 +127,13 @@ const HajjKitDetails = () => {
               <button
                 key={opt.key}
                 onClick={() => { setKit(opt.key); setActiveCat("All"); }}
-                className={`inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full font-body text-sm font-semibold transition-all ${
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-body text-sm font-bold transition-all ${
                   active
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "text-foreground/70 hover:text-foreground"
+                    ? "bg-primary text-primary-foreground shadow-lg"
+                    : "text-muted-foreground hover:text-foreground hover:bg-neutral-50"
                 }`}
               >
-                {Icon && <Icon className="w-4 h-4 text-accent" />}
+                {Icon && <Icon className={`w-4 h-4 ${active ? "text-accent" : "text-accent/60"}`} />}
                 {opt.label}
               </button>
             );
@@ -146,7 +142,7 @@ const HajjKitDetails = () => {
       </div>
 
       {/* Category filters */}
-      <div className="mt-5 flex flex-wrap justify-center gap-2">
+      <div className="mt-8 flex flex-wrap justify-center gap-2">
         {categories.map((c) => {
           const Icon = c.icon;
           const active = activeCat === c.key;
@@ -156,10 +152,10 @@ const HajjKitDetails = () => {
             <button
               key={c.key}
               onClick={() => setActiveCat(c.key)}
-              className={`inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full font-body text-xs sm:text-sm font-medium transition-all border ${
+              className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full font-body text-xs font-bold transition-all border ${
                 active
-                  ? "bg-primary text-primary-foreground border-primary shadow-md"
-                  : "bg-background/90 text-foreground/80 border-border hover:bg-background"
+                  ? "bg-foreground text-background border-foreground shadow-md"
+                  : "bg-white/60 text-muted-foreground border-neutral-200 hover:border-primary/30"
               }`}
             >
               {Icon && <Icon className="w-3.5 h-3.5" />}
@@ -169,63 +165,62 @@ const HajjKitDetails = () => {
         })}
       </div>
 
-      {/* Items grid — now selectable */}
-      {filtered.length === 0 ? (
-        <p className="text-center text-muted-foreground py-8 mt-6">
-          No items in this kit. Set <code>kit_type</code> in product metadata.
-        </p>
-      ) : (
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filtered.map((item) => {
-            const selected = selectedIds.has(item.id);
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleToggle(item)}
-                className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border shadow-sm w-full text-left transition-all group ${
-                  selected
-                    ? "bg-primary/5 border-primary shadow-md"
-                    : "bg-background/95 border-border hover:shadow-md hover:border-accent/50"
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  {selected
-                    ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0" />
-                    : <Circle className="w-5 h-5 text-neutral-300 group-hover:text-primary/40 transition-colors shrink-0" />
-                  }
-                  <div className="min-w-0">
-                    <p className="font-body text-sm font-semibold text-foreground truncate">
-                      {item.name}
-                    </p>
-                    {item.bangla !== item.name && (
-                      <p
-                        className="font-body text-xs text-muted-foreground truncate"
-                        style={{ fontFamily: "'Noto Sans Bengali', sans-serif" }}
-                      >
-                        {item.bangla}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <span className={`font-body text-xs font-bold px-2.5 py-1 rounded-full shrink-0 ${
-                  selected ? "bg-primary text-white" : "bg-secondary text-foreground"
+      {/* Items grid */}
+      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filtered.map((item) => {
+          const selected = selectedIds.has(item.id);
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleToggle(item)}
+              className={`group relative flex items-center justify-between gap-3 px-5 py-4 rounded-2xl border transition-all w-full text-left ${
+                selected
+                  ? "bg-white border-primary shadow-xl shadow-primary/5 -translate-y-0.5"
+                  : "bg-white/40 border-neutral-100 hover:bg-white hover:border-primary/20 hover:shadow-lg"
+              }`}
+            >
+              <div className="flex items-center gap-4 min-w-0">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                  selected 
+                    ? "bg-primary text-white" 
+                    : "bg-neutral-100 text-neutral-300 group-hover:bg-primary/10 group-hover:text-primary/40"
                 }`}>
-                  {item.price > 0 ? `৳${item.price}` : "—"}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
+                  {selected ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
+                </div>
+                <div className="min-w-0">
+                  <p className={`font-body text-sm font-bold truncate leading-tight ${selected ? "text-primary" : "text-foreground"}`}>
+                    {item.name}
+                  </p>
+                  {item.bangla !== item.name && (
+                    <p className="font-body text-[11px] text-muted-foreground truncate leading-tight mt-1 opacity-70">
+                      {item.bangla}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <span className={`font-body text-xs font-bold px-2.5 py-1 rounded-full shrink-0 transition-colors ${
+                selected ? "bg-primary text-white" : "bg-neutral-100 text-neutral-700"
+              }`}>
+                {item.price > 0 ? `৳${item.price.toLocaleString()}` : "—"}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
-      {/* View Full Kit Builder link */}
-      <div className="mt-8 text-center">
+      {/* Sticky CTA replacement / Footer link */}
+      <div className="mt-12 text-center">
         <a
           href="/hajj-kit"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-white font-bold text-sm hover:bg-primary/90 transition-colors shadow-md"
+          className="group inline-flex items-center gap-3 px-8 py-4 rounded-full bg-primary text-white font-bold text-sm hover:bg-accent transition-all shadow-xl shadow-primary/25 hover:scale-105"
         >
-          🛒 Build Your Full Kit →
+          <ShoppingCart className="w-5 h-5" />
+          <span>Build Your Full Kit</span>
+          <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
         </a>
+        <p className="mt-4 font-body text-[11px] text-muted-foreground uppercase tracking-widest">
+          Choose from 21+ essentials for your journey
+        </p>
       </div>
     </div>
   );

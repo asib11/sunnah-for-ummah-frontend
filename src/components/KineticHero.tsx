@@ -4,11 +4,23 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import SacredStepsHero from "@/components/SacredStepsHero";
 import HajjPackages from "@/components/HajjPackages";
+import CalligraphyDropShoulder from "@/components/CalligraphyDropShoulder";
+import CalligraphyShowcase from "@/components/CalligraphyShowcase";
+import WearYourDeen from "@/components/WearYourDeen";
+import TimesOfSuccess from "@/components/TimesOfSuccess";
+import SabrShowcase from "@/components/SabrShowcase";
+import BaggySweatpants from "@/components/BaggySweatpants";
+import BaggySweatpantsWhite from "@/components/BaggySweatpantsWhite";
+import BaggySweatpantsWashed from "@/components/BaggySweatpantsWashed";
 import heroMasjidHaram from "@/assets/hero-masjid-haram.jpg";
 import heroMasjidNabawi from "@/assets/hero-masjid-nabawi.jpg";
-import heroAlAqsa from "@/assets/hero-al-aqsa.jpg";
-import heroBlueMosque from "@/assets/hero-blue-mosque.jpg";
-import heroSheikhZayed from "@/assets/hero-sheikh-zayed.jpg";
+import heroQubaMosque from "@/assets/hero-quba-mosque.jpg";
+import heroUmayyadMosque from "@/assets/hero-umayyad-mosque.jpg";
+import heroKairouanMosque from "@/assets/hero-kairouan-mosque.jpg";
+import heroCordobaMezquita from "@/assets/hero-cordoba-mezquita.jpg";
+import heroAlhambra from "@/assets/hero-alhambra.jpg";
+import heroSamarraMinaret from "@/assets/hero-samarra-minaret.jpg";
+import heroBadshahiMosque from "@/assets/hero-badshahi-mosque.jpg";
 import hajjHeroBg from "@/assets/hajj-hero-bg.jpg";
 
 type Showcase = {
@@ -46,28 +58,60 @@ const showcases: Showcase[] = [
     cta: "Madinah Edit",
   },
   {
-    eyebrow: "First Qibla",
-    title: "Masjid al-Aqsa",
-    subtitle: "মসজিদ আল-আকসা",
-    description: "A tribute to the blessed land — heritage pieces with quiet, dignified strength.",
-    image: heroAlAqsa.src,
-    cta: "Heritage Line",
+    eyebrow: "First Foundation",
+    title: "Masjid Quba",
+    subtitle: "মসজিদ কুবা",
+    description: "The first mosque built by the Prophet ﷺ — a quiet sanctuary where every prayer carries the reward of an Umrah.",
+    image: heroQubaMosque.src,
+    cta: "Discover Quba",
   },
   {
-    eyebrow: "Ottoman Grace",
-    title: "Sultan Ahmet",
-    subtitle: "নীল মসজিদ",
-    description: "Crafted silhouettes echoing the artistry of the Blue Mosque's six minarets.",
-    image: heroBlueMosque.src,
-    cta: "Crafted Series",
+    eyebrow: "Umayyad Legacy",
+    title: "Umayyad Mosque",
+    subtitle: "উমাইয়া মসজিদ",
+    description: "Damascus' ancient jewel — golden mosaics and arched courtyards echoing centuries of devotion.",
+    image: heroUmayyadMosque.src,
+    cta: "Damascus Heritage",
   },
   {
-    eyebrow: "Emirati Elegance",
-    title: "Sheikh Zayed",
-    subtitle: "শেখ জায়েদ মসজিদ",
-    description: "Refined modern essentials inspired by the grandeur of the Grand Mosque.",
-    image: heroSheikhZayed.src,
-    cta: "Modern Edit",
+    eyebrow: "African Heart",
+    title: "Mosque of Kairouan",
+    subtitle: "কাইরাওয়ান মসজিদ",
+    description: "The fourth holiest mosque in Islam — sandstone walls rising from the Tunisian desert with quiet majesty.",
+    image: heroKairouanMosque.src,
+    cta: "Kairouan Story",
+  },
+  {
+    eyebrow: "Andalusian Light",
+    title: "Mezquita of Córdoba",
+    subtitle: "কর্ডোবা মসজিদ",
+    description: "Infinite horseshoe arches in red and ivory — a forest of columns from the golden age of Al-Andalus.",
+    image: heroCordobaMezquita.src,
+    cta: "Al-Andalus",
+  },
+  {
+    eyebrow: "Nasrid Refinement",
+    title: "Alhambra",
+    subtitle: "আলহাম্‌রা",
+    description: "Granada's crowning palace — geometric tile, carved stucco, and still water reflecting Islamic artistry at its zenith.",
+    image: heroAlhambra.src,
+    cta: "Granada Heritage",
+  },
+  {
+    eyebrow: "Abbasid Echo",
+    title: "Spiral of Samarra",
+    subtitle: "সামাররা মিনার",
+    description: "The helical Malwiya minaret of Iraq — a sand-built spiral spiraling into history's earliest Islamic empires.",
+    image: heroSamarraMinaret.src,
+    cta: "Samarra Story",
+  },
+  {
+    eyebrow: "Mughal Grandeur",
+    title: "Badshahi Mosque",
+    subtitle: "বাদশাহী মসজিদ",
+    description: "Lahore's red sandstone giant — vast courtyards and white marble domes carrying the dignity of Mughal Islam.",
+    image: heroBadshahiMosque.src,
+    cta: "Mughal Edit",
   },
 ];
 
@@ -91,7 +135,15 @@ const KineticHero = () => {
     return () => observer.disconnect();
   }, []);
 
-  const active = showcases[activeIndex];
+  // Auto-cycle through all showcase sites in a loop
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setActiveIndex((i) => (i + 1) % showcases.length);
+    }, 4500);
+    return () => window.clearInterval(id);
+  }, []);
+
+  const active = showcases[activeIndex] ?? showcases[0];
 
   return (
     <section className="relative w-full px-3 sm:px-4 py-3 sm:py-4">
@@ -108,14 +160,11 @@ const KineticHero = () => {
                   alt={s.title}
                   width={1920}
                   height={1080}
-                  className="absolute inset-0 w-full h-full object-cover transition-all duration-[1200ms] ease-out"
+                  className="absolute inset-0 w-full h-full object-cover transition-all transition-duration-[1200ms] ease-out"
                   style={{
                     opacity: i === activeIndex ? 1 : 0,
                     transform: i === activeIndex ? "scale(1.06)" : "scale(1)",
                   }}
-                  {...(i === 0
-                    ? { fetchPriority: "high" as const }
-                    : { loading: "lazy" as const })}
                 />
               ))}
             </div>
@@ -219,20 +268,60 @@ const KineticHero = () => {
             <HajjPackages />
           </div>
 
-          {showcases.slice(1).map((s, idx) => {
-            const i = idx + 1;
+          {/* Calligraphy Drop Shoulder feature */}
+          <div className="relative h-[60svh] sm:h-[65vh] min-h-[360px] sm:min-h-[440px]">
+            <CalligraphyDropShoulder />
+          </div>
+
+          {/* Calligraphy Showcase — front & back cinematic detail */}
+          <div className="relative h-[65svh] sm:h-[70vh] min-h-[420px] sm:min-h-[500px]">
+            <CalligraphyShowcase />
+          </div>
+
+          {/* Wear Your Deen — Tawakkul cinematic film */}
+          <div className="relative h-[70svh] sm:h-[75vh] min-h-[460px] sm:min-h-[540px]">
+            <WearYourDeen />
+          </div>
+
+          {/* Times of Success — Five Daily Prayers cinematic film */}
+          <div className="relative h-[70svh] sm:h-[75vh] min-h-[460px] sm:min-h-[540px]">
+            <TimesOfSuccess />
+          </div>
+
+          {/* Sabr — Patience cinematic film */}
+          <div className="relative h-[70svh] sm:h-[75vh] min-h-[460px] sm:min-h-[540px]">
+            <SabrShowcase />
+          </div>
+
+          {/* Baggy Sweatpants — cinematic streetwear film */}
+          <div className="relative h-[70svh] sm:h-[75vh] min-h-[460px] sm:min-h-[540px]">
+            <BaggySweatpants />
+          </div>
+
+          {/* Baggy Sweatpants Ivory — cinematic streetwear film */}
+          <div className="relative h-[70svh] sm:h-[75vh] min-h-[460px] sm:min-h-[540px]">
+            <BaggySweatpantsWhite />
+          </div>
+
+          {/* Baggy Sweatpants Washed — cinematic streetwear film */}
+          <div className="relative h-[70svh] sm:h-[75vh] min-h-[460px] sm:min-h-[540px]">
+            <BaggySweatpantsWashed />
+          </div>
+
+          {showcases.slice(3).map((s, idx) => {
+            const i = idx + 3;
             return (
               <div
                 key={i}
                 data-index={i}
                 ref={(el) => (panelRefs.current[i] = el)}
-                className="relative h-[calc(100svh-1.5rem)] sm:h-[calc(100vh-2rem)] min-h-[420px] sm:min-h-[520px] overflow-hidden rounded-2xl group"
+                className="relative h-[55svh] sm:h-[60vh] min-h-[320px] sm:min-h-[400px] overflow-hidden rounded-2xl group"
               >
                 <img
                   src={s.image}
                   alt={s.title}
                   loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform transition-duration-[1200ms] ease-out group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
 
