@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Circle, Shirt, Droplets, Backpack, Sparkles, BedDouble, Crown, Loader2, ArrowRight } from "lucide-react";
+import { CheckCircle2, Circle, Shirt, Droplets, Backpack, Sparkles, BedDouble, Crown, Loader2, ArrowRight, ShoppingCart } from "lucide-react";
 import { storeApi } from "@/lib/api";
 import { useCart } from "@/hooks/useCart";
 import { toast } from "sonner";

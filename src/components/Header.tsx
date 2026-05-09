@@ -35,7 +35,7 @@ const navItems = [
   { label: "Women's", href: "#" },
   { label: "Accessories", href: "#" },
   { label: "Perfume Oil (Attar)", href: "#" },
-  { label: "Hajj Kit", href: "/hajj-kit" },
+
 ];
 
 const useTypingPlaceholder = (words: string[], typingSpeed = 80, deleteSpeed = 40, pauseMs = 1500) => {

@@ -331,6 +331,7 @@ export const storeApi = {
     const response = await fetch(`${BASE_URL}/store/carts`, {
       method: "POST",
       headers: getDefaultHeaders(),
+      credentials: "include",
       body: JSON.stringify({}),
     });
 

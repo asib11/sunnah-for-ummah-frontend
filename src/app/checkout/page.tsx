@@ -74,8 +74,12 @@ export default function CheckoutPage() {
     e.preventDefault();
     setIsProcessing(true);
     try {
-      // 1. Add customer to cart
-      await storeApi.addCustomerToCart(cart!.id);
+      // 1. Add customer to cart (optional, might fail if session is wonky but email update still works)
+      try {
+        await storeApi.addCustomerToCart(cart!.id);
+      } catch (err) {
+        console.warn("Could not link customer to cart:", err);
+      }
       
       // 2. Update cart with shipping address
       await storeApi.updateCart(cart!.id, {
@@ -84,7 +88,7 @@ export default function CheckoutPage() {
       });
       
       await refetchCart();
-      setStep("shipping");
+      setStep("payment");
       window.scrollTo(0, 0);
     } catch (error: any) {
       toast.error(error.message || "Failed to update address");
@@ -102,7 +106,7 @@ export default function CheckoutPage() {
     try {
       await storeApi.addShippingMethod(cart!.id, selectedShippingMethod);
       await refetchCart();
-      setStep("payment");
+      // No next step, we are at the end
       window.scrollTo(0, 0);
     } catch (error: any) {
       toast.error(error.message || "Failed to set shipping method");
@@ -112,8 +116,15 @@ export default function CheckoutPage() {
   };
 
   const handleCompleteOrder = async () => {
+    if (!selectedShippingMethod) {
+      toast.error("Please select a shipping method");
+      return;
+    }
     setIsProcessing(true);
     try {
+      // Add the selected shipping method before completing
+      await storeApi.addShippingMethod(cart!.id, selectedShippingMethod);
+
       // 1. Create payment collection
       await storeApi.createPaymentCollection(cart!.id);
       
@@ -160,8 +171,8 @@ export default function CheckoutPage() {
 
   const steps = [
     { id: "address", label: "Address", icon: MapPin },
-    { id: "shipping", label: "Delivery", icon: Truck },
     { id: "payment", label: "Payment", icon: CreditCard },
+    { id: "shipping", label: "Delivery", icon: Truck },
   ];
 
   return (
@@ -267,17 +278,17 @@ export default function CheckoutPage() {
                     disabled={isProcessing}
                     className="w-full bg-primary text-primary-foreground py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all disabled:opacity-50 mt-8"
                   >
-                    {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Continue to Delivery <ArrowRight className="w-4 h-4" /></>}
+                    {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Continue to Payment <ArrowRight className="w-4 h-4" /></>}
                   </button>
                 </form>
               )}
 
               {step === "shipping" && (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between mb-6">
+                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold">Delivery Method</h2>
-                    <button onClick={() => setStep("address")} className="text-sm text-primary hover:underline flex items-center gap-1">
-                      <ArrowLeft className="w-3 h-3" /> Back to Address
+                    <button onClick={() => setStep("payment")} className="text-sm text-primary hover:underline flex items-center gap-1">
+                      <ArrowLeft className="w-3 h-3" /> Back to Payment
                     </button>
                   </div>
                   
@@ -308,22 +319,22 @@ export default function CheckoutPage() {
                     {shippingMethods.length === 0 && <p className="text-muted-foreground py-8 text-center">No shipping methods available for this address.</p>}
                   </div>
 
-                  <button 
-                    onClick={handleShippingSubmit}
+                   <button 
+                    onClick={handleCompleteOrder}
                     disabled={isProcessing || !selectedShippingMethod}
                     className="w-full bg-primary text-primary-foreground py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all disabled:opacity-50 mt-8"
                   >
-                    {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Continue to Payment <ArrowRight className="w-4 h-4" /></>}
+                    {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Complete Order <Check className="w-4 h-4" /></>}
                   </button>
                 </div>
               )}
 
               {step === "payment" && (
                 <div className="space-y-6">
-                  <div className="flex items-center justify-between mb-6">
+                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-bold">Payment Method</h2>
-                    <button onClick={() => setStep("shipping")} className="text-sm text-primary hover:underline flex items-center gap-1">
-                      <ArrowLeft className="w-3 h-3" /> Back to Delivery
+                    <button onClick={() => setStep("address")} className="text-sm text-primary hover:underline flex items-center gap-1">
+                      <ArrowLeft className="w-3 h-3" /> Back to Address
                     </button>
                   </div>
 
@@ -344,12 +355,15 @@ export default function CheckoutPage() {
                     </p>
                   </div>
 
-                  <button 
-                    onClick={handleCompleteOrder}
+                   <button 
+                    onClick={() => {
+                      setStep("shipping");
+                      window.scrollTo(0, 0);
+                    }}
                     disabled={isProcessing}
                     className="w-full bg-primary text-primary-foreground py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all disabled:opacity-50 mt-8"
                   >
-                    {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Complete Order <Check className="w-4 h-4" /></>}
+                    {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Continue to Delivery <ArrowRight className="w-4 h-4" /></>}
                   </button>
                 </div>
               )}
