@@ -9,7 +9,7 @@ type View = "front" | "back";
 
 const CalligraphyShowcase = () => {
   const [view, setView] = useState<View>("front");
-  const { urls, editor } = useSectionMedia("calligraphy-showcase", [
+  const { urls } = useSectionMedia("calligraphy-showcase", [
     { key: "video", label: "Background video", kind: "video", defaultUrl: "/calligraphy-showcase.mp4" },
     { key: "image", label: "T-shirt (front+back)", kind: "image", defaultUrl: tshirtImage.src },
   ]);
@@ -19,7 +19,6 @@ const CalligraphyShowcase = () => {
       className="relative h-full w-full overflow-hidden rounded-2xl bg-foreground group"
       onMouseLeave={() => setView("front")}
     >
-      {editor}
       {/* Looping cinematic video */}
       <video
         src={urls.video}

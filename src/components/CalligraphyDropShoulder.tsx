@@ -7,9 +7,9 @@ import backImage from "@/assets/calligraphy-drop-shoulder-back.png";
 import { useSectionMedia } from "@/components/SectionMediaEditor";
 
 const CalligraphyDropShoulder = () => {
-  const [revealed, setRevealed] = useState(false);
+  const [revealed, setRevealed] = useState(true);
   const [view, setView] = useState<"front" | "back">("front");
-  const { urls, editor } = useSectionMedia("calligraphy-drop-shoulder", [
+  const { urls } = useSectionMedia("calligraphy-drop-shoulder", [
     { key: "video", label: "Background video", kind: "video", defaultUrl: "/calligraphy-drop-shoulder.mp4" },
     { key: "front", label: "Front image", kind: "image", defaultUrl: frontImage.src },
     { key: "back", label: "Back image", kind: "image", defaultUrl: backImage.src },
@@ -20,17 +20,16 @@ const CalligraphyDropShoulder = () => {
       className="relative h-full w-full overflow-hidden rounded-2xl bg-foreground group cursor-pointer"
       onClick={() => setRevealed(true)}
     >
-      {editor}
-      {/* Cinematic video — plays once, then product reveals */}
+      {/* Cinematic video — loops in background */}
       <video
         src={urls.video}
         key={urls.video}
         autoPlay
+        loop
         muted
         playsInline
-        onEnded={() => setRevealed(true)}
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-out"
-        style={{ opacity: revealed ? 0.25 : 0.95 }}
+        style={{ opacity: 0.25 }}
       />
 
       {/* Cinematic overlays */}

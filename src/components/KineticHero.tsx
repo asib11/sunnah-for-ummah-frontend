@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, X, Menu } from "lucide-react";
 import SacredStepsHero from "@/components/SacredStepsHero";
 import HajjPackages from "@/components/HajjPackages";
 import CalligraphyDropShoulder from "@/components/CalligraphyDropShoulder";
@@ -117,6 +117,7 @@ const showcases: Showcase[] = [
 
 const KineticHero = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -143,117 +144,184 @@ const KineticHero = () => {
     return () => window.clearInterval(id);
   }, []);
 
+  // Lock body scroll when drawer is open
+  useEffect(() => {
+    if (drawerOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [drawerOpen]);
+
   const active = showcases[activeIndex] ?? showcases[0];
 
   return (
     <section className="relative w-full px-3 sm:px-4 py-3 sm:py-4">
-      <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4">
-        {/* LEFT — sticky pinned panel (hidden on mobile to avoid duplicate content) */}
-        <div className="hidden lg:block lg:col-span-5 lg:sticky lg:top-4 self-start h-[calc(100vh-2rem)] min-h-[480px]">
-          <div className="relative w-full h-full overflow-hidden rounded-2xl bg-foreground">
-            {/* Image stack — fades with active panel */}
-            <div className="absolute inset-0">
-              {showcases.map((s, i) => (
-                <img
-                  key={i}
-                  src={s.image}
-                  alt={s.title}
-                  width={1920}
-                  height={1080}
-                  className="absolute inset-0 w-full h-full object-cover transition-all transition-duration-[1200ms] ease-out"
-                  style={{
-                    opacity: i === activeIndex ? 1 : 0,
-                    transform: i === activeIndex ? "scale(1.06)" : "scale(1)",
-                  }}
-                />
-              ))}
-            </div>
 
-            {/* Cinematic overlays */}
-            <div className="absolute inset-0 bg-gradient-to-r from-foreground/85 via-foreground/55 to-foreground/30" />
-            <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-transparent to-transparent" />
+      {/* ── Burger Button ── */}
+      <button
+        onClick={() => setDrawerOpen(true)}
+        aria-label="Open Sunnah Showcase"
+        className="fixed left-4 bottom-6 z-40 flex items-center justify-center w-12 h-12 rounded-full bg-foreground/90 backdrop-blur-sm border border-accent/30 shadow-lg hover:bg-foreground transition-all hover:scale-105 active:scale-95"
+      >
+        <Menu className="w-5 h-5 text-accent" />
+      </button>
 
-            {/* Vertical accent rule */}
-            <div className="absolute left-6 md:left-10 top-10 bottom-10 w-px bg-gradient-to-b from-transparent via-accent/60 to-transparent hidden md:block" />
 
-            {/* Counter */}
-            <div className="absolute top-6 right-6 md:top-8 md:right-10 flex items-center gap-2 font-body text-[10px] md:text-xs uppercase tracking-[0.3em] text-primary-foreground/70 z-10">
-              <span className="text-accent">{String(activeIndex + 1).padStart(2, "0")}</span>
-              <span className="w-8 h-px bg-primary-foreground/40" />
-              <span>{String(showcases.length).padStart(2, "0")}</span>
-            </div>
 
-            {/* Brand label */}
-            <div className="absolute top-6 left-6 md:top-8 md:left-10 z-10">
-              <p className="font-body text-[10px] md:text-xs uppercase tracking-[0.35em] text-accent">
-                Sunnah Showcase
-              </p>
-            </div>
+      {/* ── Drawer Backdrop ── */}
+      <div
+        onClick={() => setDrawerOpen(false)}
+        className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+          drawerOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+      />
 
-            {/* Content */}
-            <div className="relative h-full px-6 md:px-10 lg:px-14 flex flex-col justify-end pb-10 md:pb-14">
-              <div className="max-w-md">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="w-10 h-px bg-accent" />
-                  <p
-                    key={`eb-${activeIndex}`}
-                    className="text-accent text-[10px] md:text-xs uppercase tracking-[0.35em] font-body font-medium animate-fade-in"
-                  >
-                    {active.eyebrow}
-                  </p>
-                </div>
-
-                <p className="font-body text-xs md:text-sm uppercase tracking-[0.3em] text-primary-foreground/60 mb-3">
-                  Explore the Kinetic Showcase
-                </p>
-
-                <h2
-                  key={`t-${activeIndex}`}
-                  className="font-display text-4xl md:text-5xl lg:text-6xl font-semibold text-primary-foreground leading-[1.05] tracking-tight animate-fade-in"
-                >
-                  {active.title}
-                </h2>
-                <p
-                  key={`s-${activeIndex}`}
-                  className="font-display text-lg md:text-xl text-primary-foreground/70 mt-2 italic animate-fade-in"
-                >
-                  {active.subtitle}
-                </p>
-
-                <p
-                  key={`d-${activeIndex}`}
-                  className="font-body text-sm md:text-base text-primary-foreground/75 mt-5 leading-relaxed max-w-sm animate-fade-in"
-                >
-                  {active.description}
-                </p>
-
-                <div className="mt-7 flex items-center gap-4">
-                  <button className="group inline-flex items-center gap-3 bg-accent text-accent-foreground pl-6 pr-2 py-2 rounded-full text-sm font-body font-semibold hover:bg-accent/90 transition-all">
-                    {active.cta}
-                    <span className="w-9 h-9 rounded-full bg-accent-foreground/10 group-hover:bg-accent-foreground/20 flex items-center justify-center transition-colors">
-                      <ArrowUpRight className="w-4 h-4" />
-                    </span>
-                  </button>
-                </div>
-
-                {/* Progress dots */}
-                <div className="mt-8 flex items-center gap-2">
-                  {showcases.map((_, i) => (
-                    <span
-                      key={i}
-                      className={`h-1 rounded-full transition-all duration-500 ${
-                        i === activeIndex ? "w-8 bg-accent" : "w-3 bg-primary-foreground/30"
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* ── Drawer Panel ── */}
+      <div
+        className={`fixed top-0 left-0 z-50 h-full w-[90vw] max-w-sm flex flex-col overflow-hidden bg-foreground shadow-2xl transition-transform duration-500 ease-in-out ${
+          drawerOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Drawer image background */}
+        <div className="absolute inset-0">
+          {showcases.map((s, i) => (
+            <img
+              key={i}
+              src={s.image}
+              alt={s.title}
+              className="absolute inset-0 w-full h-full object-cover transition-all duration-[1200ms] ease-out"
+              style={{
+                opacity: i === activeIndex ? 1 : 0,
+                transform: i === activeIndex ? "scale(1.06)" : "scale(1)",
+              }}
+            />
+          ))}
         </div>
 
-        {/* RIGHT — vertically scrolling panels */}
-        <div className="lg:col-span-7 flex flex-col gap-3 sm:gap-4">
+        {/* Cinematic overlays */}
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/90 via-foreground/60 to-foreground/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent" />
+
+        {/* Close Button */}
+        <button
+          onClick={() => setDrawerOpen(false)}
+          aria-label="Close Showcase"
+          className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-primary-foreground/10 hover:bg-primary-foreground/20 backdrop-blur-sm flex items-center justify-center transition-all border border-primary-foreground/20"
+        >
+          <X className="w-4 h-4 text-primary-foreground" />
+        </button>
+
+        {/* Counter */}
+        <div className="absolute top-6 left-6 flex items-center gap-2 font-body text-[10px] uppercase tracking-[0.3em] text-primary-foreground/70 z-10">
+          <span className="text-accent">{String(activeIndex + 1).padStart(2, "0")}</span>
+          <span className="w-6 h-px bg-primary-foreground/40" />
+          <span>{String(showcases.length).padStart(2, "0")}</span>
+        </div>
+
+        {/* Brand label */}
+        <div className="absolute top-14 left-6 z-10">
+          <p className="font-body text-[10px] uppercase tracking-[0.35em] text-accent">
+            Sunnah Showcase
+          </p>
+        </div>
+
+        {/* Drawer Content */}
+        <div className="relative flex-1 flex flex-col justify-end px-6 pb-10 pt-24">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="w-8 h-px bg-accent" />
+            <p
+              key={`deb-${activeIndex}`}
+              className="text-accent text-[10px] uppercase tracking-[0.35em] font-body font-medium animate-fade-in"
+            >
+              {active.eyebrow}
+            </p>
+          </div>
+
+          <p className="font-body text-xs uppercase tracking-[0.3em] text-primary-foreground/60 mb-3">
+            Explore the Kinetic Showcase
+          </p>
+
+          <h2
+            key={`dt-${activeIndex}`}
+            className="font-display text-4xl font-semibold text-primary-foreground leading-[1.05] tracking-tight animate-fade-in"
+          >
+            {active.title}
+          </h2>
+          <p
+            key={`ds-${activeIndex}`}
+            className="font-display text-lg text-primary-foreground/70 mt-2 italic animate-fade-in"
+          >
+            {active.subtitle}
+          </p>
+
+          <p
+            key={`dd-${activeIndex}`}
+            className="font-body text-sm text-primary-foreground/75 mt-4 leading-relaxed animate-fade-in"
+          >
+            {active.description}
+          </p>
+
+          <div className="mt-6">
+            <button
+              onClick={() => setDrawerOpen(false)}
+              className="group inline-flex items-center gap-3 bg-accent text-accent-foreground pl-5 pr-2 py-2 rounded-full text-sm font-body font-semibold hover:bg-accent/90 transition-all"
+            >
+              {active.cta}
+              <span className="w-8 h-8 rounded-full bg-accent-foreground/10 group-hover:bg-accent-foreground/20 flex items-center justify-center transition-colors">
+                <ArrowUpRight className="w-4 h-4" />
+              </span>
+            </button>
+          </div>
+
+          {/* Showcase item list */}
+          <div className="mt-8 flex flex-col gap-2 max-h-40 overflow-y-auto pr-1 scrollbar-none">
+            {showcases.map((s, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveIndex(i)}
+                className={`flex items-center gap-3 text-left px-3 py-2 rounded-xl transition-all ${
+                  i === activeIndex
+                    ? "bg-accent/20 border border-accent/40"
+                    : "hover:bg-primary-foreground/10 border border-transparent"
+                }`}
+              >
+                <span
+                  className={`text-xs font-body font-semibold ${
+                    i === activeIndex ? "text-accent" : "text-primary-foreground/40"
+                  }`}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span
+                  className={`text-xs font-body ${
+                    i === activeIndex ? "text-primary-foreground" : "text-primary-foreground/60"
+                  }`}
+                >
+                  {s.title}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* Progress dots */}
+          <div className="mt-5 flex items-center gap-2">
+            {showcases.map((_, i) => (
+              <span
+                key={i}
+                onClick={() => setActiveIndex(i)}
+                className={`h-1 rounded-full cursor-pointer transition-all duration-500 ${
+                  i === activeIndex ? "w-6 bg-accent" : "w-2 bg-primary-foreground/30"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="relative">
+        {/* Scrolling panels — full width */}
+        <div className="flex flex-col gap-3 sm:gap-4">
           {/* First panel: Sacred Steps Hero */}
           <div
             data-index={0}
@@ -308,49 +376,6 @@ const KineticHero = () => {
             <BaggySweatpantsWashed />
           </div>
 
-          {showcases.slice(3).map((s, idx) => {
-            const i = idx + 3;
-            return (
-              <div
-                key={i}
-                data-index={i}
-                ref={(el) => (panelRefs.current[i] = el)}
-                className="relative h-[55svh] sm:h-[60vh] min-h-[320px] sm:min-h-[400px] overflow-hidden rounded-2xl group"
-              >
-                <img
-                  src={s.image}
-                  alt={s.title}
-                  loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform transition-duration-[1200ms] ease-out group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent" />
-
-                <div className="absolute top-6 left-6 md:top-8 md:left-10 flex items-center gap-3">
-                  <span className="font-display text-2xl md:text-3xl text-primary-foreground">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span className="w-10 h-px bg-accent" />
-                  <span className="font-body text-[10px] md:text-xs uppercase tracking-[0.3em] text-primary-foreground/80">
-                    {s.eyebrow}
-                  </span>
-                </div>
-
-                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
-                  <h3 className="font-display text-3xl md:text-4xl lg:text-5xl font-semibold text-primary-foreground leading-tight">
-                    {s.title}
-                  </h3>
-                  <div className="mt-3 flex items-center justify-between">
-                    <p className="font-body text-sm text-primary-foreground/80 max-w-sm">
-                      {s.description}
-                    </p>
-                    <span className="hidden md:inline-flex w-12 h-12 rounded-full bg-accent text-accent-foreground items-center justify-center shrink-0 ml-4 transition-transform group-hover:rotate-45">
-                      <ArrowUpRight className="w-5 h-5" />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
     </section>

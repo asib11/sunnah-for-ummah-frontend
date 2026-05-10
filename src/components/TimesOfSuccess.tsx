@@ -13,8 +13,8 @@ const PRAYERS = ["Fajr", "Zuhr", "Asr", "Maghrib", "Isha"];
 
 const TimesOfSuccess = () => {
   const [view, setView] = useState<View>("front");
-  const [revealed, setRevealed] = useState(false);
-  const { urls, editor } = useSectionMedia("times-of-success", [
+  const [revealed, setRevealed] = useState(true);
+  const { urls } = useSectionMedia("times-of-success", [
     { key: "video", label: "Background video", kind: "video", defaultUrl: "/times-of-success.mp4" },
     { key: "front", label: "Front view image", kind: "image", defaultUrl: tshirtFront.src },
     { key: "back", label: "Back view image", kind: "image", defaultUrl: tshirtBack.src },
@@ -26,12 +26,12 @@ const TimesOfSuccess = () => {
       onMouseLeave={() => setView("front")}
       onClick={() => setRevealed(true)}
     >
-      {editor}
       {/* Cinematic intro video — plays once, then fades back as ambient bg */}
       <video
         src={urls.video}
         key={urls.video}
         autoPlay
+        loop
         muted
         playsInline
         onEnded={() => setRevealed(true)}

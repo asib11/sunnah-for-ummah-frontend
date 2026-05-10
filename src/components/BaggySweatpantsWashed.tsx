@@ -7,8 +7,8 @@ import sweatpantsImage from "@/assets/baggy-sweatpants-washed.png";
 import { useSectionMedia } from "@/components/SectionMediaEditor";
 
 const BaggySweatpantsWashed = () => {
-  const [revealed, setRevealed] = useState(false);
-  const { urls, editor } = useSectionMedia("baggy-sweatpants-washed", [
+  const [revealed, setRevealed] = useState(true);
+  const { urls } = useSectionMedia("baggy-sweatpants-washed", [
     { key: "video", label: "Background video", kind: "video", defaultUrl: "/baggy-sweatpants-washed-cinematic.mp4" },
     { key: "image", label: "Product image", kind: "image", defaultUrl: sweatpantsImage.src },
   ]);
@@ -18,11 +18,11 @@ const BaggySweatpantsWashed = () => {
       className="relative h-full w-full overflow-hidden rounded-2xl bg-foreground group cursor-pointer"
       onClick={() => setRevealed(true)}
     >
-      {editor}
       <video
         src={urls.video}
         key={urls.video}
         autoPlay
+        loop
         muted
         playsInline
         onEnded={() => setRevealed(true)}

@@ -10,8 +10,8 @@ type View = "front" | "back";
 
 const SabrShowcase = () => {
   const [view, setView] = useState<View>("front");
-  const [revealed, setRevealed] = useState(false);
-  const { urls, editor } = useSectionMedia("sabr-showcase", [
+  const [revealed, setRevealed] = useState(true);
+  const { urls } = useSectionMedia("sabr-showcase", [
     { key: "video", label: "Background video", kind: "video", defaultUrl: "/sabr-cinematic.mp4" },
     { key: "image", label: "T-shirt (front+back)", kind: "image", defaultUrl: sabrImage.src },
   ]);
@@ -22,12 +22,12 @@ const SabrShowcase = () => {
       onMouseLeave={() => setView("front")}
       onClick={() => setRevealed(true)}
     >
-      {editor}
       {/* Cinematic intro video — plays once, then fades to ambient backdrop */}
       <video
         src={urls.video}
         key={urls.video}
         autoPlay
+        loop
         muted
         playsInline
         onEnded={() => setRevealed(true)}
