@@ -191,16 +191,29 @@ const HajjPackages = () => {
   return (
     <section className="relative">
       {/* What's Inside the Kit */}
-      <div id="whats-inside-kit" className="py-16 md:py-20 bg-gradient-to-b from-background to-secondary/30 scroll-mt-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-4">
-            <h3 className="font-display text-3xl md:text-4xl font-bold text-foreground">
-              What&apos;s Inside the Kit
+      <div id="whats-inside-kit" className="py-20 md:py-32 bg-gradient-to-b from-background via-secondary/10 to-background scroll-mt-24 overflow-hidden relative">
+        {/* Decorative elements for the section */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-accent/5 rounded-full blur-3xl" />
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="text-center mb-12">
+            <span className="inline-block px-4 py-1 rounded-full bg-accent/10 text-accent text-[10px] font-bold tracking-[0.3em] uppercase mb-4 border border-accent/20">
+              The Essentials
+            </span>
+            <h3 className="font-display text-4xl md:text-5xl font-bold text-foreground tracking-tight">
+              What&apos;s Inside <span className="text-primary">The Kit</span>
             </h3>
-            <p className="font-body text-sm md:text-base text-muted-foreground mt-3">
-              21 premium items — Total value <span className="font-bold text-primary">৳4,640</span>
+            <p className="font-body text-sm md:text-base text-muted-foreground mt-4 max-w-2xl mx-auto leading-relaxed">
+              We&apos;ve curated <span className="font-bold text-foreground underline decoration-accent/40 decoration-4 underline-offset-4">21 premium items</span> essential for your sacred journey. 
+              Total value exceeding <span className="font-bold text-primary">৳4,640</span>.
             </p>
-            <div className="w-16 h-1 bg-accent mx-auto mt-4 rounded-full" />
+            <div className="flex items-center justify-center gap-3 mt-6">
+              <div className="w-12 h-[1px] bg-gradient-to-r from-transparent to-neutral-300" />
+              <div className="w-2 h-2 rotate-45 border border-neutral-300" />
+              <div className="w-12 h-[1px] bg-gradient-to-l from-transparent to-neutral-300" />
+            </div>
           </div>
           <HajjKitDetails />
         </div>

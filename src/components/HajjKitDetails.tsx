@@ -64,6 +64,7 @@ const HajjKitDetails = () => {
       category:    p.metadata?.sub_category || "General",
       kitType:     p.metadata?.kit_type || "mens-kit",
       variantId:   p.variants?.[0]?.id || "",
+      thumbnail:   p.thumbnail,
     })),
     [allProducts]
   );
@@ -166,59 +167,82 @@ const HajjKitDetails = () => {
       </div>
 
       {/* Items grid */}
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((item) => {
           const selected = selectedIds.has(item.id);
           return (
             <button
               key={item.id}
               onClick={() => handleToggle(item)}
-              className={`group relative flex items-center justify-between gap-3 px-5 py-4 rounded-2xl border transition-all w-full text-left ${
+              className={`group relative flex items-center gap-4 px-4 py-4 rounded-3xl border transition-all w-full text-left overflow-hidden ${
                 selected
-                  ? "bg-white border-primary shadow-xl shadow-primary/5 -translate-y-0.5"
-                  : "bg-white/40 border-neutral-100 hover:bg-white hover:border-primary/20 hover:shadow-lg"
+                  ? "bg-white border-primary shadow-2xl shadow-primary/10 -translate-y-1"
+                  : "bg-white/40 border-neutral-100 hover:bg-white hover:border-primary/20 hover:shadow-xl"
               }`}
             >
-              <div className="flex items-center gap-4 min-w-0">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                  selected 
-                    ? "bg-primary text-white" 
-                    : "bg-neutral-100 text-neutral-300 group-hover:bg-primary/10 group-hover:text-primary/40"
-                }`}>
-                  {selected ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
-                </div>
-                <div className="min-w-0">
+              {/* Product Thumbnail */}
+              <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-neutral-100 shrink-0">
+                {item.thumbnail ? (
+                  <img 
+                    src={item.thumbnail} 
+                    alt={item.name}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-neutral-300">
+                    <Shirt className="w-8 h-8" />
+                  </div>
+                )}
+                {selected && (
+                  <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8 text-white fill-primary" />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
                   <p className={`font-body text-sm font-bold truncate leading-tight ${selected ? "text-primary" : "text-foreground"}`}>
                     {item.name}
                   </p>
-                  {item.bangla !== item.name && (
-                    <p className="font-body text-[11px] text-muted-foreground truncate leading-tight mt-1 opacity-70">
-                      {item.bangla}
-                    </p>
-                  )}
+                  <span className={`font-body text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 transition-colors ${
+                    selected ? "bg-primary text-white" : "bg-neutral-100 text-neutral-700"
+                  }`}>
+                    {item.price > 0 ? `৳${item.price.toLocaleString()}` : "—"}
+                  </span>
                 </div>
+                {item.bangla !== item.name && (
+                  <p className="font-body text-[11px] text-muted-foreground truncate leading-tight mt-1 opacity-70">
+                    {item.bangla}
+                  </p>
+                )}
               </div>
-              <span className={`font-body text-xs font-bold px-2.5 py-1 rounded-full shrink-0 transition-colors ${
-                selected ? "bg-primary text-white" : "bg-neutral-100 text-neutral-700"
-              }`}>
-                {item.price > 0 ? `৳${item.price.toLocaleString()}` : "—"}
-              </span>
+
+              {/* Selection indicator for desktop hover */}
+              {!selected && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                   <Circle className="w-5 h-5 text-primary/20" />
+                </div>
+              )}
             </button>
           );
         })}
       </div>
 
       {/* Sticky CTA replacement / Footer link */}
-      <div className="mt-12 text-center">
-        <a
-          href="/hajj-kit"
-          className="group inline-flex items-center gap-3 px-8 py-4 rounded-full bg-primary text-white font-bold text-sm hover:bg-accent transition-all shadow-xl shadow-primary/25 hover:scale-105"
-        >
-          <ShoppingCart className="w-5 h-5" />
-          <span>Build Your Full Kit</span>
-          <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-        </a>
-        <p className="mt-4 font-body text-[11px] text-muted-foreground uppercase tracking-widest">
+      <div className="mt-16 text-center">
+        <div className="relative inline-block group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary to-accent rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+          <a
+            href="/hajj-kit"
+            className="relative flex items-center gap-3 px-10 py-5 rounded-full bg-primary text-white font-bold text-base hover:bg-accent transition-all shadow-2xl shadow-primary/25 hover:scale-105"
+          >
+            <ShoppingCart className="w-6 h-6" />
+            <span>Explore The Full Kit</span>
+            <ArrowRight className="w-6 h-6 transition-transform group-hover:translate-x-1" />
+          </a>
+        </div>
+        <p className="mt-6 font-body text-[12px] text-muted-foreground uppercase tracking-[0.2em] font-medium">
           Choose from 21+ essentials for your journey
         </p>
       </div>

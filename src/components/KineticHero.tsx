@@ -265,7 +265,14 @@ const KineticHero = () => {
 
           <div className="mt-6">
             <button
-              onClick={() => setDrawerOpen(false)}
+              onClick={() => {
+                setDrawerOpen(false);
+                if (activeIndex === 0) {
+                  setTimeout(() => {
+                    document.getElementById("whats-inside-kit")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  }, 300);
+                }
+              }}
               className="group inline-flex items-center gap-3 bg-accent text-accent-foreground pl-5 pr-2 py-2 rounded-full text-sm font-body font-semibold hover:bg-accent/90 transition-all"
             >
               {active.cta}

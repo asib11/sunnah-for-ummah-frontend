@@ -91,6 +91,11 @@ const SacredStepsHero = () => {
         <div className="mt-7 flex flex-wrap items-center justify-center gap-3 animate-fade-in">
           <button
             type="button"
+            onClick={() =>
+              document
+                .getElementById("whats-inside-kit")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" })
+            }
             className="group relative inline-flex items-center gap-3 rounded-full px-7 py-3 font-body text-sm font-semibold text-primary-foreground
               bg-primary-foreground/10 backdrop-blur-md border border-primary-foreground/25
               shadow-[0_8px_32px_-8px_hsl(var(--foreground)/0.5)]
