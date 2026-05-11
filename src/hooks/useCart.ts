@@ -31,16 +31,23 @@ export function useCart() {
   } = useQuery({
     queryKey: ["cart", cartId],
     queryFn: async () => {
-      const res = await storeApi.getCart(cartId as string);
-      const fetchedCart = res.cart;
-      // If the cart was already completed (i.e. an order was placed), clear it automatically
-      if (fetchedCart?.completed_at) {
+      try {
+        const res = await storeApi.getCart(cartId as string);
+        const fetchedCart = res.cart;
+        if (fetchedCart?.completed_at) {
+          if (typeof window !== "undefined") {
+            localStorage.removeItem(CART_KEY);
+          }
+          return null;
+        }
+        return fetchedCart;
+      } catch (error) {
+        // If the cart doesn't exist anymore or throws an error, clear it so we can create a new one
         if (typeof window !== "undefined") {
           localStorage.removeItem(CART_KEY);
         }
         return null;
       }
-      return fetchedCart;
     },
     enabled: !!cartId,
   });
@@ -59,16 +66,23 @@ export function useCart() {
     mutationFn: async ({ variantId, quantity }: { variantId: string; quantity: number }) => {
       let currentCartId = getLocalCartId();
       
-      // If no cart exists, create one first
       if (!currentCartId) {
         const newCartData = await storeApi.createCart();
         currentCartId = newCartData.cart.id;
         setLocalCartId(currentCartId);
       }
 
-      // Then add the item
-      const response = await storeApi.addToCart(currentCartId, variantId, quantity);
-      return response.cart;
+      try {
+        const response = await storeApi.addToCart(currentCartId, variantId, quantity);
+        return response.cart;
+      } catch (error) {
+        // Cart might be stale/deleted on the backend, create a new one and retry
+        const newCartData = await storeApi.createCart();
+        currentCartId = newCartData.cart.id;
+        setLocalCartId(currentCartId);
+        const response = await storeApi.addToCart(currentCartId, variantId, quantity);
+        return response.cart;
+      }
     },
     onSuccess: (updatedCart) => {
       queryClient.setQueryData(["cart", updatedCart.id], updatedCart);
@@ -119,11 +133,11 @@ export function useCart() {
     isError,
     totalItems,
     totalPrice,
-    addToCart: addToCartMutation.mutate,
+    addToCart: addToCartMutation.mutateAsync,
     isAdding: addToCartMutation.isPending,
-    updateItem: updateItemMutation.mutate,
+    updateItem: updateItemMutation.mutateAsync,
     isUpdating: updateItemMutation.isPending,
-    removeItem: removeItemMutation.mutate,
+    removeItem: removeItemMutation.mutateAsync,
     isRemoving: removeItemMutation.isPending,
     refetch,
   };

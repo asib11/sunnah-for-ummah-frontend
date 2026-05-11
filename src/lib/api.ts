@@ -239,7 +239,7 @@ export const storeApi = {
    * Fetch products by category ID
    */
   async getProductsByCategory(categoryId: string) {
-    const response = await fetch(`${BASE_URL}/store/products?category_id[]=${categoryId}&fields=id,title,handle,thumbnail,metadata,*variants.prices`, {
+    const response = await fetch(`${BASE_URL}/store/products?category_id[]=${categoryId}&fields=id,title,subtitle,handle,thumbnail,metadata,*variants.prices&limit=100`, {
       method: "GET",
       headers: getDefaultHeaders(),
     });
@@ -255,9 +255,9 @@ export const storeApi = {
   /**
    * Fetch all products (for home page / new arrivals)
    */
-  async getProducts(limit = 8) {
+  async getProducts(limit = 100) {
     const response = await fetch(
-      `${BASE_URL}/store/products?fields=id,title,handle,thumbnail,metadata,*variants.prices&limit=${limit}`,
+      `${BASE_URL}/store/products?fields=id,title,subtitle,handle,thumbnail,metadata,*variants.prices&limit=${limit}`,
       { method: "GET", headers: getDefaultHeaders() }
     );
     if (!response.ok) {
@@ -269,7 +269,7 @@ export const storeApi = {
 
   async getProductByHandle(handle: string) {
     const response = await fetch(
-      `${BASE_URL}/store/products?handle=${handle}&fields=id,title,handle,description,thumbnail,metadata,*variants.prices,*variants.options,*options`,
+      `${BASE_URL}/store/products?handle=${handle}&fields=id,title,subtitle,handle,description,thumbnail,metadata,*variants.prices,*variants.options,*options`,
       { method: "GET", headers: getDefaultHeaders() }
     );
     if (!response.ok) {

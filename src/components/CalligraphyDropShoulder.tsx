@@ -5,8 +5,19 @@ import { ArrowUpRight, Sparkles, Star } from "lucide-react";
 import frontImage from "@/assets/calligraphy-drop-shoulder-front.png";
 import backImage from "@/assets/calligraphy-drop-shoulder-back.png";
 import { useSectionMedia } from "@/components/SectionMediaEditor";
+import { useQuery } from "@tanstack/react-query";
+import { storeApi } from "@/lib/api";
+import { getProductPrices } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const CalligraphyDropShoulder = () => {
+
+  const router = useRouter();
+  const { data, isLoading } = useQuery({
+    queryKey: ["product", "calligraphy-drop-shoulder"],
+    queryFn: () => storeApi.getProductByHandle("calligraphy-drop-shoulder"),
+  });
+  const { price } = getProductPrices(data);
   const [revealed, setRevealed] = useState(true);
   const [view, setView] = useState<"front" | "back">("front");
   const { urls } = useSectionMedia("calligraphy-drop-shoulder", [
@@ -59,7 +70,7 @@ const CalligraphyDropShoulder = () => {
       {/* Top right price tag */}
       <div className="absolute top-6 right-6 md:top-10 md:right-12 z-20 text-right">
         <p className="font-body text-[10px] uppercase tracking-[0.3em] text-primary-foreground/60">Starting at</p>
-        <p className="font-display text-2xl md:text-3xl font-semibold text-accent">৳1,290</p>
+        <p className="font-display text-2xl md:text-3xl font-semibold text-accent">{isLoading ? "..." : price ? `৳${price}` : "৳..."}</p>
         <div className="flex items-center justify-end gap-0.5 mt-1">
           {[...Array(5)].map((_, i) => (
             <Star key={i} className="w-3 h-3 fill-accent text-accent" />
@@ -145,7 +156,10 @@ const CalligraphyDropShoulder = () => {
             <span>Premium Print</span>
           </div>
           <button
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation();
+              router.push("/products/calligraphy-drop-shoulder");
+            }}
             className="group/btn mt-2 inline-flex items-center gap-1.5 bg-accent text-accent-foreground pl-3 pr-1.5 py-1.5 rounded-full text-[10px] md:text-xs font-body font-semibold hover:bg-accent/90 transition-all shadow-lg shadow-accent/30"
           >
             Shop the Drop

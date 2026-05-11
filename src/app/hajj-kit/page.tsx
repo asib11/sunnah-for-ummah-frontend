@@ -35,7 +35,7 @@ const toKitItem = (p: any) => {
   return {
     id:          p.id,
     en:          p.title,
-    bn:          p.metadata?.bn_name || p.title,
+    bn:          p.subtitle || p.title,
     price:       getBdtPrice(firstVariant),
     subCategory: p.metadata?.sub_category || "General",
     kitType:     p.metadata?.kit_type || "mens-kit",

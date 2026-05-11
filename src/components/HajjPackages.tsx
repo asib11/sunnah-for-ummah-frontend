@@ -140,7 +140,7 @@ const HajjPackages = () => {
       return {
         id: p.id,
         title: p.title,
-        bangla: p.metadata?.bn_name || p.title,
+        bangla: p.subtitle || p.title,
         price: price,
         oldPrice: oldPrice,
         badge: p.metadata?.badge,

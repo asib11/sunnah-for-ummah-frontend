@@ -59,7 +59,7 @@ const HajjKitDetails = () => {
     allProducts.map((p) => ({
       id:          p.id,
       name:        p.title,
-      bangla:      p.metadata?.bn_name || p.title,
+      bangla:      p.subtitle || p.title,
       price:       getBdtPrice(p.variants?.[0]),
       category:    p.metadata?.sub_category || "General",
       kitType:     p.metadata?.kit_type || "mens-kit",

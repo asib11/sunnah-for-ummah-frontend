@@ -144,15 +144,6 @@ const KineticHero = () => {
     return () => window.clearInterval(id);
   }, []);
 
-  // Lock body scroll when drawer is open
-  useEffect(() => {
-    if (drawerOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => { document.body.style.overflow = ""; };
-  }, [drawerOpen]);
 
   const active = showcases[activeIndex] ?? showcases[0];
 
@@ -170,13 +161,7 @@ const KineticHero = () => {
 
 
 
-      {/* ── Drawer Backdrop ── */}
-      <div
-        onClick={() => setDrawerOpen(false)}
-        className={`fixed inset-0 z-50 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
-          drawerOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-      />
+
 
       {/* ── Drawer Panel ── */}
       <div

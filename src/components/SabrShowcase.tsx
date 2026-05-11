@@ -5,10 +5,21 @@ import { ArrowUpRight, Eye, RotateCcw, Sparkles, Star } from "lucide-react";
 import videoAsset from "../../public/sabr-cinematic.mp4.asset.json";
 import sabrImage from "@/assets/sabr-tshirt-front-back.png";
 import { useSectionMedia } from "@/components/SectionMediaEditor";
+import { useQuery } from "@tanstack/react-query";
+import { storeApi } from "@/lib/api";
+import { getProductPrices } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 type View = "front" | "back";
 
 const SabrShowcase = () => {
+
+  const router = useRouter();
+  const { data, isLoading } = useQuery({
+    queryKey: ["product", "patience-sabr"],
+    queryFn: () => storeApi.getProductByHandle("patience-sabr"),
+  });
+  const { price } = getProductPrices(data);
   const [view, setView] = useState<View>("front");
   const [revealed, setRevealed] = useState(true);
   const { urls } = useSectionMedia("sabr-showcase", [
@@ -147,7 +158,7 @@ const SabrShowcase = () => {
       {/* Top right rating */}
       <div className="hidden md:block absolute top-24 right-6 md:right-12 z-10 text-right">
         <p className="font-body text-[10px] uppercase tracking-[0.3em] text-primary-foreground/60">From</p>
-        <p className="font-display text-2xl md:text-3xl font-semibold text-accent">৳1,390</p>
+        <p className="font-display text-2xl md:text-3xl font-semibold text-accent">{isLoading ? "..." : price ? `৳${price}` : "৳..."}</p>
         <div className="flex items-center justify-end gap-0.5 mt-1">
           {[...Array(5)].map((_, i) => (
             <Star key={i} className="w-3 h-3 fill-accent text-accent" />
@@ -227,7 +238,7 @@ const SabrShowcase = () => {
             </div>
           </div>
 
-          <button className="group/btn inline-flex items-center gap-2 bg-accent text-accent-foreground pl-4 pr-1.5 py-1.5 rounded-full text-xs font-body font-semibold hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 shrink-0">
+          <button onClick={(e) => { e.stopPropagation(); router.push("/products/patience-sabr"); }} className="group/btn inline-flex items-center gap-2 bg-accent text-accent-foreground pl-4 pr-1.5 py-1.5 rounded-full text-xs font-body font-semibold hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 shrink-0">
             Wear Patience
             <span className="w-7 h-7 rounded-full bg-accent-foreground/10 group-hover/btn:bg-accent-foreground/20 flex items-center justify-center transition-all group-hover/btn:rotate-45">
               <ArrowUpRight className="w-3.5 h-3.5" />
