@@ -3,7 +3,7 @@
 import { Search, ShoppingCart, Heart, User, Menu, X, Star } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { authApi } from "@/lib/api";
 import {
@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import logoSfu from "@/assets/logo-sfu.png";
 import { useCart } from "@/hooks/useCart";
+import { CartDrawer } from "./CartDrawer";
 
 const searchProducts = [
   "Premium Black Embroidered Panjabi",
@@ -30,12 +31,13 @@ const searchProducts = [
 ];
 
 const navItems = [
-  { label: "Eid Collection", href: "#" },
+  { label: "Eid Collection", href: "/eid-collection" },
   { label: "Men's", href: "#" },
   { label: "Women's", href: "#" },
-  { label: "Accessories", href: "#" },
-  { label: "Perfume Oil (Attar)", href: "#" },
-
+  { label: "Calligraphy T-shirt", href: "/#calligraphy-showcase" },
+  // { label: "Accessories", href: "#" },
+  // { label: "Perfume Oil (Attar)", href: "#" },
+  { label: "Calligraphy Dropshoulder", href: "/#calligraphy-drop-shoulder" },
 ];
 
 const useTypingPlaceholder = (words: string[], typingSpeed = 80, deleteSpeed = 40, pauseMs = 1500) => {
@@ -83,6 +85,7 @@ const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const typingText = useTypingPlaceholder(searchProducts);
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
   const { totalItems, totalPrice } = useCart();
 
@@ -143,30 +146,36 @@ const Header = () => {
           </button>
 
           {/* Animated cart pill with live total */}
-          <Link href="/cart" className="hidden md:flex items-center gap-2 pl-3 pr-1.5 py-1.5 rounded-full bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 border border-accent/30 hover:border-accent transition-all group shadow-sm hover:shadow-[0_0_20px_-4px_hsl(var(--accent)/0.5)]">
-            <div className="flex flex-col leading-none">
-              <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-body font-semibold">Your Bag</span>
-              <span className="text-sm font-display font-bold text-primary tabular-nums">৳ {totalPrice.toLocaleString()}</span>
+          <button 
+            onClick={() => window.dispatchEvent(new CustomEvent("open-cart"))}
+            className="hidden md:flex items-center gap-3 pl-4 pr-1.5 py-1.5 rounded-full bg-card border border-border hover:border-primary/30 transition-all group shadow-sm hover:shadow-md"
+          >
+            <div className="flex flex-col items-start leading-none">
+              <span className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground font-body font-bold">Your Bag</span>
+              <span className="text-sm font-display font-bold text-primary tabular-nums">৳ {totalPrice.toFixed(2)}</span>
             </div>
-            <div className="relative p-2 rounded-full bg-primary text-primary-foreground group-hover:bg-accent group-hover:text-accent-foreground transition-all group-hover:rotate-12 group-hover:scale-110">
+            <div className="relative p-2.5 rounded-full bg-primary text-primary-foreground group-hover:bg-emerald-light transition-all duration-300">
               <ShoppingCart className="w-4 h-4" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold ring-2 ring-background animate-pulse">
+                <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-[10px] min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center font-bold ring-2 ring-card animate-in zoom-in duration-300">
                   {totalItems}
                 </span>
               )}
             </div>
-          </Link>
+          </button>
 
           {/* Mobile cart */}
-          <Link href="/cart" className="md:hidden relative p-2 hover:text-primary transition-colors">
+          <button 
+            onClick={() => window.dispatchEvent(new CustomEvent("open-cart"))}
+            className="md:hidden relative p-2 hover:text-primary transition-colors"
+          >
             <ShoppingCart className="w-5 h-5" />
             {totalItems > 0 && (
               <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-body">
                 {totalItems}
               </span>
             )}
-          </Link>
+          </button>
 
           <button className="relative p-2 rounded-full hover:bg-accent/10 hover:text-accent transition-all hover:scale-110 hidden md:block group" aria-label="Wishlist">
             <Heart className="w-5 h-5 group-hover:fill-accent transition-all" />
@@ -226,16 +235,34 @@ const Header = () => {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
         <div className="container relative mx-auto flex items-center justify-center gap-8 px-4 py-2.5">
-          {navItems.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              className="group relative text-sm font-body font-medium text-foreground hover:text-primary transition-colors"
-            >
-              {item.label}
-              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-px w-0 bg-gradient-to-r from-primary via-accent to-primary group-hover:w-full transition-all duration-300" />
-            </a>
-          ))}
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href) && !item.href.includes("#"));
+            return item.href.startsWith("/") && !item.href.includes("#") ? (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={`group relative text-sm font-body font-medium transition-colors ${
+                  isActive ? "text-primary" : "text-foreground hover:text-primary"
+                }`}
+              >
+                {item.label}
+                <span
+                  className={`absolute -bottom-1 left-1/2 -translate-x-1/2 h-px bg-gradient-to-r from-primary via-accent to-primary transition-all duration-300 ${
+                    isActive ? "w-full" : "w-0 group-hover:w-full"
+                  }`}
+                />
+              </Link>
+            ) : (
+              <a
+                key={item.label}
+                href={item.href}
+                className="group relative text-sm font-body font-medium text-foreground hover:text-primary transition-colors"
+              >
+                {item.label}
+                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-px w-0 bg-gradient-to-r from-primary via-accent to-primary group-hover:w-full transition-all duration-300" />
+              </a>
+            );
+          })}
           <button
             type="button"
             onClick={() =>
@@ -289,6 +316,8 @@ const Header = () => {
           </div>
         </nav>
       )}
+
+      <CartDrawer />
     </header>
   );
 };

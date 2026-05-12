@@ -176,7 +176,7 @@ const KineticHero = () => {
               key={i}
               src={s.image}
               alt={s.title}
-              className="absolute inset-0 w-full h-full object-cover transition-all duration-[1200ms] ease-out"
+              className="absolute inset-0 w-full h-full object-cover transition-all transition-duration-[1200ms] ease-out"
               style={{
                 opacity: i === activeIndex ? 1 : 0,
                 transform: i === activeIndex ? "scale(1.06)" : "scale(1)",

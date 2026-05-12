@@ -38,7 +38,7 @@ const CalligraphyShowcase = () => {
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover opacity-60 transition-transform duration-[2000ms] ease-out group-hover:scale-110"
+        className="absolute inset-0 w-full h-full object-cover opacity-60 transition-transform transition-duration-[2000ms] ease-out group-hover:scale-110"
       />
 
       {/* Cinematic overlays */}
@@ -94,7 +94,7 @@ const CalligraphyShowcase = () => {
         <div className="relative h-full w-full max-w-3xl mx-auto">
           {/* Glow halo behind active tshirt */}
           <div
-            className="absolute inset-0 transition-all duration-[1200ms] ease-out"
+            className="absolute inset-0 transition-all transition-duration-[1200ms] ease-out"
             style={{
               background:
                 "radial-gradient(circle at center, hsl(var(--accent) / 0.3), transparent 60%)",
@@ -107,7 +107,7 @@ const CalligraphyShowcase = () => {
           <img
             src={urls.image}
             alt="Muslim Calligraphy T-Shirt — front view"
-            className="absolute inset-0 w-full h-full object-contain transition-all duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
+            className="absolute inset-0 w-full h-full object-contain transition-all transition-duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
             style={{
               clipPath: "inset(0 50% 0 0)",
               transform:
@@ -123,7 +123,7 @@ const CalligraphyShowcase = () => {
           <img
             src={urls.image}
             alt="Muslim Calligraphy T-Shirt — back view"
-            className="absolute inset-0 w-full h-full object-contain transition-all duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
+            className="absolute inset-0 w-full h-full object-contain transition-all transition-duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
             style={{
               clipPath: "inset(0 0 0 50%)",
               transform:

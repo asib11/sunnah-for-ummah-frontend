@@ -39,7 +39,7 @@ const CalligraphyDropShoulder = () => {
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-out"
+        className="absolute inset-0 w-full h-full object-cover transition-opacity transition-duration-[1500ms] ease-out"
         style={{ opacity: 0.25 }}
       />
 
@@ -80,7 +80,7 @@ const CalligraphyDropShoulder = () => {
 
       {/* Product reveal — appears after video ends */}
       <div
-        className="absolute inset-0 flex items-center justify-center z-10 pt-20 pb-40 md:pb-32 transition-all duration-[1400ms] ease-out pointer-events-none"
+        className="absolute inset-0 flex items-center justify-center z-10 pt-20 pb-40 md:pb-32 transition-all transition-duration-[1400ms] ease-out pointer-events-none"
         style={{
           opacity: revealed ? 1 : 0,
           transform: revealed ? "scale(1)" : "scale(0.92)",

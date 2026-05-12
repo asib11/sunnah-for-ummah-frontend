@@ -33,7 +33,7 @@ const SacredStepsHero = () => {
             key={i}
             src={s.image.src}
             alt={s.label}
-            className="absolute inset-0 w-full h-full object-cover transition-all duration-[2000ms] ease-out"
+            className="absolute inset-0 w-full h-full object-cover transition-all transition-duration-[2000ms] ease-out"
             style={{
               opacity: i === active ? 1 : 0,
               transform: i === active ? "scale(1.08)" : "scale(1)",
