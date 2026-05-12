@@ -29,8 +29,8 @@ const NewArrivals = () => {
 
   // Uses the same BASE_URL, API key, and headers as every other API call
   const { data, isLoading } = useQuery({
-    queryKey: ["new_arrivals"],
-    queryFn:  () => storeApi.getProducts(12), // Fetch more so shuffle feels real
+    queryKey: ["all_products"],
+    queryFn:  () => storeApi.getProducts(100), // Fetch all available products
     staleTime: 1000 * 60 * 5,
   });
 
@@ -49,37 +49,25 @@ const NewArrivals = () => {
     };
   });
 
-  // Get 8 random products
-  const shuffled = [...displayProducts]
-    .sort(() => 0.5 - Math.random())
-    .slice(0, 8);
-
   return (
     <section className="container mx-auto px-4 py-12 md:py-20">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="w-8 h-px bg-primary" />
-            <span className="font-body text-xs font-semibold uppercase tracking-[0.2em] text-primary">Explore Latest</span>
+            <span className="font-body text-xs font-semibold uppercase tracking-[0.2em] text-primary">Discover More</span>
           </div>
           <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground">
-            New Arrivals
+            Our Collection
           </h2>
         </div>
         
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setShuffleKey(k => k + 1)}
-            className="group flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20 bg-background text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-sm"
-          >
-            <Sparkles className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-            <span className="font-body text-sm font-semibold">Shuffle Selection</span>
-          </button>
           <a
-            href="/shop"
+            href="/eid-collection"
             className="font-body text-sm font-semibold text-foreground/70 hover:text-primary transition-colors underline underline-offset-4"
           >
-            View All Collection
+            View Eid Drop
           </a>
         </div>
       </div>
@@ -94,10 +82,9 @@ const NewArrivals = () => {
         </p>
       ) : (
         <div 
-          key={shuffleKey}
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-fade-in"
         >
-          {shuffled.map((product) => (
+          {displayProducts.map((product) => (
             <ProductCard 
               key={product.id}
               name={product.name}

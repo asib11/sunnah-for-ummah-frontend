@@ -80,15 +80,6 @@ const ProductCard = ({ name, price, originalPrice, image, badge, variantId, hand
 
         {/* Quick Add Overlay (Desktop) */}
         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-[2]" />
-        
-        {/* Floating Quick View/Add Button */}
-        <button 
-          onClick={handleAddToCart}
-          disabled={isAdding}
-          className="absolute bottom-4 right-4 z-[3] w-10 h-10 rounded-full bg-background/90 backdrop-blur-md border border-emerald-tint shadow-lg flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 active:scale-90"
-        >
-          {isAdding ? <Loader2 className="w-5 h-5 animate-spin" /> : <ShoppingCart className="w-5 h-5" />}
-        </button>
       </Link>
 
       {/* Info */}
@@ -108,6 +99,15 @@ const ProductCard = ({ name, price, originalPrice, image, badge, variantId, hand
               </span>
             )}
           </div>
+
+          <button 
+            onClick={handleAddToCart}
+            disabled={isAdding}
+            className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 active:scale-90 shadow-sm border border-primary/20"
+            aria-label="Add to cart"
+          >
+            {isAdding ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShoppingCart className="w-4 h-4" />}
+          </button>
         </div>
 
         <button

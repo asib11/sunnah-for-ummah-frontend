@@ -32,12 +32,12 @@ const searchProducts = [
 
 const navItems = [
   { label: "Eid Collection", href: "/eid-collection" },
-  { label: "Men's", href: "#" },
-  { label: "Women's", href: "#" },
-  { label: "Calligraphy T-shirt", href: "/#calligraphy-showcase" },
+  { label: "Men's", href: "/eid-collection" },
+  { label: "Women's", href: "/eid-collection" },
+  { label: "Calligraphy T-shirt", href: "/eid-collection" },
   // { label: "Accessories", href: "#" },
   // { label: "Perfume Oil (Attar)", href: "#" },
-  { label: "Calligraphy Dropshoulder", href: "/#calligraphy-drop-shoulder" },
+  { label: "Calligraphy Dropshoulder", href: "/eid-collection" },
 ];
 
 const useTypingPlaceholder = (words: string[], typingSpeed = 80, deleteSpeed = 40, pauseMs = 1500) => {

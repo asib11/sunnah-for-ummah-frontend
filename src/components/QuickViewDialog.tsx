@@ -1,15 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  ShoppingCart,
-  Check,
-  ZoomIn,
-  ZoomOut,
-  X,
-  ChevronLeft,
-  ChevronRight,
-  Maximize2,
-  RotateCcw,
-} from "lucide-react";
+import { ShoppingCart, Check, ZoomIn, ZoomOut, X, ChevronLeft, ChevronRight, Maximize2, RotateCcw, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -17,8 +7,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import Link from "next/link";
+import { useCart } from "@/hooks/useCart";
+import { toast } from "sonner";
 
 export interface QuickViewProduct {
+  id?: string;
   name: string;
   price: number;
   originalPrice?: number;
@@ -30,6 +23,8 @@ export interface QuickViewProduct {
   sizes?: string[];
   colors?: { name: string; hex: string }[];
   slug?: string;
+  variantId?: string;
+  variants?: any[];
 }
 
 interface Props {
@@ -41,6 +36,7 @@ interface Props {
 const DEFAULT_SIZES = ["S", "M", "L", "XL", "XXL"];
 
 const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
+  const { addToCart, isAdding } = useCart();
   const [activeImage, setActiveImage] = useState(0);
   const [size, setSize] = useState<string | null>(null);
   const [colorIdx, setColorIdx] = useState(0);
@@ -97,6 +93,39 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
     setOrigin({ x, y });
   };
 
+  const handleAddToCart = () => {
+    if (!product) return;
+
+    let selectedVariantId = product.variantId;
+
+    if (size && product.variants) {
+      const match = product.variants.find(v => 
+        v.title.toLowerCase() === size.toLowerCase() || 
+        v.options?.some((opt: any) => opt.value.toLowerCase() === size.toLowerCase())
+      );
+      if (match) selectedVariantId = match.id;
+    }
+
+    if (!selectedVariantId) {
+      toast.error("Please select a valid option.");
+      return;
+    }
+
+    addToCart(
+      { variantId: selectedVariantId, quantity: 1 },
+      {
+        onSuccess: () => {
+          toast.success(`${product.name} added to cart!`);
+          onOpenChange(false);
+          window.dispatchEvent(new CustomEvent("open-cart"));
+        },
+        onError: () => {
+          toast.error("Failed to add to cart. Please try again.");
+        }
+      }
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl p-0 overflow-hidden bg-card border-emerald-tint/60">
@@ -115,7 +144,6 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
               </span>
             )}
 
-            {/* Zoom controls */}
             <div className="absolute bottom-[5.5rem] right-3 z-10 flex flex-col gap-2">
               <button
                 type="button"
@@ -177,7 +205,6 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
             )}
           </div>
 
-          {/* Details */}
           <div className="p-6 md:p-8 flex flex-col">
             <span className="uppercase tracking-[0.35em] text-[10px] font-body font-semibold text-emerald-light mb-2">
               Sunnah For Ummah
@@ -202,7 +229,6 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
                 "Crafted with premium fabric and modest tailoring — designed for everyday Sunnah-inspired wear."}
             </DialogDescription>
 
-            {/* Color */}
             {product.colors && product.colors.length > 0 && (
               <div className="mt-5">
                 <p className="font-body text-xs uppercase tracking-widest text-muted-foreground mb-2">
@@ -226,7 +252,6 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
               </div>
             )}
 
-            {/* Sizes */}
             <div className="mt-5">
               <p className="font-body text-xs uppercase tracking-widest text-muted-foreground mb-2">
                 Size
@@ -248,14 +273,14 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
               </div>
             </div>
 
-            {/* CTA */}
             <div className="mt-auto pt-6 flex items-center gap-3">
               <button
-                disabled={!size}
+                onClick={handleAddToCart}
+                disabled={!size || isAdding}
                 className="flex-1 inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-body font-semibold py-3 rounded-full hover:bg-emerald-light transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {size ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />}
-                {size ? `Add ${size} to Cart` : "Select a size"}
+                {isAdding ? <Loader2 className="w-4 h-4 animate-spin" /> : (size ? <Check className="w-4 h-4" /> : <ShoppingCart className="w-4 h-4" />)}
+                {isAdding ? "Adding..." : (size ? `Add ${size} to Cart` : "Select a size")}
               </button>
             </div>
 
@@ -274,7 +299,6 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
         </div>
       </DialogContent>
 
-      {/* Lightbox */}
       {lightbox && (
         <div
           className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center"
@@ -288,7 +312,6 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
           }}
           tabIndex={-1}
         >
-          {/* Top toolbar */}
           <div
             className="absolute top-4 right-4 flex items-center gap-2 z-10"
             onClick={(e) => e.stopPropagation()}
@@ -330,7 +353,6 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
             </button>
           </div>
 
-          {/* Prev / Next */}
           {gallery.length > 1 && (
             <>
               <button
@@ -360,7 +382,6 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
             </>
           )}
 
-          {/* Image */}
           <div
             className="relative max-w-[92vw] max-h-[88vh] overflow-hidden select-none"
             onClick={(e) => e.stopPropagation()}
@@ -403,7 +424,6 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
             />
           </div>
 
-          {/* Counter / hint */}
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/70 font-body text-xs">
             {gallery.length > 1 && (
               <span className="tabular-nums">
