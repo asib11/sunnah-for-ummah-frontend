@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ArrowUpRight, Eye, RotateCcw, Sparkles, Star } from "lucide-react";
-import videoAsset from "../../public/times-of-success.mp4.asset.json";
+import videoAsset from "@/assets/times-of-success-cinematic.mp4.asset.json";
 import tshirtFront from "@/assets/times-of-success-tshirt.png";
 import tshirtBack from "@/assets/times-of-success-tshirt-back.png";
 import { useSectionMedia } from "@/components/SectionMediaEditor";
@@ -26,7 +26,7 @@ const TimesOfSuccess = () => {
   const [view, setView] = useState<View>("front");
   const [revealed, setRevealed] = useState(true);
   const { urls } = useSectionMedia("times-of-success", [
-    { key: "video", label: "Background video", kind: "video", defaultUrl: "/times-of-success.mp4" },
+    { key: "video", label: "Background video", kind: "video", defaultUrl: videoAsset.url },
     { key: "front", label: "Front view image", kind: "image", defaultUrl: tshirtFront.src },
     { key: "back", label: "Back view image", kind: "image", defaultUrl: tshirtBack.src },
   ]);

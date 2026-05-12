@@ -23,7 +23,7 @@ const SabrShowcase = () => {
   const [view, setView] = useState<View>("front");
   const [revealed, setRevealed] = useState(true);
   const { urls } = useSectionMedia("sabr-showcase", [
-    { key: "video", label: "Background video", kind: "video", defaultUrl: "/sabr-cinematic.mp4" },
+    { key: "video", label: "Background video", kind: "video", defaultUrl: videoAsset.url },
     { key: "image", label: "T-shirt (front+back)", kind: "image", defaultUrl: sabrImage.src },
   ]);
 

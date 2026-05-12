@@ -20,7 +20,7 @@ const BaggySweatpantsWhite = () => {
   const { price } = getProductPrices(data);
   const [revealed, setRevealed] = useState(true);
   const { urls } = useSectionMedia("baggy-sweatpants-white", [
-    { key: "video", label: "Background video", kind: "video", defaultUrl: "/baggy-sweatpants-white-cinematic-v2.mp4" },
+    { key: "video", label: "Background video", kind: "video", defaultUrl: videoAsset.url },
     { key: "image", label: "Product image", kind: "image", defaultUrl: sweatpantsImage.src },
   ]);
 
