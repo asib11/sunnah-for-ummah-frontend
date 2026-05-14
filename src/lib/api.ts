@@ -239,7 +239,7 @@ export const storeApi = {
    * Fetch products by category ID
    */
   async getProductsByCategory(categoryId: string) {
-    const response = await fetch(`${BASE_URL}/store/products?category_id[]=${categoryId}&fields=id,title,subtitle,handle,thumbnail,metadata,*variants.prices&limit=100`, {
+    const response = await fetch(`${BASE_URL}/store/products?category_id[]=${categoryId}&fields=id,title,subtitle,handle,thumbnail,metadata,*images,*variants.prices&limit=100`, {
       method: "GET",
       headers: getDefaultHeaders(),
     });

@@ -103,7 +103,7 @@ const ProductCard = ({ name, price, originalPrice, image, badge, variantId, hand
           <button 
             onClick={handleAddToCart}
             disabled={isAdding}
-            className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300 active:scale-90 shadow-sm border border-primary/20"
+            className="w-9 h-9 rounded-full bg-[#1b4332] flex items-center justify-center text-white active:scale-90 shadow-sm"
             aria-label="Add to cart"
           >
             {isAdding ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShoppingCart className="w-4 h-4" />}
