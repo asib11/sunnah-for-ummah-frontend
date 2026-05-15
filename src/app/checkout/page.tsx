@@ -102,28 +102,36 @@ export default function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cart?.id]);
 
-  // Auto-select shipping when district changes
+  // Helper to calculate estimated Steadfast shipping cost
+  function getEstimatedShippingCost() {
+    if (!addr.districtId) return 0;
+    const city = addr.districtName?.toLowerCase() || "";
+    const area = addr.areaName?.toLowerCase() || "";
+
+    if (city.includes("dhaka") && !area.includes("suburb") && !area.includes("keraniganj") && !area.includes("savar")) {
+      return 70;
+    }
+    
+    if (area.includes("savar") || area.includes("keraniganj") || city.includes("gazipur") || city.includes("narayanganj")) {
+      return 100;
+    }
+
+    return 130;
+  }
+
+  // Auto-select shipping when available
   useEffect(() => {
     if (!shippingMethods.length || !addr.districtId) return;
 
-    const insideDhaka = shippingMethods.find((m) =>
-      m.name.toLowerCase().includes("inside")
-    );
-    const outsideDhaka = shippingMethods.find((m) =>
-      m.name.toLowerCase().includes("outside")
-    );
+    // Prefer Steadfast (calculated or named) over old flat rates
+    const steadfastOption = shippingMethods.find(
+      (m) => m.price_type === "calculated" || m.name?.toLowerCase().includes("steadfast")
+    ) || shippingMethods[0];
 
-    let target: any;
-    if (addr.isInsideDhaka) {
-      target = insideDhaka;
-    } else {
-      target = outsideDhaka;
+    if (steadfastOption) {
+      setSelectedShippingId(steadfastOption.id);
     }
-
-    if (target) {
-      setSelectedShippingId(target.id);
-    }
-  }, [addr.districtId, addr.isInsideDhaka, shippingMethods]);
+  }, [addr.districtId, shippingMethods]);
 
   async function loadShippingMethods() {
     try {
@@ -136,7 +144,8 @@ export default function CheckoutPage() {
 
   const selectedMethod = shippingMethods.find((m) => m.id === selectedShippingId);
   const subtotal = cart?.subtotal ?? 0;
-  const shippingCost = selectedMethod?.amount ?? 0;
+  // Always use the dynamic estimated cost for display so it matches the banner exactly
+  const shippingCost = getEstimatedShippingCost();
   const total = subtotal + shippingCost;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -320,15 +329,9 @@ export default function CheckoutPage() {
 
                 {/* Address badge — shown once district is picked */}
                 {addr.districtId && (
-                  <div className={`mt-4 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium ${
-                    addr.isInsideDhaka
-                      ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                      : "bg-sky-50 text-sky-700 border border-sky-200"
-                  }`}>
+                  <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <Truck className="w-4 h-4 shrink-0" />
-                    {addr.isInsideDhaka
-                      ? "✓ Inside Dhaka City — ৳60 delivery charge"
-                      : `✓ Outside Dhaka — ৳120 delivery charge`}
+                    ✓ Steadfast Courier Delivery — ৳{getEstimatedShippingCost()} charge
                   </div>
                 )}
               </div>
@@ -428,7 +431,7 @@ export default function CheckoutPage() {
                     </span>
                   </div>
                   {selectedMethod && (
-                    <p className="text-xs text-muted-foreground">{selectedMethod.name}</p>
+                    <p className="text-xs text-muted-foreground">Steadfast Courier Delivery</p>
                   )}
                   <div className="flex justify-between items-center border-t border-neutral-100 pt-4">
                     <span className="font-bold">Total</span>
