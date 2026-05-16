@@ -328,7 +328,7 @@ export const storeApi = {
   // ==========================================
 
   async createCart() {
-    const response = await fetch(`${BASE_URL}/store/carts`, {
+    const response = await fetch(`${BASE_URL}/store/carts?fields=+promotions`, {
       method: "POST",
       headers: getDefaultHeaders(),
       credentials: "include",
@@ -344,7 +344,7 @@ export const storeApi = {
   },
 
   async getCart(cartId: string) {
-    const response = await fetch(`${BASE_URL}/store/carts/${cartId}`, {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}?fields=+promotions`, {
       method: "GET",
       headers: getDefaultHeaders(),
     });
@@ -358,7 +358,7 @@ export const storeApi = {
   },
 
   async addToCart(cartId: string, variantId: string, quantity: number) {
-    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/line-items`, {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/line-items?fields=+promotions`, {
       method: "POST",
       headers: getDefaultHeaders(),
       body: JSON.stringify({ variant_id: variantId, quantity }),
@@ -373,7 +373,7 @@ export const storeApi = {
   },
 
   async updateLineItem(cartId: string, lineId: string, quantity: number) {
-    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/line-items/${lineId}`, {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/line-items/${lineId}?fields=+promotions`, {
       method: "POST",
       headers: getDefaultHeaders(),
       body: JSON.stringify({ quantity }),
@@ -388,7 +388,7 @@ export const storeApi = {
   },
 
   async removeLineItem(cartId: string, lineId: string) {
-    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/line-items/${lineId}`, {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/line-items/${lineId}?fields=+promotions`, {
       method: "DELETE",
       headers: getDefaultHeaders(),
     });
@@ -402,7 +402,7 @@ export const storeApi = {
   },
 
   async addCustomerToCart(cartId: string) {
-    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/customer`, {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/customer?fields=+promotions`, {
       method: "POST",
       headers: getDefaultHeaders(),
       credentials: "include", // Essential to pick up the session cookie
@@ -418,7 +418,7 @@ export const storeApi = {
   },
 
   async updateCart(cartId: string, data: any) {
-    const response = await fetch(`${BASE_URL}/store/carts/${cartId}`, {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}?fields=+promotions`, {
       method: "POST",
       headers: getDefaultHeaders(),
       credentials: "include",
@@ -428,6 +428,46 @@ export const storeApi = {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || "Failed to update cart.");
+    }
+
+    return response.json();
+  },
+
+  async addPromotion(cartId: string, promoCode: string) {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/promotions?fields=+promotions`, {
+      method: "POST",
+      headers: getDefaultHeaders(),
+      credentials: "include",
+      body: JSON.stringify({ promo_codes: [promoCode] }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to apply discount code.");
+    }
+
+    const data = await response.json();
+    
+    // Check if the promotion was actually attached to the cart
+    const appliedCodes = data.cart?.promotions?.map((p: any) => p.code?.toUpperCase()) || [];
+    if (!appliedCodes.includes(promoCode.toUpperCase())) {
+      throw new Error("This discount code is not applicable to your current cart.");
+    }
+
+    return data;
+  },
+
+  async removePromotion(cartId: string, promoCode: string) {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/promotions?fields=+promotions`, {
+      method: "DELETE",
+      headers: getDefaultHeaders(),
+      credentials: "include",
+      body: JSON.stringify({ promo_codes: [promoCode] }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to remove discount code.");
     }
 
     return response.json();
@@ -449,7 +489,7 @@ export const storeApi = {
   },
 
   async addShippingMethod(cartId: string, optionId: string) {
-    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/shipping-methods`, {
+    const response = await fetch(`${BASE_URL}/store/carts/${cartId}/shipping-methods?fields=+promotions`, {
       method: "POST",
       headers: getDefaultHeaders(),
       credentials: "include",

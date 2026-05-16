@@ -8,7 +8,7 @@ import { storeApi } from "@/lib/api";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import {
-  Loader2, Check, MapPin, ShoppingBag, Truck, ChevronDown,
+  Loader2, Check, MapPin, ShoppingBag, Truck, ChevronDown, Tag, X
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -59,7 +59,7 @@ function SelectField({
 export default function CheckoutPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { cart, isLoading: isCartLoading, refetch: refetchCart } = useCart();
+  const { cart, isLoading: isCartLoading, refetch: refetchCart, addPromotion, isAddingPromotion, removePromotion, isRemovingPromotion } = useCart();
   const { customer, isAuthenticated, isLoading: isAuthLoading } = useCustomer();
 
   const {
@@ -71,6 +71,7 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [shippingMethods, setShippingMethods] = useState<any[]>([]);
   const [selectedShippingId, setSelectedShippingId] = useState<string>("");
+  const [promoCodeInput, setPromoCodeInput] = useState("");
 
   // Contact details
   const [contact, setContact] = useState({
@@ -130,8 +131,23 @@ export default function CheckoutPage() {
 
     if (steadfastOption) {
       setSelectedShippingId(steadfastOption.id);
+      // Immediately sync shipping address and method to backend so promotions can evaluate against the correct cost
+      if (cart?.id && addr.districtName) {
+        storeApi.updateCart(cart.id, {
+          shipping_address: {
+            city: addr.districtName,
+            province: addr.divisionName,
+            address_2: addr.areaName,
+            country_code: "bd",
+          }
+        }).then(() => {
+          return storeApi.addShippingMethod(cart.id, steadfastOption.id);
+        }).then(() => {
+          refetchCart();
+        }).catch(() => {});
+      }
     }
-  }, [addr.districtId, shippingMethods]);
+  }, [addr.districtId, addr.districtName, addr.divisionName, addr.areaName, shippingMethods, cart?.id, refetchCart]);
 
   async function loadShippingMethods() {
     try {
@@ -143,10 +159,47 @@ export default function CheckoutPage() {
   }
 
   const selectedMethod = shippingMethods.find((m) => m.id === selectedShippingId);
-  const subtotal = cart?.subtotal ?? 0;
-  // Always use the dynamic estimated cost for display so it matches the banner exactly
-  const shippingCost = getEstimatedShippingCost();
-  const total = subtotal + shippingCost;
+  
+  // Use item_subtotal to avoid double counting shipping if Medusa includes it in subtotal
+  const subtotal = cart?.item_subtotal ?? cart?.subtotal ?? 0;
+  // Use shipping_subtotal from backend if available, otherwise calculate it
+  const shippingCost = cart?.shipping_subtotal ?? getEstimatedShippingCost();
+  
+  const discountTotal = cart?.discount_total ?? 0;
+  
+  // Medusa's cart.total already calculates everything accurately including shipping and discounts!
+  const total = cart?.total !== undefined && cart.total !== null 
+    ? cart.total 
+    : subtotal + shippingCost - discountTotal;
+
+  async function handleApplyPromo(e?: React.FormEvent | React.MouseEvent | React.KeyboardEvent) {
+    if (e) e.preventDefault();
+    if (!promoCodeInput.trim()) return;
+    try {
+      if (customer?.email && cart && !cart.email) {
+        await storeApi.updateCart(cart.id, { email: customer.email });
+      }
+      await addPromotion({ promoCode: promoCodeInput });
+      toast.success("Discount applied!");
+      setPromoCodeInput("");
+    } catch (err: any) {
+      const msg = err.message || "";
+      if (msg.includes("customer_email")) {
+        toast.error("Please login to use this discount code.");
+      } else {
+        toast.error(msg || "Invalid or expired discount code");
+      }
+    }
+  }
+
+  async function handleRemovePromo(code: string) {
+    try {
+      await removePromotion({ promoCode: code });
+      toast.success("Discount removed");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to remove discount");
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -177,8 +230,10 @@ export default function CheckoutPage() {
         email: customer?.email,
       });
 
-      // 3. Set shipping method
-      await storeApi.addShippingMethod(cart!.id, selectedShippingId);
+      // 3. Set shipping method (already added when selected, but re-adding just in case)
+      if (selectedShippingId) {
+        await storeApi.addShippingMethod(cart!.id, selectedShippingId);
+      }
 
       // 4. Payment collection
       await storeApi.createPaymentCollection(cart!.id);
@@ -418,12 +473,70 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
+                {/* Discount Code */}
+                <div className="mb-5 space-y-3">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                      <input
+                        type="text"
+                        placeholder="Discount code"
+                        value={promoCodeInput}
+                        onChange={(e) => setPromoCodeInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleApplyPromo(e);
+                          }
+                        }}
+                        className="w-full pl-9 pr-4 py-3 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => handleApplyPromo(e)}
+                      disabled={!promoCodeInput.trim() || isAddingPromotion}
+                      className="px-4 py-3 bg-neutral-900 text-white text-sm font-bold rounded-xl hover:bg-neutral-800 disabled:opacity-50 transition-colors flex items-center justify-center min-w-[80px]"
+                    >
+                      {isAddingPromotion ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                    </button>
+                  </div>
+                  
+                  {/* Applied Promotions */}
+                  {cart.promotions && cart.promotions.length > 0 && (
+                    <div className="space-y-2">
+                      {cart.promotions.map((promo: any) => (
+                        <div key={promo.id} className="flex items-center justify-between px-3 py-2 bg-emerald-50 border border-emerald-100 rounded-lg text-sm">
+                          <div className="flex items-center gap-2 text-emerald-700 font-medium">
+                            <Tag className="w-4 h-4" />
+                            <span>{promo.code}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePromo(promo.code)}
+                            disabled={isRemovingPromotion}
+                            className="p-1 hover:bg-emerald-100 rounded text-emerald-600 transition-colors disabled:opacity-50"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 {/* Totals */}
                 <div className="space-y-3 border-t border-neutral-100 pt-5">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
                     <span className="font-bold">৳ {subtotal}</span>
                   </div>
+                  {discountTotal > 0 && (
+                    <div className="flex justify-between text-sm text-emerald-600 font-medium">
+                      <span>Discount</span>
+                      <span>- ৳ {discountTotal}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Delivery</span>
                     <span className={`font-bold ${selectedMethod ? "text-primary" : "text-muted-foreground"}`}>

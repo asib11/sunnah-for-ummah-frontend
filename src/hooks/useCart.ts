@@ -124,8 +124,35 @@ export function useCart() {
   // Calculate total items in the cart
   const totalItems = cart?.items?.reduce((acc: number, item: any) => acc + item.quantity, 0) || 0;
 
-  // Calculate total price in the cart
   const totalPrice = cart?.items?.reduce((acc: number, item: any) => acc + (item.unit_price * item.quantity), 0) || 0;
+
+  // Mutation to add a promotion
+  const addPromotionMutation = useMutation({
+    mutationFn: async ({ promoCode }: { promoCode: string }) => {
+      const currentCartId = getLocalCartId();
+      if (!currentCartId) throw new Error("No cart found");
+      const response = await storeApi.addPromotion(currentCartId, promoCode);
+      return response.cart;
+    },
+    onSuccess: (updatedCart) => {
+      queryClient.setQueryData(["cart", updatedCart.id], updatedCart);
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
+
+  // Mutation to remove a promotion
+  const removePromotionMutation = useMutation({
+    mutationFn: async ({ promoCode }: { promoCode: string }) => {
+      const currentCartId = getLocalCartId();
+      if (!currentCartId) throw new Error("No cart found");
+      const response = await storeApi.removePromotion(currentCartId, promoCode);
+      return response.cart;
+    },
+    onSuccess: (updatedCart) => {
+      queryClient.setQueryData(["cart", updatedCart.id], updatedCart);
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
 
   return {
     cart,
@@ -139,6 +166,10 @@ export function useCart() {
     isUpdating: updateItemMutation.isPending,
     removeItem: removeItemMutation.mutateAsync,
     isRemoving: removeItemMutation.isPending,
+    addPromotion: addPromotionMutation.mutateAsync,
+    isAddingPromotion: addPromotionMutation.isPending,
+    removePromotion: removePromotionMutation.mutateAsync,
+    isRemovingPromotion: removePromotionMutation.isPending,
     refetch,
   };
 }

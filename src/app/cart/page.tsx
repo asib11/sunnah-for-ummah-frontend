@@ -1,9 +1,11 @@
 "use client";
+import { useState } from "react";
 
 import { useCart } from "@/hooks/useCart";
+import { storeApi } from "@/lib/api";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Loader2, Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Loader2, Minus, Plus, Trash2, ShoppingBag, ArrowRight, Tag, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCustomer } from "@/hooks/useCustomer";
@@ -11,8 +13,38 @@ import { toast } from "sonner";
 
 export default function CartPage() {
   const router = useRouter();
-  const { cart, isLoading, isError, updateItem, isUpdating, removeItem, isRemoving } = useCart();
-  const { isAuthenticated, isLoading: isAuthLoading } = useCustomer();
+  const { cart, isLoading, isError, updateItem, isUpdating, removeItem, isRemoving, addPromotion, isAddingPromotion, removePromotion, isRemovingPromotion } = useCart();
+  const { customer, isAuthenticated, isLoading: isAuthLoading } = useCustomer();
+  const [promoCodeInput, setPromoCodeInput] = useState("");
+
+  async function handleApplyPromo(e: React.FormEvent) {
+    e.preventDefault();
+    if (!promoCodeInput.trim()) return;
+    try {
+      if (customer?.email && cart && !cart.email) {
+        await storeApi.updateCart(cart.id, { email: customer.email });
+      }
+      await addPromotion({ promoCode: promoCodeInput });
+      toast.success("Discount applied!");
+      setPromoCodeInput("");
+    } catch (err: any) {
+      const msg = err.message || "";
+      if (msg.includes("customer_email")) {
+        toast.error("Please login to use this discount code.");
+      } else {
+        toast.error(msg || "Invalid or expired discount code");
+      }
+    }
+  }
+
+  async function handleRemovePromo(code: string) {
+    try {
+      await removePromotion({ promoCode: code });
+      toast.success("Discount removed");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to remove discount");
+    }
+  }
 
   const handleQuantityChange = (lineId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -49,9 +81,11 @@ export default function CartPage() {
   // Medusa stores amounts in cents/smallest currency unit.
   // For BDT 200, it might be 200. We'll divide by 100 if needed, but in our JSON it was just 200.
   // We'll assume the cart.subtotal is the correct amount to display.
-  const subtotal = cart?.subtotal || 0;
-  const total = cart?.total || 0;
-  const shipping = cart?.shipping_total || 0;
+  // We use item_subtotal to exclude shipping costs from the item list sum.
+  const subtotal = cart?.item_subtotal ?? cart?.subtotal ?? 0;
+  const total = cart?.total ?? 0;
+  const shipping = cart?.shipping_subtotal ?? cart?.shipping_total ?? 0;
+  const discountTotal = cart?.discount_total ?? 0;
 
   return (
     <div className="min-h-screen bg-background flex flex-col font-body">
@@ -155,10 +189,62 @@ export default function CartPage() {
                     <span className="text-muted-foreground">Subtotal</span>
                     <span className="font-medium">৳ {subtotal}</span>
                   </div>
+                  {discountTotal > 0 && (
+                    <div className="flex justify-between text-emerald-600 font-medium">
+                      <span>Discount</span>
+                      <span>- ৳ {discountTotal}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
                     <span className="font-medium">{shipping === 0 ? "Calculated at checkout" : `৳ ${shipping}`}</span>
                   </div>
+                  
+                  {/* Discount Code */}
+                  <div className="pt-4 border-t border-border">
+                    <form onSubmit={handleApplyPromo} className="flex gap-2 mb-3">
+                      <div className="relative flex-1">
+                        <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <input
+                          type="text"
+                          placeholder="Promo code"
+                          value={promoCodeInput}
+                          onChange={(e) => setPromoCodeInput(e.target.value)}
+                          className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={!promoCodeInput.trim() || isAddingPromotion}
+                        className="px-4 py-2.5 bg-neutral-900 text-white text-sm font-medium rounded-lg hover:bg-neutral-800 disabled:opacity-50 transition-colors flex items-center justify-center min-w-[80px]"
+                      >
+                        {isAddingPromotion ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                      </button>
+                    </form>
+                    
+                    {/* Applied Promotions */}
+                    {cart.promotions && cart.promotions.length > 0 && (
+                      <div className="space-y-2">
+                        {cart.promotions.map((promo: any) => (
+                          <div key={promo.id} className="flex items-center justify-between px-3 py-2 bg-emerald-50 border border-emerald-100 rounded-lg text-sm">
+                            <div className="flex items-center gap-2 text-emerald-700 font-medium">
+                              <Tag className="w-4 h-4" />
+                              <span>{promo.code}</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePromo(promo.code)}
+                              disabled={isRemovingPromotion}
+                              className="p-1 hover:bg-emerald-100 rounded text-emerald-600 transition-colors disabled:opacity-50"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <div className="border-t border-border pt-4 mt-4 flex justify-between items-center">
                     <span className="text-base font-bold">Total</span>
                     <span className="text-xl font-bold text-primary">৳ {total}</span>
