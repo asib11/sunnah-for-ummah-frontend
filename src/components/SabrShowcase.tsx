@@ -1,31 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, Eye, RotateCcw, Sparkles, Star } from "lucide-react";
-import videoAsset from "../../public/sabr-cinematic.mp4.asset.json";
-import sabrImage from "@/assets/sabr-tshirt-front-back.png";
+import { toast } from "sonner";
 import { useSectionMedia } from "@/components/SectionMediaEditor";
-import { useQuery } from "@tanstack/react-query";
-import { storeApi } from "@/lib/api";
-import { getProductPrices } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useVideoTelemetry } from "@/hooks/useVideoTelemetry";
+import { useCart } from "@/hooks/useCart";
+
+const DEFAULT_VIDEO_URL = "/__l5e/assets-v1/caaf452b-81a9-444d-ac95-61aed01263ff/sabr-cinematic.mp4";
+const sabrImage = "/assets/sabr-tshirt-front-back.png";
 
 type View = "front" | "back";
 
-const SabrShowcase = () => {
+const SABR_PRODUCT = { id: "sabr-tee", name: "Sabr Tee", price: 1290 };
 
-  const router = useRouter();
-  const { data, isLoading } = useQuery({
-    queryKey: ["product", "patience-sabr"],
-    queryFn: () => storeApi.getProductByHandle("patience-sabr"),
-  });
-  const { price } = getProductPrices(data);
+const SabrShowcase = () => {
   const [view, setView] = useState<View>("front");
-  const [revealed, setRevealed] = useState(true);
-  const { urls } = useSectionMedia("sabr-showcase", [
-    { key: "video", label: "Background video", kind: "video", defaultUrl: videoAsset.url },
-    { key: "image", label: "T-shirt (front+back)", kind: "image", defaultUrl: sabrImage.src },
+  const [revealed, setRevealed] = useState(false);
+
+  // Auto-reveal after a short delay (video is looped so onEnded never fires)
+  useEffect(() => {
+    const t = setTimeout(() => setRevealed(true), 800);
+    return () => clearTimeout(t);
+  }, []);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  useVideoTelemetry(videoRef, "sabr-showcase");
+  const { urls, editor } = useSectionMedia("sabr-showcase", [
+    { key: "video", label: "Background video", kind: "video", defaultUrl: DEFAULT_VIDEO_URL },
+    { key: "image", label: "T-shirt (front+back)", kind: "image", defaultUrl: sabrImage },
   ]);
+  const { addToCart, isAdding } = useCart();
+  const handleShop = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.location.href = "/calligraphy-tshirt";
+  };
 
   return (
     <section
@@ -33,7 +41,7 @@ const SabrShowcase = () => {
       onMouseLeave={() => setView("front")}
       onClick={() => setRevealed(true)}
     >
-      {/* Cinematic intro video — plays once, then fades to ambient backdrop */}
+      {editor}
       <video
         src={urls.video}
         key={urls.video}
@@ -41,11 +49,10 @@ const SabrShowcase = () => {
         loop
         muted
         playsInline
-        onEnded={() => setRevealed(true)}
-        className="absolute inset-0 w-full h-full object-cover transition-opacity transition-duration-[1500ms] ease-out"
-        style={{ opacity: revealed ? 0.3 : 0.9 }}
+        className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-[2000ms] ease-out group-hover:scale-110"
       />
-
+            {/* Cinematic intro video — plays once, then fades to ambient backdrop */}
+      
       {/* Cinematic overlays */}
       <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/55 to-foreground/70" />
       <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/20 to-foreground/70" />
@@ -76,16 +83,16 @@ const SabrShowcase = () => {
       </div>
 
       {/* Detail badge */}
-      <div className="absolute top-6 right-6 md:top-10 md:right-12 z-20 flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-accent/30 rounded-full px-4 py-2">
+      <div className="absolute top-6 right-6 md:top-10 md:right-12 z-20 flex items-center gap-2 bg-emerald/40 backdrop-blur-md border border-accent/30 rounded-full px-4 py-2">
         <Eye className="w-3.5 h-3.5 text-accent" />
-        <span className="font-body text-[10px] uppercase tracking-[0.3em] text-primary-foreground/80">
+        <span className="font-body text-[10px] uppercase tracking-[0.3em] text-cream/80">
           {view === "front" ? "Front · SABR" : "Back · صبر"}
         </span>
       </div>
 
       {/* Carousel stage — fades in once intro ends. Left half = front, right half = back */}
       <div
-        className="absolute inset-0 flex items-center justify-center z-10 pt-16 pb-32 md:pb-28 transition-all transition-duration-[1400ms] ease-out"
+        className="absolute inset-0 flex items-center justify-center z-10 pt-16 pb-32 md:pb-28 transition-all duration-[1400ms] ease-out"
         style={{
           opacity: revealed ? 1 : 0,
           transform: revealed ? "scale(1)" : "scale(0.92)",
@@ -96,7 +103,7 @@ const SabrShowcase = () => {
         <div className="relative h-full w-full max-w-3xl mx-auto">
           {/* Glow halo behind active tshirt */}
           <div
-            className="absolute inset-0 transition-all transition-duration-[1200ms] ease-out"
+            className="absolute inset-0 transition-all duration-[1200ms] ease-out"
             style={{
               background:
                 "radial-gradient(circle at center, hsl(var(--accent) / 0.3), transparent 60%)",
@@ -109,7 +116,7 @@ const SabrShowcase = () => {
           <img
             src={urls.image}
             alt="Sabr T-Shirt — front view"
-            className="absolute inset-0 w-full h-full object-contain transition-all transition-duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
+            className="absolute inset-0 w-full h-full object-contain transition-all duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
             style={{
               clipPath: "inset(0 50% 0 0)",
               transform:
@@ -125,7 +132,7 @@ const SabrShowcase = () => {
           <img
             src={urls.image}
             alt="Sabr T-Shirt — back view"
-            className="absolute inset-0 w-full h-full object-contain transition-all transition-duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
+            className="absolute inset-0 w-full h-full object-contain transition-all duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
             style={{
               clipPath: "inset(0 0 0 50%)",
               transform:
@@ -157,8 +164,8 @@ const SabrShowcase = () => {
 
       {/* Top right rating */}
       <div className="hidden md:block absolute top-24 right-6 md:right-12 z-10 text-right">
-        <p className="font-body text-[10px] uppercase tracking-[0.3em] text-primary-foreground/60">From</p>
-        <p className="font-display text-2xl md:text-3xl font-semibold text-accent">{isLoading ? "..." : price ? `৳${price}` : "৳..."}</p>
+        <p className="font-body text-[10px] uppercase tracking-[0.3em] text-cream/60">From</p>
+        <p className="font-display text-2xl md:text-3xl font-semibold text-accent">৳1,390</p>
         <div className="flex items-center justify-end gap-0.5 mt-1">
           {[...Array(5)].map((_, i) => (
             <Star key={i} className="w-3 h-3 fill-accent text-accent" />
@@ -173,7 +180,7 @@ const SabrShowcase = () => {
             <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-accent/90 mb-1">
               Calligraphy Collection · 05
             </p>
-            <h3 className="font-display text-xl md:text-3xl font-semibold text-primary-foreground leading-tight">
+            <h3 className="font-display text-xl md:text-3xl font-semibold text-cream leading-tight">
               {view === "front" ? (
                 <>
                   Patience · <span className="italic text-accent">SABR</span>
@@ -184,15 +191,15 @@ const SabrShowcase = () => {
                 </>
               )}
             </h3>
-            <p className="font-display text-[11px] md:text-sm text-primary-foreground/80 mt-1 italic">
+            <p className="font-display text-[11px] md:text-sm text-cream/80 mt-1 italic">
               Sabr · صبر — "Verily, with hardship comes ease."
             </p>
-            <p className="font-body text-[10px] md:text-xs text-primary-foreground/65 mt-1.5 leading-relaxed">
+            <p className="font-body text-[10px] md:text-xs text-cream/65 mt-1.5 leading-relaxed">
               {view === "front"
                 ? "Refined SABR wordmark layered over flowing Arabic script, framed by hand-stitched Palestinian tatreez at the shoulders and hem."
                 : "A bold emerald block holds the Arabic word صبر in confident calligraphy — the silent pillar of every believer."}
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-[9px] md:text-[10px] uppercase tracking-[0.25em] text-primary-foreground/55">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-[9px] md:text-[10px] uppercase tracking-[0.25em] text-cream/55">
               <span>240 GSM Combed</span>
               <span className="w-1 h-1 rounded-full bg-accent" />
               <span>Boxy Drop Shoulder</span>
@@ -214,7 +221,7 @@ const SabrShowcase = () => {
                     view === "front" ? "w-6 bg-accent" : "w-2.5 bg-primary-foreground/30"
                   }`}
                 />
-                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-primary-foreground/80">
+                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-cream/80">
                   Front
                 </span>
               </button>
@@ -231,14 +238,14 @@ const SabrShowcase = () => {
                     view === "back" ? "w-6 bg-accent" : "w-2.5 bg-primary-foreground/30"
                   }`}
                 />
-                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-primary-foreground/80">
+                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-cream/80">
                   Back
                 </span>
               </button>
             </div>
           </div>
 
-          <button onClick={(e) => { e.stopPropagation(); router.push("/products/patience-sabr"); }} className="group/btn inline-flex items-center gap-2 bg-accent text-accent-foreground pl-4 pr-1.5 py-1.5 rounded-full text-xs font-body font-semibold hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 shrink-0">
+          <button type="button" onClick={handleShop} className="group/btn inline-flex items-center gap-2 bg-accent text-accent-foreground pl-4 pr-1.5 py-1.5 rounded-full text-xs font-body font-semibold hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 shrink-0">
             Wear Patience
             <span className="w-7 h-7 rounded-full bg-accent-foreground/10 group-hover/btn:bg-accent-foreground/20 flex items-center justify-center transition-all group-hover/btn:rotate-45">
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -251,3 +258,5 @@ const SabrShowcase = () => {
 };
 
 export default SabrShowcase;
+
+

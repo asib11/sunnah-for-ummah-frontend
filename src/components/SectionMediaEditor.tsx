@@ -87,7 +87,17 @@ export function useSectionMedia(sectionId: string, slots: MediaSlot[]): {
   return { urls, editor };
 }
 
-function EditorPanel({
+function EditorPanel(_: {
+  slots: MediaSlot[];
+  state: Record<string, SlotState>;
+  onReplace: (key: string, file: File) => void;
+  onReset: (key: string) => void;
+}) {
+  return null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function _UnusedEditorPanel({
   slots,
   state,
   onReplace,
@@ -206,3 +216,5 @@ function SlotRow({
     </div>
   );
 }
+
+

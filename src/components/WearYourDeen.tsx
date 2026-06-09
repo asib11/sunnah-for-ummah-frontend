@@ -1,32 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowUpRight, Eye, RotateCcw, Sparkles, Star } from "lucide-react";
-import tshirtFront from "@/assets/tawakkul-tshirt.png";
-import tshirtBack from "@/assets/tawakkul-tshirt-back.png";
+import { toast } from "sonner";
+const tshirtFront = "/assets/tawakkul-tshirt.png";
+const tshirtBack = "/assets/tawakkul-tshirt-back.png";
 import { useSectionMedia } from "@/components/SectionMediaEditor";
-import { useQuery } from "@tanstack/react-query";
-import { storeApi } from "@/lib/api";
-import { getProductPrices } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useCart } from "@/hooks/useCart";
 
 type View = "front" | "back";
 
-const WearYourDeen = () => {
+const TAWAKKUL_TEE = { id: "tawakkul-tee", name: "Tawakkul Calligraphy Tee", price: 1290 };
 
-  const router = useRouter();
-  const { data, isLoading } = useQuery({
-    queryKey: ["product", "wear-your-deen"],
-    queryFn: () => storeApi.getProductByHandle("wear-your-deen"),
-  });
-  const { price } = getProductPrices(data);
+const WearYourDeen = () => {
   const [view, setView] = useState<View>("front");
-  const [revealed, setRevealed] = useState(true);
-  const { urls } = useSectionMedia("wear-your-deen", [
+  const [revealed, setRevealed] = useState(false);
+
+  // Auto-reveal after a short delay (video is looped so onEnded never fires)
+  useEffect(() => {
+    const t = setTimeout(() => setRevealed(true), 800);
+    return () => clearTimeout(t);
+  }, []);
+
+  const { urls, editor } = useSectionMedia("wear-your-deen", [
     { key: "video", label: "Background video", kind: "video", defaultUrl: "/wear-your-deen-v2.mp4" },
-    { key: "front", label: "Front view image", kind: "image", defaultUrl: tshirtFront.src },
-    { key: "back", label: "Back view image", kind: "image", defaultUrl: tshirtBack.src },
+    { key: "front", label: "Front view image", kind: "image", defaultUrl: tshirtFront },
+    { key: "back", label: "Back view image", kind: "image", defaultUrl: tshirtBack },
   ]);
+  const { addToCart, isAdding } = useCart();
+  const handleShop = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    window.location.href = "/calligraphy-tshirt";
+  };
 
   return (
     <section
@@ -34,7 +39,7 @@ const WearYourDeen = () => {
       onMouseLeave={() => setView("front")}
       onClick={() => setRevealed(true)}
     >
-      {/* Cinematic intro video — plays once, then fades back to reveal product */}
+      {editor}
       <video
         src={urls.video}
         key={urls.video}
@@ -42,17 +47,10 @@ const WearYourDeen = () => {
         loop
         muted
         playsInline
-        onEnded={() => setRevealed(true)}
-        onTimeUpdate={(e) => {
-          const v = e.currentTarget;
-          if (!revealed && v.duration && v.currentTime >= v.duration - 0.15) {
-            setRevealed(true);
-          }
-        }}
-        className="absolute inset-0 w-full h-full object-cover transition-opacity transition-duration-[1500ms] ease-out"
-        style={{ opacity: revealed ? 0.35 : 0.85 }}
+        className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-[2000ms] ease-out group-hover:scale-110"
       />
-
+            {/* Cinematic intro video — plays once, then fades back to reveal product */}
+      
 
       {/* Cinematic overlays */}
       <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/60 to-foreground/70" />
@@ -84,16 +82,16 @@ const WearYourDeen = () => {
       </div>
 
       {/* Detail badge */}
-      <div className="absolute top-6 right-6 md:top-10 md:right-12 z-20 flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-accent/30 rounded-full px-4 py-2">
+      <div className="absolute top-6 right-6 md:top-10 md:right-12 z-20 flex items-center gap-2 bg-emerald/40 backdrop-blur-md border border-accent/30 rounded-full px-4 py-2">
         <Eye className="w-3.5 h-3.5 text-accent" />
-        <span className="font-body text-[10px] uppercase tracking-[0.3em] text-primary-foreground/80">
+        <span className="font-body text-[10px] uppercase tracking-[0.3em] text-cream/80">
           {view === "front" ? "Front View" : "Back View"}
         </span>
       </div>
 
       {/* Carousel stage — fades in once the cinematic intro ends */}
       <div
-        className="absolute inset-0 flex items-center justify-center z-10 pt-16 pb-28 md:pb-24 transition-all transition-duration-[1400ms] ease-out"
+        className="absolute inset-0 flex items-center justify-center z-10 pt-16 pb-28 md:pb-24 transition-all duration-[1400ms] ease-out"
         style={{
           opacity: revealed ? 1 : 0,
           transform: revealed ? "scale(1)" : "scale(0.92)",
@@ -104,7 +102,7 @@ const WearYourDeen = () => {
         <div className="relative h-full w-full max-w-2xl mx-auto">
           {/* Glow halo behind active tshirt */}
           <div
-            className="absolute inset-0 transition-all transition-duration-[1200ms] ease-out"
+            className="absolute inset-0 transition-all duration-[1200ms] ease-out"
             style={{
               background:
                 "radial-gradient(circle at center, hsl(var(--accent) / 0.3), transparent 60%)",
@@ -115,9 +113,9 @@ const WearYourDeen = () => {
 
           {/* Front view — Tawakkul print */}
           <img
-            src={tshirtFront.src}
+            src={tshirtFront}
             alt="Tawakkul T-Shirt — front view"
-            className="absolute inset-0 w-full h-full object-contain transition-all transition-duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
+            className="absolute inset-0 w-full h-full object-contain transition-all duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
             style={{
               transform:
                 view === "front"
@@ -130,9 +128,9 @@ const WearYourDeen = () => {
 
           {/* Back view — plain black */}
           <img
-            src={tshirtBack.src}
+            src={tshirtBack}
             alt="Tawakkul T-Shirt — back view (plain black)"
-            className="absolute inset-0 w-full h-full object-contain transition-all transition-duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
+            className="absolute inset-0 w-full h-full object-contain transition-all duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
             style={{
               transform:
                 view === "back"
@@ -163,8 +161,8 @@ const WearYourDeen = () => {
 
       {/* Top right rating */}
       <div className="hidden md:block absolute top-24 right-6 md:right-12 z-10 text-right">
-        <p className="font-body text-[10px] uppercase tracking-[0.3em] text-primary-foreground/60">From</p>
-        <p className="font-display text-2xl md:text-3xl font-semibold text-accent">{isLoading ? "..." : price ? `৳${price}` : "৳..."}</p>
+        <p className="font-body text-[10px] uppercase tracking-[0.3em] text-cream/60">From</p>
+        <p className="font-display text-2xl md:text-3xl font-semibold text-accent">৳1,490</p>
         <div className="flex items-center justify-end gap-0.5 mt-1">
           {[...Array(5)].map((_, i) => (
             <Star key={i} className="w-3 h-3 fill-accent text-accent" />
@@ -179,7 +177,7 @@ const WearYourDeen = () => {
             <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-accent/90 mb-1">
               Calligraphy Collection · 03
             </p>
-            <h3 className="font-display text-xl md:text-3xl font-semibold text-primary-foreground leading-tight">
+            <h3 className="font-display text-xl md:text-3xl font-semibold text-cream leading-tight">
               {view === "front" ? (
                 <>
                   Wear Your <span className="italic text-accent">Deen</span>
@@ -190,15 +188,15 @@ const WearYourDeen = () => {
                 </>
               )}
             </h3>
-            <p className="font-display text-[11px] md:text-sm text-primary-foreground/80 mt-1 italic">
+            <p className="font-display text-[11px] md:text-sm text-cream/80 mt-1 italic">
               Tawakkul · توكل — Trust in Allah
             </p>
-            <p className="font-body text-[10px] md:text-xs text-primary-foreground/65 mt-1.5 leading-relaxed">
+            <p className="font-body text-[10px] md:text-xs text-cream/65 mt-1.5 leading-relaxed">
               {view === "front"
                 ? "A devotional oversized tee inspired by Sufi cartography — vintage Persian carpet framing, hand-drawn dhow boat sailing under a crescent moon, and a constellation of trust stitched in gold."
                 : "Clean, dignified black canvas — let the front speak."}
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-[9px] md:text-[10px] uppercase tracking-[0.25em] text-primary-foreground/55">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-[9px] md:text-[10px] uppercase tracking-[0.25em] text-cream/55">
               <span>240 GSM Combed</span>
               <span className="w-1 h-1 rounded-full bg-accent" />
               <span>Boxy Drop Shoulder</span>
@@ -220,7 +218,7 @@ const WearYourDeen = () => {
                     view === "front" ? "w-6 bg-accent" : "w-2.5 bg-primary-foreground/30"
                   }`}
                 />
-                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-primary-foreground/80">
+                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-cream/80">
                   Front
                 </span>
               </button>
@@ -237,14 +235,14 @@ const WearYourDeen = () => {
                     view === "back" ? "w-6 bg-accent" : "w-2.5 bg-primary-foreground/30"
                   }`}
                 />
-                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-primary-foreground/80">
+                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-cream/80">
                   Back
                 </span>
               </button>
             </div>
           </div>
 
-          <button onClick={(e) => { e.stopPropagation(); router.push("/products/wear-your-deen"); }} className="group/btn inline-flex items-center gap-2 bg-accent text-accent-foreground pl-4 pr-1.5 py-1.5 rounded-full text-xs font-body font-semibold hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 shrink-0">
+          <button type="button" onClick={handleShop} className="group/btn inline-flex items-center gap-2 bg-accent text-accent-foreground pl-4 pr-1.5 py-1.5 rounded-full text-xs font-body font-semibold hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 shrink-0">
             Wear Your Deen
             <span className="w-7 h-7 rounded-full bg-accent-foreground/10 group-hover/btn:bg-accent-foreground/20 flex items-center justify-center transition-all group-hover/btn:rotate-45">
               <ArrowUpRight className="w-3.5 h-3.5" />
@@ -257,3 +255,5 @@ const WearYourDeen = () => {
 };
 
 export default WearYourDeen;
+
+

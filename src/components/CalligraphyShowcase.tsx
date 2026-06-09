@@ -2,35 +2,36 @@
 
 import { useState } from "react";
 import { ArrowUpRight, Eye, RotateCcw, Sparkles, Star } from "lucide-react";
-import tshirtImage from "@/assets/muslim-tshirt-front-back.png";
+import { toast } from "sonner";
 import { useSectionMedia } from "@/components/SectionMediaEditor";
-import { useQuery } from "@tanstack/react-query";
-import { storeApi } from "@/lib/api";
-import { getProductPrices } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import { useCart } from "@/hooks/useCart";
+
+const tshirtImage = "/assets/muslim-tshirt-front-back.png";
+const DEFAULT_VIDEO_URL = "/calligraphy-showcase.mp4";
 
 type View = "front" | "back";
 
-const CalligraphyShowcase = () => {
+const SHOWCASE_PRODUCT = { id: "calligraphy-muslim-tee", name: "Muslim Calligraphy T-Shirt", price: 1290 };
 
-  const router = useRouter();
-  const { data, isLoading } = useQuery({
-    queryKey: ["product", "front-calligraphy"],
-    queryFn: () => storeApi.getProductByHandle("front-calligraphy"),
-  });
-  const { price } = getProductPrices(data);
+const CalligraphyShowcase = () => {
   const [view, setView] = useState<View>("front");
-  const { urls } = useSectionMedia("calligraphy-showcase", [
-    { key: "video", label: "Background video", kind: "video", defaultUrl: "/calligraphy-showcase.mp4" },
-    { key: "image", label: "T-shirt (front+back)", kind: "image", defaultUrl: tshirtImage.src },
+  const { urls, editor } = useSectionMedia("calligraphy-showcase", [
+    { key: "video", label: "Background video", kind: "video", defaultUrl: DEFAULT_VIDEO_URL },
+    { key: "image", label: "T-shirt (front+back)", kind: "image", defaultUrl: tshirtImage },
   ]);
+  const { addToCart, isAdding } = useCart();
+  const handleShop = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toast.info("Visit the Calligraphy T-Shirt page to add this to your cart.");
+    window.dispatchEvent(new Event("open-cart"));
+  };
 
   return (
     <section
       className="relative h-full w-full overflow-hidden rounded-2xl bg-foreground group"
       onMouseLeave={() => setView("front")}
     >
-      {/* Looping cinematic video */}
+      {editor}
       <video
         src={urls.video}
         key={urls.video}
@@ -38,9 +39,10 @@ const CalligraphyShowcase = () => {
         loop
         muted
         playsInline
-        className="absolute inset-0 w-full h-full object-cover opacity-60 transition-transform transition-duration-[2000ms] ease-out group-hover:scale-110"
+        className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-[2000ms] ease-out group-hover:scale-110"
       />
-
+      {/* Looping cinematic video — same overlay system as Drop Shoulder */}
+      
       {/* Cinematic overlays */}
       <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/60 to-foreground/70" />
       <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/30 to-foreground/70" />
@@ -71,17 +73,17 @@ const CalligraphyShowcase = () => {
       </div>
 
       {/* Detail badge */}
-      <div className="absolute top-6 right-6 md:top-10 md:right-12 z-20 flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm border border-accent/30 rounded-full px-4 py-2">
+      <div className="absolute top-6 right-6 md:top-10 md:right-12 z-20 flex items-center gap-2 bg-emerald/40 backdrop-blur-md border border-accent/30 rounded-full px-4 py-2">
         <Eye className="w-3.5 h-3.5 text-accent" />
-        <span className="font-body text-[10px] uppercase tracking-[0.3em] text-primary-foreground/80">
+        <span className="font-body text-[10px] uppercase tracking-[0.3em] text-cream/80">
           {view === "front" ? "Front View" : "Back View"}
         </span>
       </div>
 
       {/* Price tag */}
       <div className="hidden md:block absolute top-24 right-6 md:right-12 z-20 text-right">
-        <p className="font-body text-[10px] uppercase tracking-[0.3em] text-primary-foreground/60">Starting at</p>
-        <p className="font-display text-2xl md:text-3xl font-semibold text-accent">{isLoading ? "..." : price ? `৳${price}` : "৳..."}</p>
+        <p className="font-body text-[10px] uppercase tracking-[0.3em] text-cream/60">Starting at</p>
+        <p className="font-display text-2xl md:text-3xl font-semibold text-accent">৳1,290</p>
         <div className="flex items-center justify-end gap-0.5 mt-1">
           {[...Array(5)].map((_, i) => (
             <Star key={i} className="w-3 h-3 fill-accent text-accent" />
@@ -94,7 +96,7 @@ const CalligraphyShowcase = () => {
         <div className="relative h-full w-full max-w-3xl mx-auto">
           {/* Glow halo behind active tshirt */}
           <div
-            className="absolute inset-0 transition-all transition-duration-[1200ms] ease-out"
+            className="absolute inset-0 transition-all duration-[1200ms] ease-out"
             style={{
               background:
                 "radial-gradient(circle at center, hsl(var(--accent) / 0.3), transparent 60%)",
@@ -107,7 +109,7 @@ const CalligraphyShowcase = () => {
           <img
             src={urls.image}
             alt="Muslim Calligraphy T-Shirt — front view"
-            className="absolute inset-0 w-full h-full object-contain transition-all transition-duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
+            className="absolute inset-0 w-full h-full object-contain transition-all duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
             style={{
               clipPath: "inset(0 50% 0 0)",
               transform:
@@ -123,7 +125,7 @@ const CalligraphyShowcase = () => {
           <img
             src={urls.image}
             alt="Muslim Calligraphy T-Shirt — back view"
-            className="absolute inset-0 w-full h-full object-contain transition-all transition-duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
+            className="absolute inset-0 w-full h-full object-contain transition-all duration-[900ms] ease-out drop-shadow-[0_30px_70px_hsl(var(--accent)/0.4)]"
             style={{
               clipPath: "inset(0 0 0 50%)",
               transform:
@@ -160,7 +162,7 @@ const CalligraphyShowcase = () => {
             <p className="font-body text-[9px] md:text-[10px] uppercase tracking-[0.3em] text-accent/90 mb-1">
               Calligraphy Collection · 02
             </p>
-            <h3 className="font-display text-lg md:text-2xl font-semibold text-primary-foreground leading-tight">
+            <h3 className="font-display text-lg md:text-2xl font-semibold text-cream leading-tight">
               {view === "front" ? (
                 <>
                   Front · <span className="italic text-accent">Calligraphy</span>
@@ -171,7 +173,7 @@ const CalligraphyShowcase = () => {
                 </>
               )}
             </h3>
-            <p className="font-body text-[11px] md:text-xs text-primary-foreground/70 mt-1 max-w-md leading-snug">
+            <p className="font-body text-[11px] md:text-xs text-cream/70 mt-1 max-w-md leading-snug">
               {view === "front"
                 ? "Hand-drawn 'Muslim' calligraphy in flowing Arabic script."
                 : "A delicate single-line masjid skyline at the hem."}
@@ -191,7 +193,7 @@ const CalligraphyShowcase = () => {
                     view === "front" ? "w-6 bg-accent" : "w-2.5 bg-primary-foreground/30"
                   }`}
                 />
-                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-primary-foreground/80">
+                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-cream/80">
                   Front
                 </span>
               </button>
@@ -208,15 +210,15 @@ const CalligraphyShowcase = () => {
                     view === "back" ? "w-6 bg-accent" : "w-2.5 bg-primary-foreground/30"
                   }`}
                 />
-                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-primary-foreground/80">
+                <span className="font-body text-[9px] uppercase tracking-[0.3em] text-cream/80">
                   Back
                 </span>
               </button>
             </div>
           </div>
 
-          <button onClick={(e) => { e.stopPropagation(); router.push("/products/front-calligraphy"); }} className="group/btn inline-flex items-center gap-2 bg-accent text-accent-foreground pl-4 pr-1.5 py-1.5 rounded-full text-xs font-body font-semibold hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 shrink-0">
-            View Product
+          <button type="button" onClick={handleShop} className="group/btn inline-flex items-center gap-2 bg-accent text-accent-foreground pl-4 pr-1.5 py-1.5 rounded-full text-xs font-body font-semibold hover:bg-accent/90 transition-all shadow-lg shadow-accent/30 shrink-0">
+            Shop the Drop
             <span className="w-7 h-7 rounded-full bg-accent-foreground/10 group-hover/btn:bg-accent-foreground/20 flex items-center justify-center transition-all group-hover/btn:rotate-45">
               <ArrowUpRight className="w-3.5 h-3.5" />
             </span>
@@ -228,3 +230,5 @@ const CalligraphyShowcase = () => {
 };
 
 export default CalligraphyShowcase;
+
+

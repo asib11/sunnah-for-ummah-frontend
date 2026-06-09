@@ -98,16 +98,26 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
 
     let selectedVariantId = product.variantId;
 
-    if (size && product.variants) {
-      const match = product.variants.find(v => 
-        v.title.toLowerCase() === size.toLowerCase() || 
-        v.options?.some((opt: any) => opt.value.toLowerCase() === size.toLowerCase())
+    // If the product has multiple variants, resolve by selected size
+    if (product.variants && product.variants.length > 0) {
+      if (!size) {
+        toast.error("Please select a size first.");
+        return;
+      }
+      const match = product.variants.find((v) =>
+        v.title?.toLowerCase() === size.toLowerCase() ||
+        v.options?.some((opt: any) => opt.value?.toLowerCase() === size.toLowerCase())
       );
-      if (match) selectedVariantId = match.id;
+      if (match) {
+        selectedVariantId = match.id;
+      } else {
+        toast.error("Selected size is not available. Please choose another.");
+        return;
+      }
     }
 
     if (!selectedVariantId) {
-      toast.error("Please select a valid option.");
+      toast.error("This product is not yet available for online purchase.");
       return;
     }
 

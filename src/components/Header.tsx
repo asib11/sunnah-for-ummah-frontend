@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, ShoppingCart, Heart, User, Menu, X, Star } from "lucide-react";
+import { Search, ShoppingCart, Heart, User, Menu, X, Star, ChevronDown, Moon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -19,26 +19,69 @@ import logoSfu from "@/assets/logo-sfu.png";
 import { useCart } from "@/hooks/useCart";
 import { CartDrawer } from "./CartDrawer";
 
+const CrescentStar = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+    <path d="M12 1l2.5 6.5L21 8.5l-5.5 4.5 1.5 7-6-4-6 4 1.5-7L3 8.5l6.5-1L12 1z" fill="currentColor" />
+    <path d="M4 14c-1.5-1-2.5-2.8-2.5-4.8C1.5 6.3 4 3.5 7.2 3c-1 .8-1.7 2-1.7 3.5 0 2.5 2 4.5 4.5 4.5.6 0 1.2-.1 1.7-.3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+  </svg>
+);
+
+const NavIcon = ({ type, isActive }: { type?: string; isActive?: boolean }) => {
+  if (!type) return null;
+  const cls = isActive
+    ? "w-3.5 h-3.5 text-gold shrink-0 nav-icon-glow-active animate-shimmer-glow"
+    : "w-3.5 h-3.5 text-primary/90 shrink-0 drop-shadow-[0_0_5px_hsl(var(--gold)/0.65)] group-hover:animate-shimmer-glow";
+  if (type === "crescent") return <CrescentStar className={cls} />;
+  if (type === "star") return <Star className={cls} fill="currentColor" />;
+  if (type === "moon") return <Moon className={cls} />;
+  return null;
+};
+
 const searchProducts = [
+  "Hajj Essentials",
   "Premium Black Embroidered Panjabi",
   "Classic White Thobe",
   "Dawah T-Shirt",
   "Navy Blue Embroidered Panjabi",
   "Premium Attar Perfume Oil Set",
   "Beige Cotton Panjabi",
-  "Olive Green Chino Pants",
   "Solid Premium T-Shirt",
 ];
 
-const navItems = [
-  { label: "Eid Collection", href: "/eid-collection" },
-  { label: "Men's", href: "/eid-collection" },
-  { label: "Women's", href: "/eid-collection" },
-  { label: "Calligraphy T-shirt", href: "/eid-collection" },
-  // { label: "Accessories", href: "#" },
-  // { label: "Perfume Oil (Attar)", href: "#" },
-  { label: "Calligraphy Dropshoulder", href: "/eid-collection" },
+type NavChild = { label: string; href: string };
+type NavItem = { label: string; href: string; children?: NavChild[]; icon?: "crescent" | "star" | "moon" };
+
+const navItems: NavItem[] = [
+  { label: "Eid Collection", href: "/eid-collection", icon: "crescent" },
+  {
+    label: "Men's",
+    href: "#",
+    children: [
+      { label: "Calligraphy T-shirt", href: "/calligraphy-tshirt" },
+      { label: "Calligraphy Dropshoulder", href: "/calligraphy-dropshoulder" },
+      { label: "Baggy Sweatpants", href: "/baggy-sweatpants" },
+    ],
+  },
+  { label: "Calligraphy T-shirt", href: "#calligraphy-showcase", icon: "star" },
+  { label: "Calligraphy Dropshoulder", href: "/calligraphy-dropshoulder", icon: "star" },
 ];
+
+const NavLinkItem = ({
+  href, children, onClick, className,
+}: {
+  href: string;
+  children: (props: { isActive: boolean }) => React.ReactNode;
+  onClick?: () => void;
+  className?: (props: { isActive: boolean }) => string;
+}) => {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+  return (
+    <Link href={href} onClick={onClick} className={className ? className({ isActive }) : undefined}>
+      {children({ isActive })}
+    </Link>
+  );
+};
 
 const useTypingPlaceholder = (words: string[], typingSpeed = 80, deleteSpeed = 40, pauseMs = 1500) => {
   const [text, setText] = useState("");
@@ -234,48 +277,81 @@ const Header = () => {
         <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
-        <div className="container relative mx-auto flex items-center justify-center gap-8 px-4 py-2.5">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href) && !item.href.includes("#"));
-            return item.href.startsWith("/") && !item.href.includes("#") ? (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`group relative text-sm font-body font-medium transition-colors ${
-                  isActive ? "text-primary" : "text-foreground hover:text-primary"
-                }`}
-              >
-                {item.label}
-                <span
-                  className={`absolute -bottom-1 left-1/2 -translate-x-1/2 h-px bg-gradient-to-r from-primary via-accent to-primary transition-all duration-300 ${
-                    isActive ? "w-full" : "w-0 group-hover:w-full"
-                  }`}
-                />
-              </Link>
-            ) : (
-              <a
-                key={item.label}
-                href={item.href}
-                className="group relative text-sm font-body font-medium text-foreground hover:text-primary transition-colors"
-              >
-                {item.label}
-                <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-px w-0 bg-gradient-to-r from-primary via-accent to-primary group-hover:w-full transition-all duration-300" />
-              </a>
-            );
-          })}
-          <button
-            type="button"
-            onClick={() =>
-              document
-                .getElementById("whats-inside-kit")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" })
-            }
-            className="relative inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 bg-gradient-to-r from-primary/90 via-emerald-light/90 to-primary/90 text-primary-foreground font-body text-xs font-semibold shadow-md shadow-primary/30 hover:shadow-lg hover:shadow-primary/40 hover:-translate-y-0.5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background ring-1 ring-accent/40"
+        <div className="container relative mx-auto flex items-center justify-center gap-6 px-4 py-3">
+          {navItems.map((item, idx) => (
+            <div key={item.label} className="flex items-center gap-6">
+              {item.children ? (
+                <div className="relative group">
+                  {(() => {
+                    const childActive = item.children!.some((c) => pathname === c.href);
+                    return (
+                      <button type="button" className={`group/btn relative inline-flex items-center gap-1.5 font-body text-[11px] font-semibold uppercase tracking-[0.22em] transition-colors duration-300 ${childActive ? "text-primary" : "text-foreground hover:text-primary"}`}>
+                        <NavIcon type={item.icon} isActive={childActive} />
+                        {item.label}
+                        <ChevronDown className={`w-3 h-3 opacity-70 transition-transform duration-300 group-hover:rotate-180 ${childActive ? "rotate-180" : ""}`} />
+                        <span className={`pointer-events-none absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-px bg-primary transition-all duration-500 ease-out ${childActive ? "w-full" : "w-0 group-hover:w-full"}`} />
+                      </button>
+                    );
+                  })()}
+                  <div className={`absolute left-1/2 -translate-x-1/2 top-full pt-4 z-50 transition-all duration-300 ease-out ${item.children!.some((c) => pathname === c.href) ? "opacity-100 visible translate-y-0" : "opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0"}`}>
+                    <div className="min-w-[16rem] rounded-xl border border-gold/40 bg-gradient-to-b from-background via-background to-emerald-tint/30 backdrop-blur-md shadow-[0_20px_50px_-15px_hsl(var(--primary)/0.45)] overflow-hidden">
+                      <div className="h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent" />
+                      {item.children.map((c, ci) => (
+                        <NavLinkItem key={c.label} href={c.href}
+                          className={({ isActive }) => `group/item relative flex items-center gap-2.5 px-4 py-3 text-sm font-body font-semibold tracking-wide transition-all duration-300 ${ci > 0 ? "border-t border-gold/15" : ""} ${isActive ? "bg-gradient-to-r from-primary/15 via-gold/10 to-transparent text-primary" : "text-foreground hover:bg-gradient-to-r hover:from-primary/10 hover:via-gold/10 hover:to-transparent hover:text-primary hover:pl-6"}`}
+                        >
+                          {({ isActive }) => (
+                            <>
+                              <span className={`inline-block h-1.5 w-1.5 rounded-full transition-all duration-300 ${isActive ? "bg-gold shadow-[0_0_8px_hsl(var(--gold)/0.9)]" : "bg-primary/40 group-hover/item:bg-gold group-hover/item:shadow-[0_0_8px_hsl(var(--gold)/0.9)]"}`} />
+                              <span className="flex-1">{c.label}</span>
+                              <span className={`text-gold transition-all duration-300 ${isActive ? "opacity-100" : "opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0"}`} aria-hidden>✦</span>
+                            </>
+                          )}
+                        </NavLinkItem>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ) : item.href.startsWith("/") ? (
+                <NavLinkItem key={item.label} href={item.href}
+                  className={({ isActive }) => `group relative inline-flex items-center gap-1.5 font-body text-[11px] font-semibold uppercase tracking-[0.22em] transition-colors duration-300 ${isActive ? "text-primary" : "text-foreground hover:text-primary"}`}
+                >
+                  {({ isActive }) => (
+                    <>
+                      <NavIcon type={item.icon} isActive={isActive} />
+                      {item.label}
+                      <span className={`pointer-events-none absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-px bg-primary transition-all duration-500 ease-out ${isActive ? "w-full" : "w-0 group-hover:w-full"}`} />
+                    </>
+                  )}
+                </NavLinkItem>
+              ) : (
+                <a key={item.label} href={pathname !== "/" && item.href.startsWith("#") ? `/${item.href}` : item.href}
+                  className="group relative inline-flex items-center gap-1.5 font-body text-[11px] font-semibold uppercase tracking-[0.22em] text-foreground hover:text-primary transition-colors duration-300"
+                >
+                  <NavIcon type={item.icon} isActive={false} />
+                  {item.label}
+                  <span className="pointer-events-none absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-px w-0 bg-primary group-hover:w-full transition-all duration-500 ease-out" />
+                </a>
+              )}
+              {idx < navItems.length - 1 && (
+                <span aria-hidden className="text-primary/30 text-[10px] select-none">◆</span>
+              )}
+            </div>
+          ))}
+          <span aria-hidden className="mx-1 h-4 w-px bg-gradient-to-b from-transparent via-primary/30 to-transparent" />
+          <Link href="/hajj-mabroor" data-sparkle className="group relative inline-flex items-center gap-2 rounded-full pl-3 pr-2 py-1 bg-background border border-primary/25 hover:border-primary/60 text-primary font-body text-[11px] font-semibold uppercase tracking-[0.18em] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_14px_-4px_hsl(var(--primary)/0.35)]">
+            <Star className="w-3.5 h-3.5 fill-primary/70 text-primary" />
+            <span>Hajj Mabroor</span>
+            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary text-[8px] tracking-[0.15em] text-primary-foreground font-bold">NEW</span>
+          </Link>
+          <Link href="/panjabi-collection"
+            className="group relative inline-flex items-center gap-2 rounded-full pl-3 pr-2 py-1 bg-gradient-to-r from-primary via-emerald-light to-primary text-primary-foreground font-body text-[11px] font-semibold uppercase tracking-[0.18em] border border-gold/50 shadow-[0_2px_10px_-2px_hsl(var(--gold)/0.4)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_22px_-4px_hsl(var(--gold)/0.7)] overflow-hidden"
           >
-            <Star className="w-3 h-3 fill-accent text-accent animate-pulse" />
-            <span>সম্পূর্ণ হজ্জ ও উমরাহ সামগ্রী</span>
-            <span className="ml-1 px-1.5 py-px rounded-full bg-accent/90 text-[9px] uppercase tracking-wider text-accent-foreground font-bold">New</span>
-          </button>
+            <span aria-hidden className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-gold/40 to-transparent group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+            <Moon className="relative w-3.5 h-3.5 text-gold nav-icon-glow-active animate-shimmer-glow" />
+            <span className="relative">Panjabi &amp; Kurta</span>
+            <span className="relative ml-1 px-1.5 py-0.5 rounded-full bg-gold text-[8px] tracking-[0.15em] text-accent-foreground font-bold">−10%</span>
+          </Link>
         </div>
       </nav>
 
