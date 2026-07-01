@@ -64,7 +64,7 @@ export default function CheckoutPage() {
 
   const {
     divisions, districts, areas,
-    state: addr, pickDivision, pickDistrict, pickArea,
+    state: addr, pickDivision, pickDistrict, pickArea, setPostCode,
     isDhakaCity,
   } = useBDAddress();
 
@@ -75,15 +75,8 @@ export default function CheckoutPage() {
 
   // Contact details
   const [contact, setContact] = useState({
-    first_name: "", last_name: "", phone: "", address_1: "",
+    first_name: "", last_name: "", phone: "", email: "", address_1: "",
   });
-
-  // Auth guard
-  useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      router.push("/login?callbackUrl=/checkout");
-    }
-  }, [isAuthenticated, isAuthLoading, router]);
 
   // Pre-fill customer name & phone
   useEffect(() => {
@@ -93,6 +86,7 @@ export default function CheckoutPage() {
         first_name: customer.first_name || "",
         last_name: customer.last_name || "",
         phone: customer.phone || "",
+        email: customer.email || "",
       }));
     }
   }, [customer]);
@@ -227,7 +221,7 @@ export default function CheckoutPage() {
           postal_code: addr.postCode || "1000",
           country_code: "bd",
         },
-        email: customer?.email,
+        email: contact.email || customer?.email || `${contact.phone.replace(/\s+/g, '') || Date.now()}@guest.sunnahforummah.shop`,
       });
 
       // 3. Set shipping method (already added when selected, but re-adding just in case)
@@ -354,16 +348,16 @@ export default function CheckoutPage() {
                     ))}
                   </SelectField>
 
-                  {/* Post Code — auto-filled */}
+                  {/* Post Code */}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
                       Post Code
                     </label>
                     <input
-                      readOnly
                       value={addr.postCode}
-                      placeholder={addr.areaName ? "N/A" : "Auto-filled after area selection"}
-                      className="px-4 py-3 rounded-xl border border-neutral-200 text-sm bg-neutral-50 text-neutral-500 cursor-default"
+                      onChange={(e) => setPostCode(e.target.value)}
+                      placeholder={addr.areaName ? "Enter postal code" : "Auto-filled or enter manually"}
+                      className="px-4 py-3 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all bg-white text-neutral-800"
                     />
                   </div>
 
@@ -386,7 +380,7 @@ export default function CheckoutPage() {
                 {addr.districtId && (
                   <div className="mt-4 flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <Truck className="w-4 h-4 shrink-0" />
-                    ✓ Steadfast Courier Delivery — ৳{getEstimatedShippingCost()} charge
+                    ✓ Steadfast Courier Delivery — ৳{shippingCost} charge
                   </div>
                 )}
               </div>
@@ -418,6 +412,15 @@ export default function CheckoutPage() {
                     <input required type="tel" placeholder="01XXXXXXXXX"
                       value={contact.phone}
                       onChange={(e) => setContact({ ...contact, phone: e.target.value })}
+                      className="px-4 py-3 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+                  </div>
+                  <div className="flex flex-col gap-1.5 sm:col-span-2">
+                    <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+                      Email Address (Optional)
+                    </label>
+                    <input type="email" placeholder="example@domain.com"
+                      value={contact.email}
+                      onChange={(e) => setContact({ ...contact, email: e.target.value })}
                       className="px-4 py-3 rounded-xl border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
                   </div>
                 </div>

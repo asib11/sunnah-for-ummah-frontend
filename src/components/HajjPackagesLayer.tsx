@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { ArrowUpRight, Moon, Star } from "lucide-react";
 
+
+import { useQuery } from "@tanstack/react-query";
+import { storeApi } from "@/lib/api";
 
 type Pkg = {
   slug: string;
@@ -14,16 +17,6 @@ type Pkg = {
   image: string;
 };
 
-const packages: Pkg[] = [
-  { slug: "hajj-combo", title: "Hajj Package (Men & Women)", bangla: "হজ্জ প্যাকেজ (পুরুষ ও মহিলা)", price: 10500, oldPrice: 12000, badge: "Best Value", image: "/assets/pkg-hajj-combo.jpg" },
-  { slug: "hajj-premium-men", title: "Hajj Premium (Men)", bangla: "হজ্জ প্রিমিয়াম (পুরুষ)", price: 8000, badge: "Premium", image: "/assets/pkg-hajj-men-premium.jpg" },
-  { slug: "hajj-men", title: "Hajj Package (Men)", bangla: "হজ্জ প্যাকেজ (পুরুষ)", price: 6000, image: "/assets/pkg-hajj-men.jpg" },
-  { slug: "hajj-women", title: "Hajj Package (Women)", bangla: "হজ্জ প্যাকেজ (মহিলা)", price: 6000, image: "/assets/pkg-hajj-women.jpg" },
-  { slug: "umrah-combo", title: "Umrah Package (Men & Women)", bangla: "উমরা প্যাকেজ (পুরুষ ও মহিলা)", price: 4700, oldPrice: 4900, badge: "Popular", image: "/assets/pkg-umrah-combo.jpg" },
-  { slug: "umrah-men", title: "Umrah Package (Men)", bangla: "উমরা প্যাকেজ (পুরুষ)", price: 2500, image: "/assets/pkg-umrah-men.jpg" },
-  { slug: "umrah-women", title: "Umrah Package (Women)", bangla: "উমরা প্যাকেজ (মহিলা)", price: 2400, image: "/assets/pkg-umrah-women.jpg" },
-];
-
 type ItemRow = { package_slug: string; image_url: string; label: string | null; sort_order: number };
 
 type Props = { onNavigateToKit?: () => void };
@@ -32,6 +25,33 @@ type Pos = { x: number; y: number };
 const POS_STORAGE_KEY = "hajj-pkg-bubble-positions-v1";
 
 const HajjPackagesLayer = ({ onNavigateToKit }: Props = {}) => {
+  const { data, isLoading } = useQuery({
+    queryKey: ["hajj-packages"],
+    queryFn: () => storeApi.getProductsByCategoryHandle("packages"),
+  });
+
+  const packages: Pkg[] = useMemo(() => {
+    if (!data?.products) return [];
+    return data.products.map((p: any) => {
+      const v = p.variants?.[0];
+      let price = 0;
+      if (v?.prices) {
+        const bdt = v.prices.find((pr: any) => pr.currency_code === "bdt");
+        const raw = bdt?.amount ?? v.prices[0]?.amount ?? 0;
+        price = raw > 10000 ? Math.round(raw / 100) : raw;
+      }
+      return {
+        slug: p.handle,
+        title: p.title,
+        bangla: p.subtitle || p.metadata?.bangla || "",
+        price: price,
+        oldPrice: p.metadata?.oldPrice ? parseInt(p.metadata.oldPrice, 10) : undefined,
+        badge: p.metadata?.badge,
+        image: p.thumbnail || "/assets/pkg-hajj-combo.jpg",
+      };
+    });
+  }, [data]);
+
   const [itemsBySlug, setItemsBySlug] = useState<Record<string, ItemRow[]>>({});
   const [positions, setPositions] = useState<Record<string, Pos>>(() => {
     try {
@@ -87,6 +107,16 @@ const HajjPackagesLayer = ({ onNavigateToKit }: Props = {}) => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto w-full">
+          {isLoading && (
+            <div className="col-span-full py-12 flex justify-center items-center">
+              <Star className="w-8 h-8 text-accent animate-spin" />
+            </div>
+          )}
+          {!isLoading && packages.length === 0 && (
+            <div className="col-span-full py-12 text-center text-muted-foreground font-body">
+              No packages found.
+            </div>
+          )}
           {packages.map((p, idx) => {
             const items = itemsBySlug[p.slug] ?? [];
             // Elegantly scattered orbit — uneven spacing, varied radii for a hand-placed feel

@@ -144,6 +144,13 @@ export function useBDAddress() {
     }));
   }
 
+  function setPostCode(code: string) {
+    setState((prev) => ({
+      ...prev,
+      postCode: code,
+    }));
+  }
+
   return {
     divisions: allDivisions,
     districts,
@@ -152,6 +159,7 @@ export function useBDAddress() {
     pickDivision,
     pickDistrict,
     pickArea,
+    setPostCode,
     isDhakaDivision: state.divisionId === DHAKA_DIVISION_ID,
     isDhakaCity:     state.districtId === DHAKA_DISTRICT_ID,
   };

@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, ShoppingCart, Heart, User, Menu, X, Star, ChevronDown, Moon } from "lucide-react";
+import { Search, ShoppingCart, Heart, User, Menu, X, Star, ChevronDown, ChevronRight, Moon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -17,7 +17,6 @@ import {
 import { toast } from "sonner";
 import logoSfu from "@/assets/logo-sfu.png";
 import { useCart } from "@/hooks/useCart";
-import { CartDrawer } from "./CartDrawer";
 
 const CrescentStar = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
@@ -62,7 +61,7 @@ const navItems: NavItem[] = [
       { label: "Baggy Sweatpants", href: "/baggy-sweatpants" },
     ],
   },
-  { label: "Calligraphy T-shirt", href: "#calligraphy-showcase", icon: "star" },
+  { label: "Calligraphy T-shirt", href: "/calligraphy-tshirt", icon: "star" },
   { label: "Calligraphy Dropshoulder", href: "/calligraphy-dropshoulder", icon: "star" },
 ];
 
@@ -257,25 +256,26 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile search - always visible */}
-      <div className="md:hidden px-4 pb-3">
-        <div className="flex items-center gap-2 bg-secondary rounded-full px-4 py-2">
+      {/* Mobile search — always visible below logo row */}
+      <div className="md:hidden px-4 pb-2 pt-1">
+        <div className="flex items-center gap-2 bg-secondary rounded-full px-4 py-2.5">
           <Search className="w-4 h-4 text-muted-foreground shrink-0" />
           <input
             type="text"
-            placeholder={typingText || "Search"}
+            placeholder={typingText || "Search products…"}
             className="bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground w-full font-body"
           />
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="hidden md:block relative border-t border-primary/20 overflow-hidden bg-gradient-to-r from-primary/10 via-emerald-light/15 to-primary/10">
-        {/* Decorative glow shimmer */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(var(--primary)/0.18),_transparent_70%)]" />
-        <div className="pointer-events-none absolute -top-1/2 left-0 right-0 h-[200%] bg-[linear-gradient(110deg,transparent_30%,hsl(var(--accent)/0.15)_50%,transparent_70%)] animate-[shimmer_6s_linear_infinite] bg-[length:200%_100%]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+      <nav className="hidden md:block relative border-t border-primary/20 bg-gradient-to-r from-primary/10 via-emerald-light/15 to-primary/10">
+        {/* Decorative glow shimmer — clipped to nav bounds only */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(var(--primary)/0.18),_transparent_70%)]" />
+          <div className="absolute -top-1/2 left-0 right-0 h-[200%] bg-[linear-gradient(110deg,transparent_30%,hsl(var(--accent)/0.15)_50%,transparent_70%)] animate-[shimmer_6s_linear_infinite] bg-[length:200%_100%]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/60 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        </div>
 
         <div className="container relative mx-auto flex items-center justify-center gap-6 px-4 py-3">
           {navItems.map((item, idx) => (
@@ -288,12 +288,12 @@ const Header = () => {
                       <button type="button" className={`group/btn relative inline-flex items-center gap-1.5 font-body text-[11px] font-semibold uppercase tracking-[0.22em] transition-colors duration-300 ${childActive ? "text-primary" : "text-foreground hover:text-primary"}`}>
                         <NavIcon type={item.icon} isActive={childActive} />
                         {item.label}
-                        <ChevronDown className={`w-3 h-3 opacity-70 transition-transform duration-300 group-hover:rotate-180 ${childActive ? "rotate-180" : ""}`} />
+                        <ChevronDown className="w-3 h-3 opacity-70 transition-transform duration-300 group-hover:rotate-180" />
                         <span className={`pointer-events-none absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-px bg-primary transition-all duration-500 ease-out ${childActive ? "w-full" : "w-0 group-hover:w-full"}`} />
                       </button>
                     );
                   })()}
-                  <div className={`absolute left-1/2 -translate-x-1/2 top-full pt-4 z-50 transition-all duration-300 ease-out ${item.children!.some((c) => pathname === c.href) ? "opacity-100 visible translate-y-0" : "opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0"}`}>
+                  <div className="absolute left-1/2 -translate-x-1/2 top-full pt-4 z-50 transition-all duration-300 ease-out opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0">
                     <div className="min-w-[16rem] rounded-xl border border-gold/40 bg-gradient-to-b from-background via-background to-emerald-tint/30 backdrop-blur-md shadow-[0_20px_50px_-15px_hsl(var(--primary)/0.45)] overflow-hidden">
                       <div className="h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent" />
                       {item.children.map((c, ci) => (
@@ -355,45 +355,109 @@ const Header = () => {
         </div>
       </nav>
 
-      {/* Mobile nav */}
+      {/* Mobile nav — full-screen slide-down panel */}
       {mobileOpen && (
         <nav className="md:hidden border-t border-border bg-background">
-          <div className="flex flex-col px-4 py-3 gap-3">
-            <div className="flex items-center gap-2 bg-secondary rounded-full px-4 py-2">
-              <Search className="w-4 h-4 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder={typingText || "Search"}
-                className="bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground w-full font-body"
-              />
-            </div>
-            {navItems.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="text-sm font-body font-medium text-foreground hover:text-primary transition-colors py-1"
-              >
-                {item.label}
-              </a>
-            ))}
-            <button
-              type="button"
-              onClick={() => {
-                setMobileOpen(false);
-                document
-                  .getElementById("whats-inside-kit")
-                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 bg-accent/15 border border-accent/50 text-accent font-body text-xs font-semibold hover:bg-accent/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background w-fit"
+
+          {/* Nav rows */}
+          <div className="flex flex-col px-2 pb-3 pt-1">
+
+            {navItems.map((item) =>
+              item.children ? (
+                /* ── Section label + always-visible children ── */
+                <div key={item.label}>
+                  {/* Section header — non-clickable label */}
+                  <div className="flex items-center gap-2 px-3 pt-3 pb-1">
+                    <NavIcon type={item.icon} isActive={item.children.some((c) => pathname === c.href)} />
+                    <span className="text-sm font-body font-bold text-foreground tracking-wide">
+                      {item.label}
+                    </span>
+                  </div>
+                  {/* Children — always shown */}
+                  {item.children.map((child) => (
+                    <Link
+                      key={child.label}
+                      href={child.href}
+                      onClick={() => setMobileOpen(false)}
+                      className={`flex items-center justify-between px-4 py-3 text-sm font-body rounded-lg mx-1 transition-colors ${
+                        pathname === child.href
+                          ? "text-primary font-semibold bg-primary/5"
+                          : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span
+                          className={`inline-block h-1.5 w-1.5 rounded-full shrink-0 ${
+                            pathname === child.href ? "bg-primary" : "bg-border"
+                          }`}
+                        />
+                        {child.label}
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground/50 shrink-0" />
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                /* ── Regular row link ── */
+                <Link
+                  key={item.label}
+                  href={
+                    pathname !== "/" && item.href.startsWith("#")
+                      ? `/${item.href}`
+                      : item.href
+                  }
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center justify-between px-3 py-3 text-sm font-body font-semibold rounded-lg mx-1 transition-colors ${
+                    pathname === item.href
+                      ? "text-primary bg-primary/5"
+                      : "text-foreground hover:text-primary hover:bg-secondary/60"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <NavIcon type={item.icon} isActive={pathname === item.href} />
+                    {item.label}
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground/50 shrink-0" />
+                </Link>
+              )
+            )}
+
+            {/* Divider */}
+            <div className="mx-3 my-2 h-px bg-border" />
+
+            {/* Hajj CTA — full width */}
+            <Link
+              href="/hajj-mabroor"
+              onClick={() => setMobileOpen(false)}
+              className="mx-1 flex items-center justify-center gap-2 rounded-xl px-4 py-3 bg-primary text-primary-foreground font-body text-sm font-bold hover:bg-primary/90 active:scale-[0.98] transition-all"
             >
-              <Star className="w-3 h-3 fill-accent" />
+              <Star className="w-4 h-4 fill-primary-foreground/80" />
               <span>সম্পূর্ণ হজ্জ ও উমরাহ সামগ্রী</span>
-            </button>
+            </Link>
+
+            {/* Wishlist / Account row */}
+            <div className="flex items-center justify-center gap-6 pt-3 pb-1">
+              <button
+                type="button"
+                className="flex items-center gap-1.5 text-xs font-body text-muted-foreground hover:text-accent transition-colors"
+              >
+                <Heart className="w-4 h-4" />
+                Wishlist
+              </button>
+              <span className="h-3 w-px bg-border" />
+              <Link
+                href="/login"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-1.5 text-xs font-body text-muted-foreground hover:text-primary transition-colors"
+              >
+                <User className="w-4 h-4" />
+                Account
+              </Link>
+            </div>
+
           </div>
         </nav>
       )}
-
-      <CartDrawer />
     </header>
   );
 };

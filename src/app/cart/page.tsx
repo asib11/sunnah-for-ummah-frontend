@@ -68,12 +68,7 @@ export default function CartPage() {
   };
 
   const handleCheckout = () => {
-    if (isAuthenticated) {
-      router.push("/checkout");
-    } else {
-      toast.info("Please login to proceed with your order");
-      router.push("/login?callbackUrl=/checkout");
-    }
+    router.push("/checkout");
   };
 
   const hasItems = cart?.items && cart.items.length > 0;
