@@ -36,9 +36,14 @@ const HajjPackagesLayer = ({ onNavigateToKit }: Props = {}) => {
       const v = p.variants?.[0];
       let price = 0;
       if (v?.prices) {
-        const bdt = v.prices.find((pr: any) => pr.currency_code === "bdt");
-        const raw = bdt?.amount ?? v.prices[0]?.amount ?? 0;
-        price = raw > 10000 ? Math.round(raw / 100) : raw;
+        const bdtPrices = v.prices
+          .filter((pr: any) => pr.currency_code === "bdt")
+          .map((pr: any) => pr.amount);
+        if (bdtPrices.length > 0) {
+          price = Math.min(...bdtPrices);
+        } else {
+          price = v.prices[0]?.amount ?? 0;
+        }
       }
       return {
         slug: p.handle,

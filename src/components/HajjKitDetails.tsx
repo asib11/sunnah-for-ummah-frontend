@@ -83,9 +83,13 @@ const STATIC_ITEMS: Item[] = [
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const getBdtPrice = (variant: any): number => {
   if (!variant?.prices) return 0;
-  const bdt = variant.prices.find((p: any) => p.currency_code === "bdt");
-  const raw = bdt?.amount ?? variant.prices[0]?.amount ?? 0;
-  return raw > 10000 ? Math.round(raw / 100) : raw;
+  const bdtPrices = variant.prices
+    .filter((p: any) => p.currency_code === "bdt")
+    .map((p: any) => p.amount);
+  if (bdtPrices.length > 0) {
+    return Math.min(...bdtPrices);
+  }
+  return variant.prices[0]?.amount ?? 0;
 };
 
 const medusaToItem = (p: any): Item => ({

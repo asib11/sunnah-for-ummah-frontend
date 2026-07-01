@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye } from "lucide-react";
+import { Eye, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -10,35 +10,66 @@ import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
 import QuickViewDialog, { type QuickViewProduct } from "@/components/QuickViewDialog";
 import { storeApi } from "@/lib/api";
-import { baggyPantsProducts } from "@/data/products";
 
-// ---------------------------------------------------------------------------
-// Live-data fetcher: resolves category handle → products with real variant IDs
-// ---------------------------------------------------------------------------
-function useBaggySweatpantsProducts() {
+import hijabCream from "@/assets/hijab_cream.png";
+import hijabEmerald from "@/assets/hijab_emerald.png";
+import hijabPink from "@/assets/hijab_pink.png";
+import hijabCharcoal from "@/assets/hijab_charcoal.png";
+
+const staticProducts: QuickViewProduct[] = [
+  {
+    id: "hijab-cream",
+    name: "Chiffon Hijab - Cream",
+    price: 690,
+    originalPrice: 890,
+    image: hijabCream.src,
+    description: "Premium cream chiffon hijab, beautifully lightweight and flowing.",
+    sizes: ["Free Size"],
+    handle: "chiffon-hijab-cream"
+  },
+  {
+    id: "hijab-emerald",
+    name: "Premium Hijab - Emerald",
+    price: 790,
+    originalPrice: 990,
+    image: hijabEmerald.src,
+    description: "Elegant emerald green chiffon hijab with a premium, luxurious feel.",
+    sizes: ["Free Size"],
+    handle: "premium-hijab-emerald"
+  },
+  {
+    id: "hijab-pink",
+    name: "Soft Chiffon Hijab - Rose",
+    price: 690,
+    image: hijabPink.src,
+    description: "Soft pink chiffon hijab, perfect for everyday modest styling.",
+    sizes: ["Free Size"],
+    handle: "soft-chiffon-hijab-rose"
+  },
+  {
+    id: "hijab-charcoal",
+    name: "Everyday Hijab - Charcoal",
+    price: 690,
+    image: hijabCharcoal.src,
+    description: "Versatile charcoal grey everyday hijab, soft and breathable.",
+    sizes: ["Free Size"],
+    handle: "everyday-hijab-charcoal"
+  }
+];
+
+function useHijabProducts() {
   return useQuery<QuickViewProduct[]>({
-    queryKey: ["products-category", "baggy-sweatpants"],
+    queryKey: ["products-category", "hijab"],
     queryFn: async () => {
-      // Try the most likely category handles in priority order
-      const candidateHandles = [
-        "baggy-sweatpants",
-        "sweatpants",
-        "baggy-pants",
-        "pants",
-      ];
-
-      for (const handle of candidateHandles) {
-        try {
-          const data = await storeApi.getProductsByCategoryHandle(handle);
-          const products: any[] = data.products ?? [];
-          if (products.length > 0) {
-            return mapMedusaProducts(products);
-          }
-        } catch {
-          // try next handle
+      try {
+        const data = await storeApi.getProductsByCategoryHandle("hijab");
+        const products: any[] = data.products ?? [];
+        if (products.length > 0) {
+          return mapMedusaProducts(products);
         }
+      } catch {
+        // Fallback
       }
-
       return [];
     },
     staleTime: 5 * 60 * 1000,
@@ -51,7 +82,7 @@ function mapMedusaProducts(products: any[]): QuickViewProduct[] {
     const sizes = variants
       .map((v: any) => {
         const sizeOpt = v.options?.find((o: any) =>
-          ["s", "m", "l", "xl", "xxl"].includes(o.value?.toLowerCase())
+          ["s", "m", "l", "xl", "xxl", "free size"].includes(o.value?.toLowerCase())
         );
         return sizeOpt?.value ?? v.title;
       })
@@ -94,9 +125,6 @@ function mapMedusaProducts(products: any[]): QuickViewProduct[] {
   });
 }
 
-// ---------------------------------------------------------------------------
-// QuickViewCard
-// ---------------------------------------------------------------------------
 const QuickViewCard = ({
   product,
   onQuickView,
@@ -117,24 +145,25 @@ const QuickViewCard = ({
   </div>
 );
 
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
-const BaggySweatpantsPage = () => {
+const HijabClient = () => {
   const [active, setActive] = useState<QuickViewProduct | null>(null);
   const [open, setOpen] = useState(false);
 
-  const { data: liveProducts, isLoading } = useBaggySweatpantsProducts();
+  const { data: liveProducts, isLoading } = useHijabProducts();
 
-  // Use live products when available; fall back to static list (no variantIds)
   const displayProducts =
-    liveProducts && liveProducts.length > 0 ? liveProducts : baggyPantsProducts;
+    liveProducts && liveProducts.length > 0 ? liveProducts : staticProducts;
+
+  const handleQuickView = (p: QuickViewProduct) => {
+    setActive(p);
+    setOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Seo
-        title="Baggy Sweatpants | Sunnah for Ummah"
-        description="Relaxed, modest-fit baggy sweatpants — black, washed and white. Built for comfort from fajr to isha."
+        title="Hijab Collection | Sunnah for Ummah"
+        description="Premium chiffon and everyday hijabs - elegant, lightweight, and comfortable modest wear for women."
         type="website"
       />
       <Header />
@@ -143,13 +172,13 @@ const BaggySweatpantsPage = () => {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(var(--primary)/0.18),_transparent_60%)]" />
         <div className="container relative mx-auto px-4 py-16 md:py-24 text-center">
           <span className="inline-block uppercase tracking-[0.4em] text-[11px] font-body font-semibold text-accent mb-4">
-            Men's · Comfort Fit
+            Women's · Modest Wear
           </span>
           <h1 className="font-display text-4xl md:text-6xl font-bold text-primary tracking-tight">
-            Baggy Sweatpants
+            Hijab Collection
           </h1>
           <p className="mt-4 max-w-2xl mx-auto font-body text-sm md:text-lg text-muted-foreground">
-            Relaxed, modest, and built for daily wear — in black, washed and pure white.
+            Premium chiffon and lightweight everyday hijabs designed for ultimate comfort and elegance.
           </p>
           <p className="mt-6 inline-block font-body text-xs uppercase tracking-[0.35em] text-emerald-light">
             Sunnah: The Legacy of the Best.
@@ -159,19 +188,15 @@ const BaggySweatpantsPage = () => {
 
       <section className="container mx-auto px-4 py-14">
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-pulse">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 animate-pulse">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="bg-muted rounded-xl aspect-[4/5]" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
             {displayProducts.map((p) => (
-              <QuickViewCard
-                key={p.id ?? p.name}
-                product={p}
-                onQuickView={(x) => { setActive(x); setOpen(true); }}
-              />
+              <QuickViewCard key={p.id ?? p.name} product={p} onQuickView={handleQuickView} />
             ))}
           </div>
         )}
@@ -184,4 +209,4 @@ const BaggySweatpantsPage = () => {
   );
 };
 
-export default BaggySweatpantsPage;
+export default HijabClient;

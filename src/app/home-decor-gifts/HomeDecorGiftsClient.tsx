@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye } from "lucide-react";
+import { Eye, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -10,23 +10,38 @@ import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
 import QuickViewDialog, { type QuickViewProduct } from "@/components/QuickViewDialog";
 import { storeApi } from "@/lib/api";
-import { baggyPantsProducts } from "@/data/products";
 
-// ---------------------------------------------------------------------------
-// Live-data fetcher: resolves category handle → products with real variant IDs
-// ---------------------------------------------------------------------------
-function useBaggySweatpantsProducts() {
+import decorPlaque from "@/assets/decor_plaque.png";
+import decorRehal from "@/assets/decor_rehal.png";
+
+const staticProducts: QuickViewProduct[] = [
+  {
+    id: "decor-plaque-bismillah",
+    name: "Brass Calligraphy Plaque",
+    price: 1850,
+    originalPrice: 2450,
+    image: decorPlaque.src,
+    description: "Exquisite brass plaque featuring Bismillah calligraphy on a solid walnut wood stand.",
+    sizes: ["Standard"],
+    handle: "brass-calligraphy-plaque"
+  },
+  {
+    id: "decor-wooden-rehal",
+    name: "Handcarved Rehal Quran Stand",
+    price: 1450,
+    originalPrice: 1950,
+    image: decorRehal.src,
+    description: "Premium handcarved walnut wood Rehal Quran stand with intricate geometrical engravings.",
+    sizes: ["Standard"],
+    handle: "handcarved-rehal-quran-stand"
+  }
+];
+
+function useHomeDecorProducts() {
   return useQuery<QuickViewProduct[]>({
-    queryKey: ["products-category", "baggy-sweatpants"],
+    queryKey: ["products-category", "home-decor-gifts"],
     queryFn: async () => {
-      // Try the most likely category handles in priority order
-      const candidateHandles = [
-        "baggy-sweatpants",
-        "sweatpants",
-        "baggy-pants",
-        "pants",
-      ];
-
+      const candidateHandles = ["home-decor-gifts", "decorations", "gifts", "accessories"];
       for (const handle of candidateHandles) {
         try {
           const data = await storeApi.getProductsByCategoryHandle(handle);
@@ -35,10 +50,9 @@ function useBaggySweatpantsProducts() {
             return mapMedusaProducts(products);
           }
         } catch {
-          // try next handle
+          // try next
         }
       }
-
       return [];
     },
     staleTime: 5 * 60 * 1000,
@@ -51,7 +65,7 @@ function mapMedusaProducts(products: any[]): QuickViewProduct[] {
     const sizes = variants
       .map((v: any) => {
         const sizeOpt = v.options?.find((o: any) =>
-          ["s", "m", "l", "xl", "xxl"].includes(o.value?.toLowerCase())
+          ["s", "m", "l", "xl", "xxl", "standard"].includes(o.value?.toLowerCase())
         );
         return sizeOpt?.value ?? v.title;
       })
@@ -94,9 +108,6 @@ function mapMedusaProducts(products: any[]): QuickViewProduct[] {
   });
 }
 
-// ---------------------------------------------------------------------------
-// QuickViewCard
-// ---------------------------------------------------------------------------
 const QuickViewCard = ({
   product,
   onQuickView,
@@ -117,24 +128,25 @@ const QuickViewCard = ({
   </div>
 );
 
-// ---------------------------------------------------------------------------
-// Page
-// ---------------------------------------------------------------------------
-const BaggySweatpantsPage = () => {
+const HomeDecorGiftsClient = () => {
   const [active, setActive] = useState<QuickViewProduct | null>(null);
   const [open, setOpen] = useState(false);
 
-  const { data: liveProducts, isLoading } = useBaggySweatpantsProducts();
+  const { data: liveProducts, isLoading } = useHomeDecorProducts();
 
-  // Use live products when available; fall back to static list (no variantIds)
   const displayProducts =
-    liveProducts && liveProducts.length > 0 ? liveProducts : baggyPantsProducts;
+    liveProducts && liveProducts.length > 0 ? liveProducts : staticProducts;
+
+  const handleQuickView = (p: QuickViewProduct) => {
+    setActive(p);
+    setOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <Seo
-        title="Baggy Sweatpants | Sunnah for Ummah"
-        description="Relaxed, modest-fit baggy sweatpants — black, washed and white. Built for comfort from fajr to isha."
+        title="Home Decor & Gifts | Sunnah for Ummah"
+        description="Exquisite Islamic home decor and premium gift items - Quran stands, calligraphy plaques, prayer mats and Islamic lifestyle essentials."
         type="website"
       />
       <Header />
@@ -143,13 +155,13 @@ const BaggySweatpantsPage = () => {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(var(--primary)/0.18),_transparent_60%)]" />
         <div className="container relative mx-auto px-4 py-16 md:py-24 text-center">
           <span className="inline-block uppercase tracking-[0.4em] text-[11px] font-body font-semibold text-accent mb-4">
-            Men's · Comfort Fit
+            Lifestyle · Home Decor &amp; Gifts
           </span>
           <h1 className="font-display text-4xl md:text-6xl font-bold text-primary tracking-tight">
-            Baggy Sweatpants
+            Home Decor &amp; Gifts
           </h1>
           <p className="mt-4 max-w-2xl mx-auto font-body text-sm md:text-lg text-muted-foreground">
-            Relaxed, modest, and built for daily wear — in black, washed and pure white.
+            Adorn your space with premium Islamic plaques, stands, and spiritual lifestyle essentials.
           </p>
           <p className="mt-6 inline-block font-body text-xs uppercase tracking-[0.35em] text-emerald-light">
             Sunnah: The Legacy of the Best.
@@ -159,19 +171,15 @@ const BaggySweatpantsPage = () => {
 
       <section className="container mx-auto px-4 py-14">
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-pulse">
-            {[...Array(4)].map((_, i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 animate-pulse">
+            {[...Array(2)].map((_, i) => (
               <div key={i} className="bg-muted rounded-xl aspect-[4/5]" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
             {displayProducts.map((p) => (
-              <QuickViewCard
-                key={p.id ?? p.name}
-                product={p}
-                onQuickView={(x) => { setActive(x); setOpen(true); }}
-              />
+              <QuickViewCard key={p.id ?? p.name} product={p} onQuickView={handleQuickView} />
             ))}
           </div>
         )}
@@ -184,4 +192,4 @@ const BaggySweatpantsPage = () => {
   );
 };
 
-export default BaggySweatpantsPage;
+export default HomeDecorGiftsClient;

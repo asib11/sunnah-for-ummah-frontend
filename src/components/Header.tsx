@@ -61,6 +61,15 @@ const navItems: NavItem[] = [
       { label: "Baggy Sweatpants", href: "/baggy-sweatpants" },
     ],
   },
+  {
+    label: "Women's",
+    href: "#",
+    children: [
+      { label: "Hijab", href: "/hijab" },
+      { label: "Niqab", href: "/niqab" },
+    ],
+  },
+  { label: "Home Decor & Gifts", href: "/home-decor-gifts", icon: "star" },
   { label: "Calligraphy T-shirt", href: "/calligraphy-tshirt", icon: "star" },
   { label: "Calligraphy Dropshoulder", href: "/calligraphy-dropshoulder", icon: "star" },
 ];

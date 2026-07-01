@@ -1,20 +1,99 @@
 "use client";
 
 import { useState } from "react";
-import { Eye } from "lucide-react";
+import { Eye, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppFloat from "@/components/WhatsAppFloat";
 import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
 import QuickViewDialog, { type QuickViewProduct } from "@/components/QuickViewDialog";
+import { storeApi } from "@/lib/api";
 
 import { dropShoulderProducts, newArrivalsProducts } from "@/data/products";
 
-const products = [
+const staticProducts = [
   ...dropShoulderProducts,
   ...newArrivalsProducts.filter((p) => /t-?shirt|tee/i.test(p.name)),
 ];
+
+function useCalligraphyTshirts() {
+  return useQuery<QuickViewProduct[]>({
+    queryKey: ["products-category", "calligraphy-shirts"],
+    queryFn: async () => {
+      const candidateHandles = [
+        "calligraphy-shirts",
+        "calligraphy-t-shirts",
+        "calligraphy-tshirts",
+        "shirts",
+      ];
+
+      for (const handle of candidateHandles) {
+        try {
+          const data = await storeApi.getProductsByCategoryHandle(handle);
+          const products: any[] = data.products ?? [];
+          if (products.length > 0) {
+            return mapMedusaProducts(products);
+          }
+        } catch {
+          // try next handle
+        }
+      }
+      return [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+function mapMedusaProducts(products: any[]): QuickViewProduct[] {
+  return products.map((p) => {
+    const variants: any[] = p.variants ?? [];
+    const sizes = variants
+      .map((v: any) => {
+        const sizeOpt = v.options?.find((o: any) =>
+          ["s", "m", "l", "xl", "xxl"].includes(o.value?.toLowerCase())
+        );
+        return sizeOpt?.value ?? v.title;
+      })
+      .filter(Boolean);
+
+    const gallery: string[] = p.images?.map((i: any) => i.url) ?? [];
+    if (!gallery.length && p.thumbnail) gallery.push(p.thumbnail);
+
+    const bdtPrices = variants[0]?.prices?.filter(
+      (pr: any) => pr.currency_code === "bdt"
+    ) ?? [];
+    let price = 0;
+    let originalPrice: number | undefined = undefined;
+    if (bdtPrices.length > 0) {
+      const amounts = bdtPrices.map((pr: any) => pr.amount);
+      price = Math.min(...amounts);
+      const maxPrice = Math.max(...amounts);
+      if (maxPrice > price) {
+        originalPrice = maxPrice;
+      }
+    } else {
+      price = variants[0]?.prices?.[0]?.amount ?? 0;
+    }
+
+    return {
+      id: p.id,
+      name: p.title,
+      price,
+      originalPrice,
+      description: p.description ?? p.subtitle,
+      image: gallery[0] ?? "",
+      backImage: gallery[1],
+      images: gallery.length ? gallery : undefined,
+      sizes: sizes.length ? sizes : undefined,
+      slug: p.handle,
+      handle: p.handle,
+      variantId: variants.length === 1 ? variants[0].id : undefined,
+      variants: variants.length > 1 ? variants : undefined,
+    } satisfies QuickViewProduct;
+  });
+}
 
 const QuickViewCard = ({
   product,
@@ -39,6 +118,16 @@ const QuickViewCard = ({
 const CalligraphyTshirt = () => {
   const [active, setActive] = useState<QuickViewProduct | null>(null);
   const [open, setOpen] = useState(false);
+
+  const { data: liveProducts, isLoading } = useCalligraphyTshirts();
+
+  const displayProducts =
+    liveProducts && liveProducts.length > 0 ? liveProducts : staticProducts;
+
+  const handleQuickView = (p: QuickViewProduct) => {
+    setActive(p);
+    setOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,11 +157,19 @@ const CalligraphyTshirt = () => {
       </section>
 
       <section className="container mx-auto px-4 py-14">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-          {products.map((p) => (
-            <QuickViewCard key={p.name} product={p} onQuickView={(x) => { setActive(x); setOpen(true); }} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 animate-pulse">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="bg-muted rounded-xl aspect-[4/5]" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            {displayProducts.map((p) => (
+              <QuickViewCard key={p.id ?? p.name} product={p} onQuickView={handleQuickView} />
+            ))}
+          </div>
+        )}
       </section>
 
       <Footer />
@@ -83,4 +180,3 @@ const CalligraphyTshirt = () => {
 };
 
 export default CalligraphyTshirt;
-

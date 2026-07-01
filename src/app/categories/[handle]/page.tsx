@@ -41,14 +41,31 @@ export default function CategoryPage({ params }: { params: Promise<{ handle: str
   // If there's an error fetching products (like the sales channel config issue), or if empty, use fallbacks
   const displayProducts = (!isLoading && (!productsData || productsData.products?.length === 0 || isProductsError)) 
     ? fallbackProducts 
-    : (productsData?.products?.map((p: any) => ({
-        name: p.title,
-        price: p.variants?.[0]?.prices?.find((pr: any) => pr.currency_code === "bdt")?.amount || 
-               p.variants?.[0]?.prices?.[0]?.amount || 0,
-        originalPrice: null,
-        image: p.thumbnail || product1.src,
-        variantId: p.variants?.[0]?.id,
-      })) || fallbackProducts);
+    : (productsData?.products?.map((p: any) => {
+        const variants = p.variants ?? [];
+        const lowestVariant = variants[0];
+        const bdtPrices = lowestVariant?.prices?.filter((pr: any) => pr.currency_code === "bdt") ?? [];
+        let price = 0;
+        let originalPrice = null;
+        if (bdtPrices.length > 0) {
+          const amounts = bdtPrices.map((pr: any) => pr.amount);
+          price = Math.min(...amounts);
+          const maxPrice = Math.max(...amounts);
+          if (maxPrice > price) {
+            originalPrice = maxPrice;
+          }
+        } else {
+          price = lowestVariant?.prices?.[0]?.amount || 0;
+        }
+        return {
+          name: p.title,
+          price,
+          originalPrice,
+          image: p.thumbnail || product1.src,
+          variantId: lowestVariant?.id,
+          handle: p.handle,
+        };
+      }) || fallbackProducts);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

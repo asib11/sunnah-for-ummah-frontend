@@ -23,6 +23,7 @@ export interface QuickViewProduct {
   sizes?: string[];
   colors?: { name: string; hex: string }[];
   slug?: string;
+  handle?: string;
   variantId?: string;
   variants?: any[];
 }
@@ -297,9 +298,9 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
             <p className="mt-3 font-body text-[11px] uppercase tracking-[0.3em] text-emerald-light text-center">
               Cash on Delivery · Free shipping over ৳ 2000
             </p>
-            {product.slug && (
+            {(product.handle || product.slug) && (
               <Link
-                href={`/product/${product.slug}`}
+                href={`/products/${product.handle || product.slug}`}
                 className="mt-2 font-body text-xs text-center text-primary hover:underline"
               >
                 View full product page →

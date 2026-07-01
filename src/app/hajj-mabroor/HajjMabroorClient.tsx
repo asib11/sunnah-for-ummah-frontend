@@ -48,9 +48,13 @@ const HajjMabroor = () => {
     );
     const getBdt = (v: any) => {
       if (!v?.prices) return 0;
-      const bdt = v.prices.find((p: any) => p.currency_code === "bdt");
-      const raw = bdt?.amount ?? v.prices[0]?.amount ?? 0;
-      return raw > 10000 ? Math.round(raw / 100) : raw;
+      const bdtPrices = v.prices
+        .filter((p: any) => p.currency_code === "bdt")
+        .map((p: any) => p.amount);
+      if (bdtPrices.length > 0) {
+        return Math.min(...bdtPrices);
+      }
+      return v.prices[0]?.amount ?? 0;
     };
     const total = mens.reduce((s, p) => s + getBdt(p.variants?.[0]), 0);
     return { kitCount: mens.length || 21, kitTotal: total || 4640 };

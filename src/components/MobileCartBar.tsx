@@ -40,7 +40,7 @@ const MobileCartBar = () => {
             Your bag
           </span>
           <span className="text-sm font-display font-bold tabular-nums">
-            ৳ {(totalPrice / 100).toFixed(2)}
+            ৳ {totalPrice.toFixed(2)}
           </span>
         </span>
         <span className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent text-accent-foreground text-xs font-body font-bold uppercase tracking-wider">

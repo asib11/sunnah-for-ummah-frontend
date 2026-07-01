@@ -68,12 +68,23 @@ function medusaProductToQuickView(
 
   // Prefer the BDT price; fall back to the first available price in paisa→taka
   const lowestVariant = variants[0];
-  const bdtPrice = lowestVariant?.prices?.find(
-    (p) => p.currency_code === "bdt"
-  );
-  const price = bdtPrice
-    ? bdtPrice.amount / 100
-    : (staticFallback?.price ?? 0);
+  let price = staticFallback?.price ?? 0;
+  let originalPrice = staticFallback?.originalPrice;
+
+  if (lowestVariant?.prices) {
+    const bdtPrices = lowestVariant.prices.filter(
+      (p) => p.currency_code === "bdt"
+    );
+    if (bdtPrices.length > 0) {
+      const amounts = bdtPrices.map((p) => p.amount);
+      const minPrice = Math.min(...amounts);
+      const maxPrice = Math.max(...amounts);
+      price = minPrice;
+      if (maxPrice > minPrice) {
+        originalPrice = maxPrice;
+      }
+    }
+  }
 
   return {
     id: product.id,
@@ -86,12 +97,13 @@ function medusaProductToQuickView(
     images: gallery.length > 0 ? gallery : staticFallback?.images,
     sizes: sizes.length > 0 ? sizes : staticFallback?.sizes,
     slug: product.handle,
+    handle: product.handle,
     // Single variant → one-click add-to-cart; multi-variant → let dialog pick
     variantId: variants.length === 1 ? variants[0].id : undefined,
     variants: variants.length > 1 ? variants : undefined,
     // Carry through static extras
     badge: staticFallback?.badge,
-    originalPrice: staticFallback?.originalPrice,
+    originalPrice,
     colors: staticFallback?.colors,
   };
 }

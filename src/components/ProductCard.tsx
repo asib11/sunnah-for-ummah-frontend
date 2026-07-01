@@ -5,6 +5,7 @@ import { ShoppingCart, Repeat2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/hooks/useCart";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
   name: string;
@@ -19,6 +20,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ name, price, originalPrice, image, backImage, badge, subtitle, variantId, handle }: ProductCardProps) => {
+  const router = useRouter();
   const discount = originalPrice
     ? Math.round(((originalPrice - price) / originalPrice) * 100)
     : null;
@@ -31,7 +33,11 @@ const ProductCard = ({ name, price, originalPrice, image, backImage, badge, subt
   const handleAdd = (e?: React.MouseEvent) => {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     if (!variantId) {
-      toast.error("This product is currently unavailable via quick-add. View the product page to shop.");
+      if (handle) {
+        router.push(`/products/${handle}`);
+      } else {
+        toast.error("This product is currently unavailable via quick-add. View the product page to shop.");
+      }
       return;
     }
     addToCart(

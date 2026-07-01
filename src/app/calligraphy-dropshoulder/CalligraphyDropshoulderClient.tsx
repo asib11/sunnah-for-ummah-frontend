@@ -17,10 +17,11 @@ import { dropShoulderProducts } from "@/data/products";
 // ---------------------------------------------------------------------------
 function useDropShoulderProducts() {
   return useQuery<QuickViewProduct[]>({
-    queryKey: ["products-category", "calligraphy-drop-shoulder-tees"],
+    queryKey: ["products-category", "calligraphy-dropshoulder"],
     queryFn: async () => {
       // Try the most likely category handles in priority order
       const candidateHandles = [
+        "calligraphy-dropshoulder",
         "calligraphy-drop-shoulder-tees",
         "calligraphy-drop-shoulder",
         "calligraphy-tees",
@@ -61,21 +62,34 @@ function mapMedusaProducts(products: any[]): QuickViewProduct[] {
     const gallery: string[] = p.images?.map((i: any) => i.url) ?? [];
     if (!gallery.length && p.thumbnail) gallery.push(p.thumbnail);
 
-    const bdtPrice = variants[0]?.prices?.find(
+    const bdtPrices = variants[0]?.prices?.filter(
       (pr: any) => pr.currency_code === "bdt"
-    );
-    const price = bdtPrice ? bdtPrice.amount / 100 : variants[0]?.prices?.[0]?.amount ?? 0;
+    ) ?? [];
+    let price = 0;
+    let originalPrice: number | undefined = undefined;
+    if (bdtPrices.length > 0) {
+      const amounts = bdtPrices.map((pr: any) => pr.amount);
+      price = Math.min(...amounts);
+      const maxPrice = Math.max(...amounts);
+      if (maxPrice > price) {
+        originalPrice = maxPrice;
+      }
+    } else {
+      price = variants[0]?.prices?.[0]?.amount ?? 0;
+    }
 
     return {
       id: p.id,
       name: p.title,
       price,
+      originalPrice,
       description: p.description ?? p.subtitle,
       image: gallery[0] ?? "",
       backImage: gallery[1],
       images: gallery.length ? gallery : undefined,
       sizes: sizes.length ? sizes : undefined,
       slug: p.handle,
+      handle: p.handle,
       variantId: variants.length === 1 ? variants[0].id : undefined,
       variants: variants.length > 1 ? variants : undefined,
     } satisfies QuickViewProduct;
