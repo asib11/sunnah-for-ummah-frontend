@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,9 +26,11 @@ const registerSchema = z.object({
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
-export default function RegisterPage() {
+function RegisterFormContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   const {
     register,
@@ -49,7 +51,7 @@ export default function RegisterPage() {
       });
       toast.success("Account created successfully!");
       // Assuming auto-login after register, or prompt to login
-      router.push("/");
+      router.push(callbackUrl);
       router.refresh();
     } catch (error: any) {
       toast.error(error.message || "Failed to create account. Please try again.");
@@ -151,10 +153,18 @@ export default function RegisterPage() {
 
       <div className="text-center text-sm font-body">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-primary hover:underline">
+        <Link href={`/login${callbackUrl !== "/" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`} className="font-medium text-primary hover:underline">
           Sign in
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center mt-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+      <RegisterFormContent />
+    </Suspense>
   );
 }

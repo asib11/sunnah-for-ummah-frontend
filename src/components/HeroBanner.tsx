@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import heroMasjidHaram from "@/assets/hero-masjid-haram.jpg";
-import heroMasjidNabawi from "@/assets/hero-masjid-nabawi.jpg";
-import heroAlAqsa from "@/assets/hero-al-aqsa.jpg";
-import heroBlueMosque from "@/assets/hero-blue-mosque.jpg";
-import heroSheikhZayed from "@/assets/hero-sheikh-zayed.jpg";
+import { ArrowUpRight } from "lucide-react";
+const heroMasjidHaram = "/assets/hero-masjid-haram.jpg";
+const heroMasjidNabawi = "/assets/hero-masjid-nabawi.jpg";
+const heroAlAqsa = "/assets/hero-al-aqsa.jpg";
+const heroBlueMosque = "/assets/hero-blue-mosque.jpg";
+const heroSheikhZayed = "/assets/hero-sheikh-zayed.jpg";
 
 const heroImages = [
   heroMasjidHaram,
@@ -17,7 +18,7 @@ const heroImages = [
 
 const taglines = [
   "Sunnah Is The Best Lifestyle",
-  "Created By The Best Men Ever Lived On Earth",
+  "Created By The Best Men Ever Lived",
   "Follow The Path Of The Prophet ﷺ",
 ];
 
@@ -67,20 +68,16 @@ const useTypingText = (words: string[], typingSpeed = 80, deleteSpeed = 40, paus
 const useHeadlineRotation = (items: typeof headlines, intervalMs = 4000) => {
   const [index, setIndex] = useState(0);
   useEffect(() => {
-    const timer = setInterval(() => {
-      setIndex((i) => (i + 1) % items.length);
-    }, intervalMs);
+    const timer = setInterval(() => setIndex((i) => (i + 1) % items.length), intervalMs);
     return () => clearInterval(timer);
   }, [items, intervalMs]);
-  return items[index];
+  return { item: items[index], index };
 };
 
-const useImageRotation = (images: typeof heroImages, intervalMs = 5000) => {
+const useImageRotation = (images: string[], intervalMs = 5000) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentIndex((i) => (i + 1) % images.length);
-    }, intervalMs);
+    const timer = setInterval(() => setCurrentIndex((i) => (i + 1) % images.length), intervalMs);
     return () => clearInterval(timer);
   }, [images, intervalMs]);
   return currentIndex;
@@ -88,45 +85,81 @@ const useImageRotation = (images: typeof heroImages, intervalMs = 5000) => {
 
 const HeroBanner = () => {
   const typingText = useTypingText(taglines);
-  const headline = useHeadlineRotation(headlines);
+  const { item: headline, index: headlineIdx } = useHeadlineRotation(headlines);
   const currentImageIndex = useImageRotation(heroImages, 5000);
 
   return (
-    <section className="relative w-full overflow-hidden">
-      <div className="relative">
-        {/* Stacked images with crossfade */}
-        <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px]">
-          {heroImages.map((imgSrc, i) => (
-            <img
-              key={i}
-              src={imgSrc.src}
-              alt="Islamic Holy Place"
-              width={1920}
-              height={800}
-              className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out"
-              style={{ opacity: i === currentImageIndex ? 1 : 0 }}
-              {...(i === 0
-                ? { fetchPriority: "high" as const, decoding: "async" as const }
-                : { loading: "lazy" as const, decoding: "async" as const })}
-            />
-          ))}
-        </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-foreground/40 to-transparent" />
-        <div className="absolute inset-0 flex items-center">
-          <div className="container mx-auto px-4">
-            <div className="max-w-lg">
-              <p className="text-primary-foreground/80 text-xs md:text-sm uppercase tracking-[0.3em] font-body mb-2 min-h-[1.5em]">
-                {typingText || "\u00A0"}
-              </p>
-              <h2 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-primary-foreground leading-tight mb-4 min-h-[4.5rem] md:min-h-[7rem] lg:min-h-[9rem]">
-                {headline.before}
-                <span className="text-gold">{headline.highlight}</span>
-                {headline.after}
-              </h2>
-              <button className="bg-primary text-primary-foreground px-6 py-3 rounded-full text-sm font-body font-semibold hover:bg-emerald-light transition-colors">
-                Shop Now
-              </button>
-            </div>
+    <section className="relative w-full overflow-hidden rounded-2xl h-full min-h-[440px] sm:min-h-[480px] md:min-h-[520px] lg:min-h-[600px]">
+      {/* Image stack with slow ken-burns */}
+      <div className="absolute inset-0">
+        {heroImages.map((src, i) => (
+          <img
+            key={i}
+            src={src}
+            alt="Islamic Holy Place"
+            width={1920}
+            height={800}
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out"
+            style={{
+              opacity: i === currentImageIndex ? 1 : 0,
+              transform: i === currentImageIndex ? "scale(1.08)" : "scale(1)",
+              transition: "opacity 1500ms ease-in-out, transform 8000ms ease-out",
+            }}
+            {...(i === 0
+              ? { fetchPriority: "high" as const, decoding: "async" as const }
+              : { loading: "lazy" as const, decoding: "async" as const })}
+          />
+        ))}
+      </div>
+
+      {/* Cinematic overlays */}
+      <div className="absolute inset-0 bg-gradient-to-r from-foreground/85 via-foreground/55 to-foreground/30" />
+      <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-transparent to-transparent" />
+      <div className="absolute inset-y-0 right-0 w-1/2 bg-gradient-to-r from-transparent to-primary/85 pointer-events-none" />
+
+      {/* Vertical accent rule */}
+      <div className="absolute left-6 md:left-10 top-10 bottom-10 w-px bg-gradient-to-b from-transparent via-accent/60 to-transparent hidden md:block" />
+
+      {/* Image counter (editorial) */}
+      <div className="absolute top-6 right-6 md:top-8 md:right-10 flex items-center gap-2 font-body text-[10px] md:text-xs uppercase tracking-[0.3em] text-primary-foreground/70 z-10">
+        <span className="text-accent">{String(currentImageIndex + 1).padStart(2, "0")}</span>
+        <span className="w-8 h-px bg-primary-foreground/40" />
+        <span>{String(heroImages.length).padStart(2, "0")}</span>
+      </div>
+
+      {/* Content */}
+      <div className="relative h-full container mx-auto px-5 sm:px-6 md:px-10 flex items-center py-10 md:py-0">
+        <div className="max-w-xl w-full">
+          <div className="flex items-center gap-3 mb-4 md:mb-5">
+            <span className="w-8 md:w-10 h-px bg-accent" />
+            <p className="text-accent text-[10px] md:text-xs uppercase tracking-[0.3em] md:tracking-[0.35em] font-body font-medium min-h-[1em]">
+              {typingText || "\u00A0"}<span className="ml-0.5 animate-pulse">|</span>
+            </p>
+          </div>
+
+          <h2
+            key={headlineIdx}
+            className="font-display text-[2rem] leading-[1.1] sm:text-4xl md:text-5xl lg:text-6xl font-semibold text-primary-foreground tracking-tight mb-5 md:mb-6 animate-fade-in"
+          >
+            {headline.before}
+            <span className="italic text-accent">{headline.highlight}</span>
+            {headline.after}
+          </h2>
+
+          <p className="font-body text-sm md:text-base text-primary-foreground/80 leading-relaxed mb-6 md:mb-8 max-w-md">
+            Timeless garments and essentials, crafted with intention — honoring tradition, designed for today.
+          </p>
+
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            <button className="group inline-flex items-center justify-between sm:justify-start gap-3 bg-accent text-accent-foreground pl-6 pr-2 py-2 rounded-full text-sm font-body font-semibold hover:bg-accent/90 transition-all w-full sm:w-auto">
+              Shop Collection
+              <span className="w-9 h-9 rounded-full bg-accent-foreground/10 group-hover:bg-accent-foreground/20 flex items-center justify-center transition-colors">
+                <ArrowUpRight className="w-4 h-4" />
+              </span>
+            </button>
+            <a href="#new-arrivals" className="text-primary-foreground/85 hover:text-accent text-sm font-body underline-offset-4 underline sm:no-underline hover:underline transition-colors text-center sm:text-left">
+              New Arrivals
+            </a>
           </div>
         </div>
       </div>
@@ -135,3 +168,5 @@ const HeroBanner = () => {
 };
 
 export default HeroBanner;
+
+

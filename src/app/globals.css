@@ -46,13 +46,13 @@
     /* Custom tokens */
     --emerald: 152 45% 25%;
     --emerald-light: 152 35% 35%;
+    --emerald-tint: 150 40% 92%;
+    --emerald-tint-deep: 150 35% 85%;
+    --emerald-tint-glow: 152 45% 30%;
     --gold: 43 70% 55%;
     --gold-light: 43 60% 70%;
     --cream: 40 30% 97%;
     --cream-dark: 40 25% 92%;
-
-    --font-display: 'Playfair Display', serif;
-    --font-body: 'DM Sans', sans-serif;
 
     --shadow-card: 0 4px 20px -4px hsl(150 20% 10% / 0.08);
     --shadow-hover: 0 8px 30px -6px hsl(150 20% 10% / 0.15);
@@ -98,11 +98,27 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-body);
+    font-family: var(--font-dm-sans), sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
+  }
+
+  /* Larger tap targets on touch devices */
+  @media (hover: none) and (pointer: coarse) {
+    button, a {
+      touch-action: manipulation;
+    }
+  }
+
+  /* Reserve space for the sticky mobile cart bar */
+  @media (max-width: 767px) {
+    body {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display);
+    font-family: var(--font-playfair), serif;
   }
 }
 
@@ -151,6 +167,40 @@
   .amoeba-card:nth-child(2n) .amoeba-blob-accent { animation-delay: -1s; animation-duration: 6s; }
   .amoeba-card:nth-child(3n) .amoeba-blob-accent { animation-delay: -3s; animation-duration: 4.5s; }
 
+  /* Extra creative blob — wild morphing for hero shapes */
+  .amoeba-blob-wild {
+    animation: amoeba-morph-wild 9s ease-in-out infinite;
+  }
+  .amoeba-card:nth-child(2n) .amoeba-blob-wild { animation-delay: -3s; animation-duration: 11s; }
+  .amoeba-card:nth-child(3n) .amoeba-blob-wild { animation-delay: -5s; animation-duration: 8s; }
+  .amoeba-card:nth-child(4n) .amoeba-blob-wild { animation-delay: -7s; animation-duration: 12s; }
+
+  /* Slow spinning ring */
+  .amoeba-spin-slow { animation: amoeba-spin 18s linear infinite; }
+  .amoeba-spin-reverse { animation: amoeba-spin 22s linear infinite reverse; }
+
+  /* Floating bob */
+  .amoeba-float { animation: amoeba-float 6s ease-in-out infinite; }
+
+  /* Orbit animations — mini blobs rotate around main blob */
+  .orbit-container { animation: orbit-spin 18s linear infinite; }
+  .orbit-container-reverse { animation: orbit-spin 22s linear infinite reverse; }
+  .orbit-container-slow { animation: orbit-spin 28s linear infinite; }
+  .orbit-item { animation: orbit-counter 18s linear infinite; }
+  .orbit-item-reverse { animation: orbit-counter 22s linear infinite reverse; }
+  .orbit-item-slow { animation: orbit-counter 28s linear infinite; }
+
+  @keyframes orbit-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes orbit-counter {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(-360deg); }
+  }
+  .amoeba-card:nth-child(2n) .amoeba-float { animation-delay: -2s; }
+  .amoeba-card:nth-child(3n) .amoeba-float { animation-delay: -4s; }
+
   @keyframes amoeba-morph {
     0%, 100% { border-radius: 62% 38% 54% 46% / 48% 56% 44% 52%; transform: rotate(0deg); }
     25%      { border-radius: 45% 55% 38% 62% / 60% 40% 60% 40%; transform: rotate(3deg); }
@@ -174,5 +224,87 @@
   @keyframes amoeba-morph-accent {
     0%, 100% { border-radius: 40% 60% 70% 30% / 50% 30% 70% 50%; transform: translate(0,0) scale(1); }
     50%      { border-radius: 65% 35% 40% 60% / 35% 65% 35% 65%; transform: translate(-10px,6px) scale(1.15); }
+  }
+
+  @keyframes amoeba-morph-wild {
+    0%, 100% { border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; transform: translate(0,0) rotate(0deg) scale(1); }
+    20%      { border-radius: 76% 24% 38% 62% / 58% 70% 30% 42%; transform: translate(10px,-12px) rotate(40deg) scale(1.1); }
+    40%      { border-radius: 24% 76% 65% 35% / 70% 30% 70% 30%; transform: translate(-12px,8px) rotate(-30deg) scale(0.95); }
+    60%      { border-radius: 60% 40% 30% 70% / 40% 60% 40% 60%; transform: translate(8px,10px) rotate(60deg) scale(1.05); }
+    80%      { border-radius: 45% 55% 55% 45% / 65% 35% 65% 35%; transform: translate(-8px,-6px) rotate(-50deg) scale(1); }
+  }
+
+  @keyframes amoeba-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  @keyframes amoeba-float {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50%      { transform: translateY(-10px) rotate(2deg); }
+  }
+
+  /* Elegant multi-layer golden glow for active nav icons */
+  .nav-icon-glow-active {
+    filter: drop-shadow(0 0 4px hsl(43 70% 55% / 0.95)) drop-shadow(0 0 14px hsl(43 70% 55% / 0.65)) drop-shadow(0 0 28px hsl(43 70% 55% / 0.35));
+  }
+
+  /* Global golden confetti sparkles on every button (opt-out with .no-sparkle) */
+  button:not(.no-sparkle):not([class*="fixed"]):not([class*="absolute"]),
+  a.sparkle,
+  [data-sparkle] {
+    position: relative;
+  }
+  button:not(.no-sparkle)::before,
+  button:not(.no-sparkle)::after,
+  a.sparkle::before,
+  a.sparkle::after,
+  [data-sparkle]::before,
+  [data-sparkle]::after {
+    content: "✦";
+    position: absolute;
+    pointer-events: none;
+    color: hsl(var(--gold));
+    font-size: 7px;
+    line-height: 1;
+    opacity: 0;
+    filter: drop-shadow(0 0 3px hsl(var(--gold) / 0.7));
+    animation: btn-sparkle-twinkle 3.8s ease-in-out infinite;
+    z-index: 2;
+  }
+  button:not(.no-sparkle)::before,
+  a.sparkle::before,
+  [data-sparkle]::before {
+    top: 2px;
+    left: 6px;
+  }
+  button:not(.no-sparkle)::after,
+  a.sparkle::after,
+  [data-sparkle]::after {
+    bottom: 2px;
+    right: 6px;
+    animation-delay: -1.9s;
+  }
+  button:not(.no-sparkle):hover::before,
+  button:not(.no-sparkle):hover::after,
+  a.sparkle:hover::before,
+  a.sparkle:hover::after,
+  [data-sparkle]:hover::before,
+  [data-sparkle]:hover::after {
+    animation-duration: 1.6s;
+    font-size: 9px;
+    filter: drop-shadow(0 0 6px hsl(var(--gold) / 0.95));
+  }
+
+  @keyframes btn-sparkle-twinkle {
+    0%, 100% { opacity: 0; transform: scale(0.4) rotate(0deg); }
+    40%      { opacity: 1; transform: scale(1) rotate(180deg); }
+    70%      { opacity: 0.5; transform: scale(0.8) rotate(300deg); }
+  }
+
+  @keyframes gradientShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 }

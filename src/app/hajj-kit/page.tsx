@@ -5,14 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/hooks/useCart";
-import { CheckCircle, Circle, Loader2 } from "lucide-react";
+import { CheckCircle2, Circle, Loader2, Sparkles, ShoppingCart, ArrowRight, Package } from "lucide-react";
 import { toast } from "sonner";
 import { storeApi } from "@/lib/api";
 import { HAJJ_KIT_QUERY_KEY, HAJJ_KIT_HANDLE } from "@/components/HajjKitDetails";
-
-// HAJJ_KIT_HANDLE and HAJJ_KIT_QUERY_KEY are imported from HajjKitDetails
-// so both this page and the home page component share the SAME React Query
-// cache entry — fetched once, reused everywhere.
 
 const KIT_TABS = [
   { key: "mens-kit",         label: "Men's Kit",         emoji: "🕌" },
@@ -20,7 +16,6 @@ const KIT_TABS = [
   { key: "womens-kit",       label: "Women's Kit",        emoji: "🌸" },
 ];
 
-// ── Sub-category icon map ────────────────────────────────────────────────────
 const SUB_CAT_ICONS: Record<string, string> = {
   "Clothing & Wear":      "👘",
   "Hygiene & Care":       "🧴",
@@ -29,23 +24,20 @@ const SUB_CAT_ICONS: Record<string, string> = {
   "Comfort & Bedding":    "🛏️",
 };
 
-// ── Helper: extract BDT price from variant ───────────────────────────────────
 const getBdtPrice = (variant: any): number => {
   if (!variant?.prices) return 0;
   const bdt = variant.prices.find((p: any) => p.currency_code === "bdt");
   return bdt?.amount ?? variant.prices[0]?.amount ?? 0;
 };
 
-// ── Map a raw Medusa product to a kit item ───────────────────────────────────
 const toKitItem = (p: any) => {
   const firstVariant = p.variants?.[0];
   return {
     id:          p.id,
     en:          p.title,
-    bn:          p.metadata?.bn_name || p.title,
+    bn:          p.subtitle || p.title,
     price:       getBdtPrice(firstVariant),
     subCategory: p.metadata?.sub_category || "General",
-    // kit_type in metadata controls which tab this product belongs to
     kitType:     p.metadata?.kit_type || "mens-kit",
     variantId:   firstVariant?.id || "",
     thumbnail:   p.thumbnail || "",
@@ -58,16 +50,12 @@ export default function HajjKitPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const { addToCart, removeItem, cart } = useCart();
 
-  // ── Fetch all Hajj Kit products once ───────────────────────────────
-  // Uses the SAME query key as HajjKitDetails — cache is shared!
   const { data: productsData, isLoading } = useQuery({
     queryKey: HAJJ_KIT_QUERY_KEY,
     queryFn:  () => storeApi.getProductsByCategoryHandle(HAJJ_KIT_HANDLE),
     staleTime: 1000 * 60 * 5,
-    gcTime:    1000 * 60 * 15,
   });
 
-  // ── Map & filter by active kit tab (using metadata.kit_type) ─────────────
   const allKitItems = useMemo(() => {
     const apiProducts = productsData?.products ?? [];
     return apiProducts.map(toKitItem);
@@ -77,7 +65,6 @@ export default function HajjKitPage() {
     return allKitItems.filter((item) => item.kitType === activeKit);
   }, [allKitItems, activeKit]);
 
-  // ── Filter pills ─────────────────────────────────────────────────────────
   const subCategories = useMemo(() => {
     const counts: Record<string, number> = {};
     kitItems.forEach((item) => {
@@ -91,14 +78,12 @@ export default function HajjKitPage() {
     return kitItems.filter((item) => item.subCategory === activeFilter);
   }, [kitItems, activeFilter]);
 
-  // ── Totals ───────────────────────────────────────────────────────────────
   const selectedItems = useMemo(
     () => kitItems.filter((item) => selectedIds.has(item.id)),
     [kitItems, selectedIds]
   );
   const totalValue = selectedItems.reduce((acc, item) => acc + item.price, 0);
 
-  // ── Toggle selection ─────────────────────────────────────────────────────
   const handleToggle = (item: ReturnType<typeof toKitItem>) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -123,72 +108,105 @@ export default function HajjKitPage() {
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col font-body"
-      style={{ background: "linear-gradient(135deg, #fdfcf7 0%, #f0ede4 100%)" }}
-    >
+    <div className="min-h-screen bg-neutral-50 flex flex-col font-body">
       <Header />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-10 mt-20">
-        {/* ── Summary Banner ─────────────────────────────────────────────── */}
-        <div className="text-center mb-8">
-          <p className="text-lg text-neutral-600">
-            <span className="font-bold text-neutral-800">
-              {selectedItems.length} premium item{selectedItems.length !== 1 ? "s" : ""}
-            </span>
-            {selectedItems.length > 0 ? (
-              <>
-                {" "}—{" "}
-                <span className="text-neutral-500">Total value</span>{" "}
-                <span className="font-extrabold text-primary text-xl">
-                  ৳{totalValue.toLocaleString()}
-                </span>
-              </>
-            ) : (
-              <span className="text-neutral-400 ml-2">— Select items to build your kit</span>
-            )}
+      <main className="flex-1 w-full max-w-6xl mx-auto px-4 py-12 md:py-20 mt-16 overflow-hidden">
+        {/* ── Background Decoration ────────────────────────────────────────── */}
+        <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -mr-64 -mt-64" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/10 rounded-full blur-[100px] -ml-48 -mb-48" />
+          <div 
+            className="absolute inset-0 opacity-[0.02] grayscale"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          />
+        </div>
+
+        {/* ── Page Header ──────────────────────────────────────────────────── */}
+        <div className="text-center mb-12 relative">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm mb-4">
+            <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" />
+            <span className="font-body text-[10px] font-bold tracking-[0.2em] uppercase text-primary">Build Your Own</span>
+          </div>
+          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight tracking-tight">
+            The Interactive <span className="italic text-primary">Hajj Kit</span> Builder
+          </h1>
+          <p className="font-body text-sm md:text-base text-muted-foreground mt-4 max-w-2xl mx-auto">
+            Choose your preferred kit type and select exactly what you need for your blessed journey. Every item is quality-assured for your peace of mind.
           </p>
-          <div className="mt-2 mx-auto w-24 h-0.5 rounded-full bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
+
+          {/* Live Status Dashboard */}
+          <div className="mt-10 max-w-lg mx-auto bg-white/70 backdrop-blur-md border border-primary/15 rounded-3xl p-5 shadow-xl shadow-primary/5 flex items-center justify-between transition-all">
+            <div className="text-left flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                <Package className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Your Selection</p>
+                <p className="text-lg font-bold text-foreground">
+                  {selectedItems.length} <span className="text-sm font-normal text-muted-foreground">Items</span>
+                </p>
+              </div>
+            </div>
+            <div className="h-10 w-px bg-primary/10 mx-2" />
+            <div className="text-right">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Total Value</p>
+              <p className="text-2xl font-display font-bold text-primary">
+                ৳{totalValue.toLocaleString()}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* ── Kit Tabs ───────────────────────────────────────────────────── */}
-        <div className="flex items-center justify-center gap-3 flex-wrap mb-6">
-          {KIT_TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => handleKitSwitch(tab.key)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all shadow-sm ${
-                activeKit === tab.key
-                  ? "bg-primary text-white shadow-md scale-105"
-                  : "bg-white text-neutral-600 hover:bg-primary/10 border border-neutral-200"
-              }`}
-            >
-              <span>{tab.emoji}</span>
-              {tab.label}
-            </button>
-          ))}
+        <div className="flex items-center justify-center gap-2 mb-10">
+          <div className="bg-white/50 backdrop-blur-sm p-1.5 rounded-full border border-neutral-200 shadow-inner flex items-center gap-1">
+            {KIT_TABS.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => handleKitSwitch(tab.key)}
+                className={`relative px-5 py-2.5 rounded-full text-xs md:text-sm font-bold transition-all duration-300 ${
+                  activeKit === tab.key
+                    ? "bg-primary text-white shadow-lg"
+                    : "text-muted-foreground hover:text-foreground hover:bg-neutral-100"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <span>{tab.emoji}</span>
+                  {tab.label}
+                </span>
+                {activeKit === tab.key && (
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1 bg-white/40 rounded-full" />
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* ── Loading ────────────────────────────────────────────────────── */}
+        {/* ── Content ────────────────────────────────────────────────────── */}
         {isLoading ? (
-          <div className="flex justify-center items-center h-48">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="flex flex-col justify-center items-center h-64 gap-4">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            <p className="text-sm font-body text-muted-foreground animate-pulse">Fetching kit components...</p>
           </div>
         ) : kitItems.length === 0 ? (
-          <div className="text-center py-20 text-neutral-400">
-            <p className="text-lg font-medium">No products found in this kit.</p>
-            <p className="text-sm mt-1">Add products to the <strong>Hajj Kit</strong> category in your Medusa admin.</p>
+          <div className="text-center py-20 bg-white/40 backdrop-blur-sm rounded-3xl border border-dashed border-neutral-300">
+            <Package className="w-12 h-12 text-neutral-300 mx-auto mb-4" />
+            <p className="text-lg font-medium text-neutral-500">No products found in this kit.</p>
+            <p className="text-sm mt-1 text-neutral-400">Add products to the <strong className="text-primary">Hajj Kit</strong> category in Medusa.</p>
           </div>
         ) : (
           <>
             {/* ── Filter Pills ──────────────────────────────────────────── */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 scrollbar-hide">
+            <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-hide">
               <button
                 onClick={() => setActiveFilter("All")}
-                className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold transition-all border ${
+                className={`flex-shrink-0 px-6 py-2 rounded-full text-xs font-bold transition-all border ${
                   activeFilter === "All"
-                    ? "bg-primary text-white border-primary"
-                    : "bg-white text-neutral-600 border-neutral-200 hover:border-primary/40"
+                    ? "bg-foreground text-background border-foreground shadow-md"
+                    : "bg-white text-muted-foreground border-neutral-200 hover:border-primary/40"
                 }`}
               >
                 All ({kitItems.length})
@@ -197,10 +215,10 @@ export default function HajjKitPage() {
                 <button
                   key={cat}
                   onClick={() => setActiveFilter(cat)}
-                  className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-all border ${
+                  className={`flex-shrink-0 flex items-center gap-2 px-5 py-2 rounded-full text-xs font-bold transition-all border ${
                     activeFilter === cat
-                      ? "bg-primary text-white border-primary"
-                      : "bg-white text-neutral-600 border-neutral-200 hover:border-primary/40"
+                      ? "bg-foreground text-background border-foreground shadow-md"
+                      : "bg-white text-muted-foreground border-neutral-200 hover:border-primary/40"
                   }`}
                 >
                   <span>{SUB_CAT_ICONS[cat] || "📦"}</span>
@@ -210,56 +228,61 @@ export default function HajjKitPage() {
             </div>
 
             {/* ── Item Grid ─────────────────────────────────────────────── */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredItems.map((item) => {
                 const selected = selectedIds.has(item.id);
                 return (
                   <button
                     key={item.id}
                     onClick={() => handleToggle(item)}
-                    className={`flex items-center gap-3 p-4 rounded-2xl text-left transition-all border-2 w-full group ${
+                    className={`group relative flex items-center gap-4 p-5 rounded-[1.5rem] text-left transition-all border-2 w-full ${
                       selected
-                        ? "border-primary bg-primary/5 shadow-md"
-                        : "border-neutral-100 bg-white hover:border-primary/30 hover:shadow-sm"
+                        ? "border-primary bg-white shadow-xl shadow-primary/5 -translate-y-1"
+                        : "border-neutral-100 bg-white/60 hover:bg-white hover:border-primary/20 hover:shadow-lg hover:-translate-y-0.5"
                     }`}
                   >
-                    {/* Checkbox */}
+                    {/* Checkbox / Icon */}
                     <div className="flex-shrink-0">
-                      {selected ? (
-                        <CheckCircle className="w-6 h-6 text-primary" />
-                      ) : (
-                        <Circle className="w-6 h-6 text-neutral-300 group-hover:text-primary/40 transition-colors" />
-                      )}
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                        selected 
+                          ? "bg-primary text-white" 
+                          : "bg-neutral-100 text-neutral-300 group-hover:bg-primary/10 group-hover:text-primary/40"
+                      }`}>
+                        {selected ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
+                      </div>
                     </div>
 
-                    {/* Thumbnail (if exists) */}
-                    {item.thumbnail && (
-                      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-muted">
-                        <img src={item.thumbnail} alt={item.en} className="w-full h-full object-cover" />
-                      </div>
-                    )}
+                    {/* Thumbnail */}
+                    <div className={`relative w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 bg-neutral-100 border transition-all ${
+                      selected ? "border-primary/30" : "border-neutral-100"
+                    }`}>
+                      <img 
+                        src={item.thumbnail} 
+                        alt={item.en} 
+                        className={`w-full h-full object-cover transition-transform duration-500 ${
+                          selected ? "scale-110" : "group-hover:scale-105"
+                        }`} 
+                      />
+                      {selected && <div className="absolute inset-0 bg-primary/5" />}
+                    </div>
 
-                    {/* Names */}
+                    {/* Names & Price */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-neutral-800 truncate leading-tight">
+                      <p className={`text-sm font-bold truncate leading-tight ${selected ? "text-primary" : "text-foreground"}`}>
                         {item.en}
                       </p>
-                      {item.bn !== item.en && (
-                        <p
-                          className="text-xs text-neutral-400 truncate leading-tight mt-0.5"
-                          style={{ fontFamily: "'Noto Sans Bengali', 'Hind Siliguri', sans-serif" }}
-                        >
-                          {item.bn}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Price */}
-                    <div className="flex-shrink-0 text-right">
-                      <p className={`text-sm font-extrabold ${selected ? "text-primary" : "text-neutral-700"}`}>
-                        {item.price > 0 ? `৳${item.price}` : "—"}
+                      <p className="text-[10px] text-muted-foreground truncate leading-tight mt-1 opacity-70">
+                        {item.bn !== item.en ? item.bn : item.subCategory}
+                      </p>
+                      <p className={`text-sm font-extrabold mt-2 ${selected ? "text-primary" : "text-neutral-700"}`}>
+                        {item.price > 0 ? `৳${item.price.toLocaleString()}` : "—"}
                       </p>
                     </div>
+
+                    {/* Subtle glow for selected items */}
+                    {selected && (
+                      <div className="absolute inset-0 -z-10 bg-primary/5 blur-xl rounded-full" />
+                    )}
                   </button>
                 );
               })}
@@ -269,26 +292,27 @@ export default function HajjKitPage() {
 
         {/* ── Sticky CTA ────────────────────────────────────────────────── */}
         {selectedItems.length > 0 && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-md">
-            <div className="bg-primary text-white rounded-2xl shadow-2xl px-6 py-4 flex items-center justify-between">
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-md animate-fade-in">
+            <div className="bg-foreground text-background rounded-full shadow-2xl px-6 py-4 flex items-center justify-between border border-primary/20 ring-4 ring-white/10 backdrop-blur-lg">
               <div>
-                <p className="text-xs font-semibold opacity-80 uppercase tracking-wider">
-                  {selectedItems.length} item{selectedItems.length !== 1 ? "s" : ""} selected
+                <p className="text-[10px] font-bold opacity-60 uppercase tracking-widest">
+                  {selectedItems.length} items ready
                 </p>
-                <p className="text-xl font-extrabold">৳{totalValue.toLocaleString()}</p>
+                <p className="text-xl font-display font-bold">৳{totalValue.toLocaleString()}</p>
               </div>
               <a
                 href="/cart"
-                className="bg-white text-primary font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-neutral-100 transition-colors"
+                className="group inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold text-sm px-6 py-3 rounded-full hover:bg-accent transition-all hover:scale-105 shadow-lg shadow-primary/25"
               >
-                View Cart →
+                <span>Complete Kit</span>
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </a>
             </div>
           </div>
         )}
       </main>
 
-      <div className={selectedItems.length > 0 ? "mb-24" : ""}>
+      <div className={selectedItems.length > 0 ? "mb-28" : ""}>
         <Footer />
       </div>
     </div>

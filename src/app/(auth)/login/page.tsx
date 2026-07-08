@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,9 +20,11 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+function LoginFormContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   const {
     register,
@@ -37,7 +39,7 @@ export default function LoginPage() {
     try {
       await authApi.login(data.email, data.password);
       toast.success("Successfully logged in!");
-      router.push("/");
+      router.push(callbackUrl);
       router.refresh(); // Refresh the layout to update user state if any
     } catch (error: any) {
       toast.error(error.message || "Failed to login. Please try again.");
@@ -106,10 +108,18 @@ export default function LoginPage() {
 
       <div className="text-center text-sm font-body">
         Don&apos;t have an account?{" "}
-        <Link href="/register" className="font-medium text-primary hover:underline">
+        <Link href={`/register${callbackUrl !== "/" ? `?callbackUrl=${encodeURIComponent(callbackUrl)}` : ""}`} className="font-medium text-primary hover:underline">
           Sign up
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center mt-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+      <LoginFormContent />
+    </Suspense>
   );
 }
