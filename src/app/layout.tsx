@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { SmoothScrollProvider } from "@/components/smooth-scroll";
 import { CartDrawer } from "@/components/CartDrawer";
+import { PageTracker } from "@/components/PageTracker";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -56,6 +57,7 @@ export default function RootLayout({
     <html lang="en" className={`${playfair.variable} ${dmSans.variable}`} suppressHydrationWarning>
       <body suppressHydrationWarning>
         <Providers>
+          <PageTracker />
           <SmoothScrollProvider />
           <Toaster />
           <Sonner />
