@@ -226,16 +226,6 @@ const CinematicPanjabiHero = () => {
       <div aria-hidden className="absolute inset-0 opacity-[0.05] bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22 viewBox=%220 0 120 120%22><path fill=%22none%22 stroke=%22%23b8924a%22 stroke-width=%220.5%22 d=%22M60 4 L72 48 L116 60 L72 72 L60 116 L48 72 L4 60 L48 48 Z%22/></svg>')] bg-[length:120px_120px]" />
 
       <div className="container relative z-10 mx-auto px-4">
-        {/* Eyebrow */}
-        <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8 px-2">
-          <span className="hidden sm:block h-px w-10 bg-gradient-to-r from-transparent to-[hsl(41_64%_56%)]" />
-          <Crown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[hsl(41_64%_56%)] shrink-0" />
-          <span className="font-body text-[8px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.6em] text-[hsl(157_35%_28%)] text-center">
-            The Falling Drop · Panjabi Atelier
-          </span>
-          <Crown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[hsl(41_64%_56%)] shrink-0" />
-          <span className="hidden sm:block h-px w-10 bg-gradient-to-l from-transparent to-[hsl(41_64%_56%)]" />
-        </div>
 
 
         {/* Stage — cinematic browser */}

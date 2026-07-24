@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ShoppingCart, Check, ZoomIn, ZoomOut, X, ChevronLeft, ChevronRight, Maximize2, RotateCcw, Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -70,6 +71,19 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
     if (!lightbox) resetLightbox();
   }, [lightbox, resetLightbox]);
 
+  // Close the Radix Dialog before opening the lightbox so Radix's
+  // dismissable layer doesn't intercept touch events on lightbox buttons.
+  const openLightbox = useCallback(() => {
+    onOpenChange(false);
+    setLightbox(true);
+  }, [onOpenChange]);
+
+  // Restore the dialog when the lightbox is closed.
+  const closeLightbox = useCallback(() => {
+    setLightbox(false);
+    onOpenChange(true);
+  }, [onOpenChange]);
+
   if (!product) return null;
 
   const gallery =
@@ -137,7 +151,153 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
     );
   };
 
+  const lightboxEl = lightbox ? (
+    <div
+      className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center"
+      role="dialog"
+      aria-label="Image viewer"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") closeLightbox();
+        if (e.key === "ArrowLeft") goPrev();
+        if (e.key === "ArrowRight") goNext();
+      }}
+      tabIndex={-1}
+    >
+      {/* Backdrop tap-to-close */}
+      <div className="absolute inset-0" onClick={closeLightbox} />
+      <div
+        className="absolute top-4 right-4 flex items-center gap-2 z-10"
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setLbZoom((z) => Math.max(1, +(z - 0.5).toFixed(2))); }}
+          className="h-10 w-10 rounded-full bg-white/10 active:bg-white/30 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur"
+          aria-label="Zoom out"
+        >
+          <ZoomOut className="w-5 h-5" />
+        </button>
+        <span className="font-body text-xs text-white/80 tabular-nums w-12 text-center">
+          {Math.round(lbZoom * 100)}%
+        </span>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setLbZoom((z) => Math.min(5, +(z + 0.5).toFixed(2))); }}
+          className="h-10 w-10 rounded-full bg-white/10 active:bg-white/30 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur"
+          aria-label="Zoom in"
+        >
+          <ZoomIn className="w-5 h-5" />
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); resetLightbox(); }}
+          className="h-10 w-10 rounded-full bg-white/10 active:bg-white/30 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur"
+          aria-label="Reset zoom"
+        >
+          <RotateCcw className="w-4 h-4" />
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
+          className="h-10 w-10 rounded-full bg-white/10 active:bg-white/30 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur"
+          aria-label="Close"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {gallery.length > 1 && (
+        <>
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); resetLightbox(); goPrev(); }}
+            className="absolute left-4 md:left-8 h-12 w-12 rounded-full bg-white/10 active:bg-white/30 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur z-10"
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <button
+            type="button"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => { e.stopPropagation(); resetLightbox(); goNext(); }}
+            className="absolute right-4 md:right-8 h-12 w-12 rounded-full bg-white/10 active:bg-white/30 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur z-10"
+            aria-label="Next image"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        </>
+      )}
+
+      <div
+        className="relative max-w-[92vw] max-h-[88vh] overflow-hidden select-none z-10"
+        onClick={(e) => e.stopPropagation()}
+        onWheel={(e) => {
+          e.preventDefault();
+          setLbZoom((z) => Math.min(5, Math.max(1, +(z - e.deltaY * 0.002).toFixed(2))));
+        }}
+        onDoubleClick={() => {
+          setLbZoom((z) => (z === 1 ? 2 : 1));
+          setLbPan({ x: 0, y: 0 });
+        }}
+        onPointerDown={(e) => {
+          if (lbZoom === 1) return;
+          (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+          dragRef.current = { startX: e.clientX, startY: e.clientY, baseX: lbPan.x, baseY: lbPan.y };
+        }}
+        onPointerMove={(e) => {
+          if (!dragRef.current) return;
+          setLbPan({
+            x: dragRef.current.baseX + (e.clientX - dragRef.current.startX),
+            y: dragRef.current.baseY + (e.clientY - dragRef.current.startY),
+          });
+        }}
+        onPointerUp={() => (dragRef.current = null)}
+        onPointerCancel={() => (dragRef.current = null)}
+        onTouchStart={(e) => {
+          if (e.touches.length === 2) {
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            (e.currentTarget as any)._pinchDist = Math.hypot(dx, dy);
+            (e.currentTarget as any)._pinchZoom = lbZoom;
+          }
+        }}
+        onTouchMove={(e) => {
+          if (e.touches.length === 2) {
+            e.preventDefault();
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const newDist = Math.hypot(dx, dy);
+            const startDist = (e.currentTarget as any)._pinchDist ?? newDist;
+            const startZoom = (e.currentTarget as any)._pinchZoom ?? lbZoom;
+            const next = Math.min(5, Math.max(1, +((startZoom * newDist) / startDist).toFixed(2)));
+            setLbZoom(next);
+            if (next === 1) setLbPan({ x: 0, y: 0 });
+          }
+        }}
+        style={{ cursor: lbZoom > 1 ? (dragRef.current ? "grabbing" : "grab") : "zoom-in", touchAction: "none" }}
+      >
+        <img
+          src={gallery[activeImage]}
+          alt={product.name}
+          draggable={false}
+          className="max-w-[92vw] max-h-[88vh] object-contain transition-transform duration-150"
+          style={{ transform: `translate(${lbPan.x}px, ${lbPan.y}px) scale(${lbZoom})` }}
+        />
+      </div>
+
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/70 font-body text-xs z-10">
+        {gallery.length > 1 && (
+          <span className="tabular-nums">{activeImage + 1} / {gallery.length}</span>
+        )}
+        <span className="uppercase tracking-[0.3em] text-[10px]">Pinch · Double-tap · Drag to pan</span>
+      </div>
+    </div>
+  ) : null;
+
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl p-0 overflow-hidden bg-card border-emerald-tint/60">
         <div className="grid md:grid-cols-2">
@@ -171,7 +331,7 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
               </button>
               <button
                 type="button"
-                onClick={() => setLightbox(true)}
+                onClick={openLightbox}
                 className="h-9 w-9 rounded-full flex items-center justify-center bg-background/80 backdrop-blur border border-emerald-tint text-foreground hover:bg-background transition"
                 aria-label="Open lightbox"
                 title="Fullscreen view"
@@ -184,7 +344,7 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
               className={`aspect-[4/5] w-full overflow-hidden ${hoverZoom ? "cursor-zoom-out" : "cursor-zoom-in"}`}
               onMouseMove={handleMove}
               onMouseLeave={() => setOrigin({ x: 50, y: 50 })}
-              onClick={() => (hoverZoom ? setLightbox(true) : setHoverZoom(true))}
+              onClick={() => (hoverZoom ? openLightbox() : setHoverZoom(true))}
             >
               <img
                 src={gallery[activeImage]}
@@ -309,145 +469,10 @@ const QuickViewDialog = ({ product, open, onOpenChange }: Props) => {
           </div>
         </div>
       </DialogContent>
-
-      {lightbox && (
-        <div
-          className="fixed inset-0 z-[80] bg-black/95 flex items-center justify-center"
-          role="dialog"
-          aria-label="Image viewer"
-          onClick={() => setLightbox(false)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") setLightbox(false);
-            if (e.key === "ArrowLeft") goPrev();
-            if (e.key === "ArrowRight") goNext();
-          }}
-          tabIndex={-1}
-        >
-          <div
-            className="absolute top-4 right-4 flex items-center gap-2 z-10"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setLbZoom((z) => Math.max(1, +(z - 0.5).toFixed(2)))}
-              className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur"
-              aria-label="Zoom out"
-            >
-              <ZoomOut className="w-5 h-5" />
-            </button>
-            <span className="font-body text-xs text-white/80 tabular-nums w-12 text-center">
-              {Math.round(lbZoom * 100)}%
-            </span>
-            <button
-              type="button"
-              onClick={() => setLbZoom((z) => Math.min(5, +(z + 0.5).toFixed(2)))}
-              className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur"
-              aria-label="Zoom in"
-            >
-              <ZoomIn className="w-5 h-5" />
-            </button>
-            <button
-              type="button"
-              onClick={resetLightbox}
-              className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur"
-              aria-label="Reset zoom"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setLightbox(false)}
-              className="h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {gallery.length > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  resetLightbox();
-                  goPrev();
-                }}
-                className="absolute left-4 md:left-8 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur z-10"
-                aria-label="Previous image"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  resetLightbox();
-                  goNext();
-                }}
-                className="absolute right-4 md:right-8 h-12 w-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center backdrop-blur z-10"
-                aria-label="Next image"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
-            </>
-          )}
-
-          <div
-            className="relative max-w-[92vw] max-h-[88vh] overflow-hidden select-none"
-            onClick={(e) => e.stopPropagation()}
-            onWheel={(e) => {
-              e.preventDefault();
-              setLbZoom((z) => Math.min(5, Math.max(1, +(z - e.deltaY * 0.002).toFixed(2))));
-            }}
-            onDoubleClick={() => {
-              setLbZoom((z) => (z === 1 ? 2 : 1));
-              setLbPan({ x: 0, y: 0 });
-            }}
-            onMouseDown={(e) => {
-              if (lbZoom === 1) return;
-              dragRef.current = {
-                startX: e.clientX,
-                startY: e.clientY,
-                baseX: lbPan.x,
-                baseY: lbPan.y,
-              };
-            }}
-            onMouseMove={(e) => {
-              if (!dragRef.current) return;
-              setLbPan({
-                x: dragRef.current.baseX + (e.clientX - dragRef.current.startX),
-                y: dragRef.current.baseY + (e.clientY - dragRef.current.startY),
-              });
-            }}
-            onMouseUp={() => (dragRef.current = null)}
-            onMouseLeave={() => (dragRef.current = null)}
-            style={{ cursor: lbZoom > 1 ? (dragRef.current ? "grabbing" : "grab") : "zoom-in" }}
-          >
-            <img
-              src={gallery[activeImage]}
-              alt={product.name}
-              draggable={false}
-              className="max-w-[92vw] max-h-[88vh] object-contain transition-transform duration-150"
-              style={{
-                transform: `translate(${lbPan.x}px, ${lbPan.y}px) scale(${lbZoom})`,
-              }}
-            />
-          </div>
-
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/70 font-body text-xs">
-            {gallery.length > 1 && (
-              <span className="tabular-nums">
-                {activeImage + 1} / {gallery.length}
-              </span>
-            )}
-            <span className="uppercase tracking-[0.3em] text-[10px]">
-              Scroll · Double-click · Drag to pan
-            </span>
-          </div>
-        </div>
-      )}
     </Dialog>
+
+    {lightboxEl && createPortal(lightboxEl, document.body)}
+    </>
   );
 };
 
