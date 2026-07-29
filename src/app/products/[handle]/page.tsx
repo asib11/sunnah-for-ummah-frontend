@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, ShoppingCart, Check, ChevronRight, Star, ShieldCheck, Truck, RotateCcw } from "lucide-react";
+import ProductDetailSkeleton from "@/components/skeletons/ProductDetailSkeleton";
 
 const getPrices = (variant: any) => {
   if (!variant?.prices) return { current: 0, old: null };
@@ -76,8 +77,8 @@ export default function ProductDetailsPage() {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <main className="flex-1 flex items-center justify-center">
-          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
+          <ProductDetailSkeleton />
         </main>
         <Footer />
       </div>
