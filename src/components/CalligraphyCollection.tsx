@@ -9,6 +9,7 @@ import { Loader2, ShoppingCart, RefreshCw } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { toast } from "sonner";
 import Link from "next/link";
+import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 
 interface CalligraphyProductCardProps {
   product: any;
@@ -194,8 +195,10 @@ const CalligraphyCollection = () => {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="w-10 h-10 animate-spin text-primary" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <ProductCardSkeleton key={i} />
+          ))}
         </div>
       ) : products.length === 0 ? (
         <p className="text-center text-muted-foreground py-20 bg-secondary/20 rounded-3xl border border-dashed border-primary/20">

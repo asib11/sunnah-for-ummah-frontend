@@ -10,52 +10,9 @@ import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
 import QuickViewDialog, { type QuickViewProduct } from "@/components/QuickViewDialog";
 import { storeApi } from "@/lib/api";
+import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 
-import hijabCream from "@/assets/hijab_cream.webp";
-import hijabEmerald from "@/assets/hijab_emerald.webp";
-import hijabPink from "@/assets/hijab_pink.webp";
-import hijabCharcoal from "@/assets/hijab_charcoal.webp";
 
-const staticProducts: QuickViewProduct[] = [
-  {
-    id: "hijab-cream",
-    name: "Chiffon Hijab - Cream",
-    price: 690,
-    originalPrice: 890,
-    image: hijabCream.src,
-    description: "Premium cream chiffon hijab, beautifully lightweight and flowing.",
-    sizes: ["Free Size"],
-    handle: "chiffon-hijab-cream"
-  },
-  {
-    id: "hijab-emerald",
-    name: "Premium Hijab - Emerald",
-    price: 790,
-    originalPrice: 990,
-    image: hijabEmerald.src,
-    description: "Elegant emerald green chiffon hijab with a premium, luxurious feel.",
-    sizes: ["Free Size"],
-    handle: "premium-hijab-emerald"
-  },
-  {
-    id: "hijab-pink",
-    name: "Soft Chiffon Hijab - Rose",
-    price: 690,
-    image: hijabPink.src,
-    description: "Soft pink chiffon hijab, perfect for everyday modest styling.",
-    sizes: ["Free Size"],
-    handle: "soft-chiffon-hijab-rose"
-  },
-  {
-    id: "hijab-charcoal",
-    name: "Everyday Hijab - Charcoal",
-    price: 690,
-    image: hijabCharcoal.src,
-    description: "Versatile charcoal grey everyday hijab, soft and breathable.",
-    sizes: ["Free Size"],
-    handle: "everyday-hijab-charcoal"
-  }
-];
 
 function useHijabProducts() {
   return useQuery<QuickViewProduct[]>({
@@ -151,8 +108,7 @@ const HijabClient = () => {
 
   const { data: liveProducts, isLoading } = useHijabProducts();
 
-  const displayProducts =
-    liveProducts && liveProducts.length > 0 ? liveProducts : staticProducts;
+  const displayProducts = liveProducts ?? [];
 
   const handleQuickView = (p: QuickViewProduct) => {
     setActive(p);
@@ -188,9 +144,9 @@ const HijabClient = () => {
 
       <section className="container mx-auto px-4 py-14">
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 animate-pulse">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-muted rounded-xl aspect-[4/5]" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            {[...Array(10)].map((_, i) => (
+              <ProductCardSkeleton key={i} />
             ))}
           </div>
         ) : (

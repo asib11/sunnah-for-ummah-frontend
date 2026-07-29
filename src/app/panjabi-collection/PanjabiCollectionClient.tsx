@@ -11,11 +11,18 @@ import WhatsAppFloat from "@/components/WhatsAppFloat";
 import Seo from "@/components/Seo";
 import { storeApi } from "@/lib/api";
 import { useCart } from "@/hooks/useCart";
-const blueCollar = "/assets/panjabi-blue-collar.webp";
-const blueCuff = "/assets/panjabi-blue-cuff.webp";
-const whitePlacket = "/assets/panjabi-white-placket.webp";
-const whiteDetail = "/assets/panjabi-white-detail.webp";
-const whiteCollar = "/assets/panjabi-white-collar.webp";
+
+
+const getBdtPrice = (variant: any): number => {
+  if (!variant?.prices) return 0;
+  const bdtPrices = variant.prices
+    .filter((p: any) => p.currency_code === "bdt")
+    .map((p: any) => p.amount);
+  if (bdtPrices.length > 0) {
+    return Math.min(...bdtPrices);
+  }
+  return variant.prices[0]?.amount ?? 0;
+};
 
 type Panjabi = {
   id: string;
@@ -30,39 +37,18 @@ type Panjabi = {
   originalPrice?: number;
 };
 
-// Static fallback shown until API responds
-const STATIC_PANJABIS: Panjabi[] = [
-  { id: "azraq-noor",  variantId: "", name: "Azraq Noor",      arabic: "أزرق النور",  fabric: "Hand-loom Cotton Silk · Slate Blue",   story: "Embroidered placket with mother-of-pearl buttons — inspired by the tiles of Isfahan.", image: blueCollar,   tag: "Signature", price: 4500, originalPrice: 5000 },
-  { id: "azraq-shahi", variantId: "", name: "Azraq Shahi",     arabic: "أزرق شاهي",  fabric: "Premium Pure Cotton · Royal Blue",      story: "Cuff calligraphy stitched in silver thread — a quiet echo of Andalusia.",             image: blueCuff,     tag: "Royal",     price: 4500, originalPrice: 5000 },
-  { id: "abyad-haram", variantId: "", name: "Abyad Al-Haram",  arabic: "أبيض الحرم", fabric: "Egyptian Cotton · Pure White",          story: "Pearl-white panjabi with silver embroidery — for the days of Jumu'ah and Eid.",       image: whitePlacket, tag: "Sacred",    price: 4500, originalPrice: 5000 },
-  { id: "abyad-noor",  variantId: "", name: "Abyad Noor",      arabic: "أبيض النور",  fabric: "Egyptian Cotton · Ivory White",        story: "Sunnah-cut placket with Arabesque trim — modest, regal, timeless.",                  image: whiteDetail,  tag: "Heritage", price: 4500, originalPrice: 5000 },
-  { id: "abyad-rawda", variantId: "", name: "Abyad Ar-Rawda",  arabic: "أبيض الروضة", fabric: "Hand-finished Cotton · Soft White",    story: "Embroidered collar with floral Khatm motif — a tribute to the gardens of Madinah.",  image: whiteCollar,  tag: "Limited",  price: 4500, originalPrice: 5000 },
-];
-
-const getBdtPrice = (variant: any): number => {
-  if (!variant?.prices) return 0;
-  const bdtPrices = variant.prices
-    .filter((p: any) => p.currency_code === "bdt")
-    .map((p: any) => p.amount);
-  if (bdtPrices.length > 0) {
-    return Math.min(...bdtPrices);
-  }
-  return variant.prices[0]?.amount ?? 0;
-};
-
-const medusaToPanjabi = (p: any, idx: number): Panjabi => {
-  const fallback = STATIC_PANJABIS[idx % STATIC_PANJABIS.length];
+const medusaToPanjabi = (p: any): Panjabi => {
   const variant = p.variants?.[0];
-  const price = getBdtPrice(variant) || fallback.price;
+  const price = getBdtPrice(variant) || 0;
   return {
     id: p.id,
     variantId: variant?.id,
     name: p.title,
-    arabic: (p.metadata?.arabic as string) || fallback.arabic,
-    fabric: p.subtitle || (p.metadata?.fabric as string) || fallback.fabric,
-    story: p.description || fallback.story,
-    image: p.thumbnail || p.images?.[0]?.url || fallback.image,
-    tag: (p.metadata?.tag as string) || fallback.tag,
+    arabic: (p.metadata?.arabic as string) || "البنجابي",
+    fabric: p.subtitle || (p.metadata?.fabric as string) || "Premium Panjabi",
+    story: p.description || "A heritage collection piece.",
+    image: p.thumbnail || p.images?.[0]?.url || "",
+    tag: (p.metadata?.tag as string) || "Classic",
     price,
     originalPrice: p.metadata?.original_price ? Number(p.metadata.original_price) : undefined,
   };
@@ -81,8 +67,7 @@ const PanjabiCollection = () => {
 
   const PANJABIS: Panjabi[] = useMemo(() => {
     const apiProducts: any[] = data?.products ?? [];
-    if (apiProducts.length === 0) return STATIC_PANJABIS;
-    return apiProducts.map((p, i) => medusaToPanjabi(p, i));
+    return apiProducts.map((p) => medusaToPanjabi(p));
   }, [data]);
 
   const safeActive = Math.min(active, Math.max(0, PANJABIS.length - 1));
@@ -208,65 +193,73 @@ const PanjabiCollection = () => {
                 )
               )}
 
-              {isLoading ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-[hsl(157_86%_12%)]">
-                  <Loader2 className="w-10 h-10 animate-spin text-[hsl(41_64%_56%)]" />
+              {isLoading || !featured ? (
+                <div className="absolute inset-0 bg-[hsl(157_86%_12%)]">
+                  <div className="absolute inset-0 bg-[hsl(157_86%_16%)] animate-pulse" />
+                  <div className="absolute bottom-8 left-8 right-8 z-30 space-y-4">
+                    <div className="h-6 w-32 bg-[hsl(157_86%_25%)] rounded animate-pulse" />
+                    <div className="h-10 w-64 bg-[hsl(157_86%_25%)] rounded animate-pulse" />
+                    <div className="h-4 w-40 bg-[hsl(157_86%_25%)] rounded animate-pulse" />
+                    <div className="h-16 w-full max-w-md bg-[hsl(157_86%_25%)] rounded animate-pulse mt-4" />
+                  </div>
                 </div>
               ) : (
-                <img
-                  key={featured.id}
-                  src={featured.image}
-                  alt={featured.name}
-                  className="absolute inset-0 w-full h-full object-cover animate-fade-in"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-[hsl(157_86%_10%/0.85)] via-transparent to-transparent" />
+                <>
+                  <img
+                    key={featured.id}
+                    src={featured.image}
+                    alt={featured.name}
+                    className="absolute inset-0 w-full h-full object-cover animate-fade-in"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[hsl(157_86%_10%/0.85)] via-transparent to-transparent" />
 
-              <div className="absolute top-8 left-8 z-30 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(41_64%_56%)] text-[hsl(157_86%_12%)] text-[10px] font-body font-bold uppercase tracking-[0.25em] shadow-lg">
-                <Crown className="w-3 h-3" /> {featured.tag}
-              </div>
-
-              <div className="absolute bottom-8 left-8 right-8 z-30">
-                <p className="font-display italic text-lg text-[hsl(41_64%_70%)]" dir="rtl">
-                  {featured.arabic}
-                </p>
-                <h2 className="font-display text-3xl md:text-4xl font-semibold text-[hsl(35_30%_96%)] mt-1">
-                  {featured.name}
-                </h2>
-                <p className="mt-2 font-body text-[11px] uppercase tracking-[0.3em] text-[hsl(41_64%_70%)]">
-                  {featured.fabric}
-                </p>
-                <p className="mt-3 font-body text-sm text-[hsl(35_25%_85%)] max-w-md leading-relaxed">
-                  {featured.story}
-                </p>
-
-                <div className="mt-5 flex items-end justify-between gap-4">
-                  <div className="flex items-end gap-3">
-                    <span className="font-display text-4xl md:text-5xl font-bold text-[hsl(41_64%_60%)] leading-none">
-                      ৳{featured.price.toLocaleString()}
-                    </span>
-                    {featured.originalPrice && (
-                      <>
-                        <span className="font-body text-sm line-through text-[hsl(41_30%_60%)] pb-1">
-                          ৳{featured.originalPrice.toLocaleString()}
-                        </span>
-                        <span className="text-[10px] font-body font-bold uppercase tracking-widest text-[hsl(157_86%_12%)] bg-[hsl(41_64%_56%)] px-2 py-1 rounded-full pb-1.5">
-                          -{Math.round((1 - featured.price / featured.originalPrice) * 100)}%
-                        </span>
-                      </>
-                    )}
+                  <div className="absolute top-8 left-8 z-30 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[hsl(41_64%_56%)] text-[hsl(157_86%_12%)] text-[10px] font-body font-bold uppercase tracking-[0.25em] shadow-lg">
+                    <Crown className="w-3 h-3" /> {featured.tag}
                   </div>
-                  <button
-                    onClick={() => handleAdd(featured)}
-                    className="group inline-flex items-center gap-2 bg-[hsl(41_64%_56%)] text-[hsl(157_86%_12%)] pl-5 pr-2 py-2 rounded-full text-xs font-body font-bold uppercase tracking-[0.2em] hover:bg-[hsl(41_64%_66%)] transition-all shadow-lg"
-                  >
-                    Add to Cart
-                    <span className="w-7 h-7 rounded-full bg-[hsl(157_86%_15%)] text-[hsl(41_64%_56%)] flex items-center justify-center transition-transform group-hover:rotate-45">
-                      <ArrowUpRight className="w-3.5 h-3.5" />
-                    </span>
-                  </button>
-                </div>
-              </div>
+
+                  <div className="absolute bottom-8 left-8 right-8 z-30">
+                    <p className="font-display italic text-lg text-[hsl(41_64%_70%)]" dir="rtl">
+                      {featured.arabic}
+                    </p>
+                    <h2 className="font-display text-3xl md:text-4xl font-semibold text-[hsl(35_30%_96%)] mt-1">
+                      {featured.name}
+                    </h2>
+                    <p className="mt-2 font-body text-[11px] uppercase tracking-[0.3em] text-[hsl(41_64%_70%)]">
+                      {featured.fabric}
+                    </p>
+                    <p className="mt-3 font-body text-sm text-[hsl(35_25%_85%)] max-w-md leading-relaxed">
+                      {featured.story}
+                    </p>
+
+                    <div className="mt-5 flex items-end justify-between gap-4">
+                      <div className="flex items-end gap-3">
+                        <span className="font-display text-4xl md:text-5xl font-bold text-[hsl(41_64%_60%)] leading-none">
+                          ৳{featured.price.toLocaleString()}
+                        </span>
+                        {featured.originalPrice && (
+                          <>
+                            <span className="font-body text-sm line-through text-[hsl(41_30%_60%)] pb-1">
+                              ৳{featured.originalPrice.toLocaleString()}
+                            </span>
+                            <span className="text-[10px] font-body font-bold uppercase tracking-widest text-[hsl(157_86%_12%)] bg-[hsl(41_64%_56%)] px-2 py-1 rounded-full pb-1.5">
+                              -{Math.round((1 - featured.price / featured.originalPrice) * 100)}%
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleAdd(featured)}
+                        className="group inline-flex items-center gap-2 bg-[hsl(41_64%_56%)] text-[hsl(157_86%_12%)] pl-5 pr-2 py-2 rounded-full text-xs font-body font-bold uppercase tracking-[0.2em] hover:bg-[hsl(41_64%_66%)] transition-all shadow-lg"
+                      >
+                        Add to Cart
+                        <span className="w-7 h-7 rounded-full bg-[hsl(157_86%_15%)] text-[hsl(41_64%_56%)] flex items-center justify-center transition-transform group-hover:rotate-45">
+                          <ArrowUpRight className="w-3.5 h-3.5" />
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -275,48 +268,64 @@ const PanjabiCollection = () => {
             <p className="font-body text-[11px] uppercase tracking-[0.4em] text-[hsl(157_86%_21%)] mb-4">
               Browse the Collection
             </p>
-            {PANJABIS.map((p, i) => {
-              const isActive = i === safeActive;
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => setActive(i)}
-                  className={`w-full group flex items-center gap-4 p-3 rounded-2xl border transition-all duration-500 text-left ${
-                    isActive
-                      ? "border-[hsl(41_64%_56%)] bg-gradient-to-r from-[hsl(157_86%_15%)] to-[hsl(157_86%_21%)] text-[hsl(35_30%_96%)] shadow-[0_15px_40px_-15px_hsl(157_86%_15%/0.5)]"
-                      : "border-[hsl(41_64%_56%/0.2)] bg-white hover:border-[hsl(41_64%_56%/0.5)] hover:bg-[hsl(35_25%_98%)]"
-                  }`}
-                >
-                  <div className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden">
-                    <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
-                    {isActive && (
-                      <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[hsl(41_64%_56%)] shadow-[0_0_8px_hsl(41_64%_56%)]" />
-                    )}
+            {isLoading ? (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="w-full flex items-center gap-4 p-3 rounded-2xl border border-[hsl(41_64%_56%/0.2)] bg-white animate-pulse">
+                  <div className="relative w-20 h-20 shrink-0 rounded-xl bg-[hsl(35_25%_94%)]" />
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="h-3 w-16 bg-muted rounded" />
+                    <div className="h-4 w-32 bg-muted rounded" />
+                    <div className="h-2 w-20 bg-muted rounded" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-display italic text-sm text-[hsl(41_64%_56%)]" dir="rtl">
-                      {p.arabic}
-                    </p>
-                    <h3 className={`font-display text-base md:text-lg font-semibold leading-tight ${isActive ? "text-[hsl(35_30%_96%)]" : "text-[hsl(157_86%_15%)]"}`}>
-                      {p.name}
-                    </h3>
-                    <p className={`font-body text-[10px] uppercase tracking-[0.2em] mt-0.5 ${isActive ? "text-[hsl(41_64%_70%)]" : "text-[hsl(157_30%_40%)]"}`}>
-                      {p.tag}
-                    </p>
+                  <div className="text-right space-y-2">
+                    <div className="h-4 w-12 bg-muted rounded ml-auto" />
                   </div>
-                  <div className="text-right">
-                    <p className={`font-display text-lg font-bold ${isActive ? "text-[hsl(41_64%_60%)]" : "text-[hsl(157_86%_18%)]"}`}>
-                      ৳{p.price.toLocaleString()}
-                    </p>
-                    {p.originalPrice && (
-                      <p className={`text-[9px] line-through ${isActive ? "text-[hsl(41_30%_70%)]" : "text-muted-foreground"}`}>
-                        ৳{p.originalPrice.toLocaleString()}
+                </div>
+              ))
+            ) : (
+              PANJABIS.map((p, i) => {
+                const isActive = i === safeActive;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setActive(i)}
+                    className={`w-full group flex items-center gap-4 p-3 rounded-2xl border transition-all duration-500 text-left ${
+                      isActive
+                        ? "border-[hsl(41_64%_56%)] bg-gradient-to-r from-[hsl(157_86%_15%)] to-[hsl(157_86%_21%)] text-[hsl(35_30%_96%)] shadow-[0_15px_40px_-15px_hsl(157_86%_15%/0.5)]"
+                        : "border-[hsl(41_64%_56%/0.2)] bg-white hover:border-[hsl(41_64%_56%/0.5)] hover:bg-[hsl(35_25%_98%)]"
+                    }`}
+                  >
+                    <div className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden">
+                      <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                      {isActive && (
+                        <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[hsl(41_64%_56%)] shadow-[0_0_8px_hsl(41_64%_56%)]" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-display italic text-sm text-[hsl(41_64%_56%)]" dir="rtl">
+                        {p.arabic}
                       </p>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+                      <h3 className={`font-display text-base md:text-lg font-semibold leading-tight ${isActive ? "text-[hsl(35_30%_96%)]" : "text-[hsl(157_86%_15%)]"}`}>
+                        {p.name}
+                      </h3>
+                      <p className={`font-body text-[10px] uppercase tracking-[0.2em] mt-0.5 ${isActive ? "text-[hsl(41_64%_70%)]" : "text-[hsl(157_30%_40%)]"}`}>
+                        {p.tag}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className={`font-display text-lg font-bold ${isActive ? "text-[hsl(41_64%_60%)]" : "text-[hsl(157_86%_18%)]"}`}>
+                        ৳{p.price.toLocaleString()}
+                      </p>
+                      {p.originalPrice && (
+                        <p className={`text-[9px] line-through ${isActive ? "text-[hsl(41_30%_70%)]" : "text-muted-foreground"}`}>
+                          ৳{p.originalPrice.toLocaleString()}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
       </section>
@@ -343,67 +352,87 @@ const PanjabiCollection = () => {
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {PANJABIS.map((p) => (
-              <article
-                key={p.id}
-                className="group relative bg-white rounded-3xl overflow-hidden border border-[hsl(41_64%_56%/0.18)] shadow-[0_15px_50px_-25px_hsl(157_86%_15%/0.25)] hover:shadow-[0_25px_60px_-25px_hsl(157_86%_15%/0.4)] transition-all duration-500 hover:-translate-y-1"
-              >
-                <div className="relative aspect-[4/5] overflow-hidden bg-[hsl(35_25%_94%)]">
-                  <img
-                    src={p.image}
-                    alt={p.name}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
-                  />
-                  <div className="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[hsl(41_64%_56%)] text-[hsl(157_86%_12%)] text-[9px] font-bold uppercase tracking-[0.2em]">
-                    <Crown className="w-2.5 h-2.5" /> {p.tag}
-                  </div>
-                  {p.originalPrice && (
-                    <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-[hsl(157_86%_15%)] text-[hsl(41_64%_60%)] text-[9px] font-bold uppercase tracking-[0.2em]">
-                      -{Math.round((1 - p.price / p.originalPrice) * 100)}%
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 animate-pulse">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white rounded-3xl overflow-hidden border border-[hsl(41_64%_56%/0.18)] shadow-sm">
+                  <div className="aspect-[4/5] bg-[hsl(35_25%_94%)]" />
+                  <div className="p-5 space-y-3">
+                    <div className="h-3 w-16 bg-muted rounded" />
+                    <div className="h-5 w-40 bg-muted rounded" />
+                    <div className="h-2 w-24 bg-muted rounded" />
+                    <div className="h-3 w-20 bg-muted rounded mt-4" />
+                    <div className="flex items-end justify-between mt-4">
+                       <div className="h-6 w-20 bg-muted rounded" />
+                       <div className="h-8 w-24 bg-muted rounded-full" />
                     </div>
-                  )}
+                  </div>
                 </div>
-
-                <div className="p-5">
-                  <p className="font-display italic text-base text-[hsl(41_64%_46%)]" dir="rtl">
-                    {p.arabic}
-                  </p>
-                  <h3 className="font-display text-xl font-semibold text-[hsl(157_86%_15%)] mt-0.5">
-                    {p.name}
-                  </h3>
-                  <p className="font-body text-[10px] uppercase tracking-[0.25em] text-[hsl(157_30%_40%)] mt-1">
-                    {p.fabric}
-                  </p>
-
-                  <div className="mt-3 flex items-center gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-3.5 h-3.5 fill-[hsl(41_64%_56%)] text-[hsl(41_64%_56%)]" />
-                    ))}
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {PANJABIS.map((p) => (
+                <article
+                  key={p.id}
+                  className="group relative bg-white rounded-3xl overflow-hidden border border-[hsl(41_64%_56%/0.18)] shadow-[0_15px_50px_-25px_hsl(157_86%_15%/0.25)] hover:shadow-[0_25px_60px_-25px_hsl(157_86%_15%/0.4)] transition-all duration-500 hover:-translate-y-1"
+                >
+                  <div className="relative aspect-[4/5] overflow-hidden bg-[hsl(35_25%_94%)]">
+                    <img
+                      src={p.image}
+                      alt={p.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
+                    />
+                    <div className="absolute top-3 left-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[hsl(41_64%_56%)] text-[hsl(157_86%_12%)] text-[9px] font-bold uppercase tracking-[0.2em]">
+                      <Crown className="w-2.5 h-2.5" /> {p.tag}
+                    </div>
+                    {p.originalPrice && (
+                      <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-[hsl(157_86%_15%)] text-[hsl(41_64%_60%)] text-[9px] font-bold uppercase tracking-[0.2em]">
+                        -{Math.round((1 - p.price / p.originalPrice) * 100)}%
+                      </div>
+                    )}
                   </div>
 
-                  <div className="mt-4 flex items-end justify-between">
-                    <div>
-                      {p.originalPrice && (
-                        <p className="font-body text-xs line-through text-muted-foreground">
-                          ৳{p.originalPrice.toLocaleString()}
+                  <div className="p-5">
+                    <p className="font-display italic text-base text-[hsl(41_64%_46%)]" dir="rtl">
+                      {p.arabic}
+                    </p>
+                    <h3 className="font-display text-xl font-semibold text-[hsl(157_86%_15%)] mt-0.5">
+                      {p.name}
+                    </h3>
+                    <p className="font-body text-[10px] uppercase tracking-[0.25em] text-[hsl(157_30%_40%)] mt-1">
+                      {p.fabric}
+                    </p>
+
+                    <div className="mt-3 flex items-center gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-[hsl(41_64%_56%)] text-[hsl(41_64%_56%)]" />
+                      ))}
+                    </div>
+
+                    <div className="mt-4 flex items-end justify-between">
+                      <div>
+                        {p.originalPrice && (
+                          <p className="font-body text-xs line-through text-muted-foreground">
+                            ৳{p.originalPrice.toLocaleString()}
+                          </p>
+                        )}
+                        <p className="font-display text-2xl font-bold text-[hsl(157_86%_15%)] leading-none">
+                          ৳{p.price.toLocaleString()}
                         </p>
-                      )}
-                      <p className="font-display text-2xl font-bold text-[hsl(157_86%_15%)] leading-none">
-                        ৳{p.price.toLocaleString()}
-                      </p>
+                      </div>
+                      <button
+                        onClick={() => handleAdd(p)}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[hsl(157_86%_18%)] text-[hsl(35_30%_96%)] text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-[hsl(157_86%_12%)] transition-all"
+                      >
+                        <ShoppingBag className="w-3 h-3" /> Add
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleAdd(p)}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[hsl(157_86%_18%)] text-[hsl(35_30%_96%)] text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-[hsl(157_86%_12%)] transition-all"
-                    >
-                      <ShoppingBag className="w-3 h-3" /> Add
-                    </button>
                   </div>
-                </div>
-              </article>
-            ))}
-          </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

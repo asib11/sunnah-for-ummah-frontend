@@ -10,7 +10,7 @@ import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
 import QuickViewDialog, { type QuickViewProduct } from "@/components/QuickViewDialog";
 import { storeApi } from "@/lib/api";
-import { dropShoulderProducts } from "@/data/products";
+import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 
 // ---------------------------------------------------------------------------
 // Live-data fetcher: resolves category handle → products with real variant IDs
@@ -133,9 +133,8 @@ const CalligraphyDropshoulder = () => {
     setOpen(true);
   };
 
-  // Use live products when available; fall back to static list (no variantIds)
-  const displayProducts =
-    liveProducts && liveProducts.length > 0 ? liveProducts : dropShoulderProducts;
+  // Use live products when available
+  const displayProducts = liveProducts ?? [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -169,9 +168,9 @@ const CalligraphyDropshoulder = () => {
       {/* Grid */}
       <section className="container mx-auto px-4 py-14">
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 animate-pulse">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-muted rounded-xl aspect-[4/5]" />
+              <ProductCardSkeleton key={i} />
             ))}
           </div>
         ) : (

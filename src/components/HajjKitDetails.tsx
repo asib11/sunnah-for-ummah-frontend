@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useCart } from "@/hooks/useCart";
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { storeApi } from "@/lib/api";
+import HajjKitItemSkeleton from "@/components/skeletons/HajjKitItemSkeleton";
 
 // ── Public constants (used by hajj-kit page too) ──────────────────────────────
 export const HAJJ_KIT_HANDLE = "hajj-kit";
@@ -45,40 +46,6 @@ const CAT_EMOJI: Record<string, string> = {
   "Spiritual Essentials": "📿",
   "Comfort & Bedding":    "🛏️",
 };
-
-// ── Static fallback (shown while API loads or if category is empty) ───────────
-const STATIC_ITEMS: Item[] = [
-  { id: "s1",  variantId: "", thumbnail: "", name: "Premium Towel Ihram (1 set)", bangla: "প্রিমিয়াম টাওয়েল ইহরাম",    price: 1200, category: "Clothing & Wear",      kit: "men" },
-  { id: "s2",  variantId: "", thumbnail: "", name: "Hajj Bedding",                 bangla: "হজ বেডিং",                   price: 450,  category: "Comfort & Bedding",     kit: "men" },
-  { id: "s3",  variantId: "", thumbnail: "", name: "Hajji Umbrella",               bangla: "হাজী ছাতা",                   price: 400,  category: "Bags & Accessories",    kit: "men" },
-  { id: "s4",  variantId: "", thumbnail: "", name: "Air Pillow",                   bangla: "হওয়ায় বালিশ",                 price: 350,  category: "Comfort & Bedding",     kit: "men" },
-  { id: "s5",  variantId: "", thumbnail: "", name: "Hajji Moisturizing Cream",     bangla: "হাজী ময়েশ্চারাইজিং",          price: 310,  category: "Hygiene & Care",        kit: "men" },
-  { id: "s6",  variantId: "", thumbnail: "", name: "Waist Foam Belt",              bangla: "কোমরের ফোম বেল্ট",            price: 290,  category: "Clothing & Wear",      kit: "men" },
-  { id: "s7",  variantId: "", thumbnail: "", name: "Unscented Hajji Shampoo",      bangla: "গন্ধবিহীন হাজী শ্যাম্পু",    price: 280,  category: "Hygiene & Care",        kit: "men" },
-  { id: "s8",  variantId: "", thumbnail: "", name: "Waterproof Pocket Prayer Mat", bangla: "ওয়াটারপ্রুফ পকেট জায়নামাজ", price: 270,  category: "Spiritual Essentials",  kit: "men" },
-  { id: "s9",  variantId: "", thumbnail: "", name: "Hajji Soap (Unscented)",       bangla: "হাজী সাবান",                  price: 240,  category: "Hygiene & Care",        kit: "men" },
-  { id: "s10", variantId: "", thumbnail: "", name: "Premium Back Bag",             bangla: "প্রিমিয়াম পিঠের ব্যাগ",      price: 210,  category: "Bags & Accessories",    kit: "men" },
-  { id: "s11", variantId: "", thumbnail: "", name: "Rope",                         bangla: "রশি",                         price: 180,  category: "Bags & Accessories",    kit: "men" },
-  { id: "s12", variantId: "", thumbnail: "", name: "Miswak",                       bangla: "মিসওয়াক",                    price: 70,   category: "Hygiene & Care",        kit: "men" },
-  { id: "s13", variantId: "", thumbnail: "", name: "Waterproof Shoe Bag",          bangla: "ওয়াটারপ্রুফ জুতার ব্যাগ",   price: 60,   category: "Bags & Accessories",    kit: "men" },
-  { id: "s14", variantId: "", thumbnail: "", name: "Umrah Guidebook",              bangla: "উমরা গাইডবুক",               price: 50,   category: "Spiritual Essentials",  kit: "men" },
-  { id: "s15", variantId: "", thumbnail: "", name: "Tawaf Tasbih",                 bangla: "তাওয়াফ তাসবিহ",              price: 40,   category: "Spiritual Essentials",  kit: "men" },
-  { id: "s16", variantId: "", thumbnail: "", name: "Tayammum Soil",                bangla: "তায়াম্মুমের মাটি",            price: 40,   category: "Spiritual Essentials",  kit: "men" },
-  { id: "s17", variantId: "", thumbnail: "", name: "Stone Keeping Bag",            bangla: "পাথর রাখার ব্যাগ",           price: 40,   category: "Bags & Accessories",    kit: "men" },
-  { id: "s18", variantId: "", thumbnail: "", name: "Head Shaving Razor",           bangla: "মাথা মুন্ডানোর রেজার",       price: 35,   category: "Hygiene & Care",        kit: "men" },
-  { id: "s19", variantId: "", thumbnail: "", name: "Dhikr Book",                   bangla: "জিকিরের বই",                 price: 35,   category: "Spiritual Essentials",  kit: "men" },
-  { id: "s20", variantId: "", thumbnail: "", name: "Luggage Sticker",              bangla: "লাগেজ স্টিকার",              price: 20,   category: "Bags & Accessories",    kit: "men" },
-  // Premium
-  { id: "s21", variantId: "", thumbnail: "", name: "Premium Ihram Belt (Leather)", bangla: "প্রিমিয়াম ইহরাম বেল্ট",      price: 650,  category: "Clothing & Wear",      kit: "men-premium" },
-  { id: "s22", variantId: "", thumbnail: "", name: "Premium Travel Toiletry Kit",  bangla: "প্রিমিয়াম ট্রাভেল টয়লেট্রি",price: 550,  category: "Hygiene & Care",        kit: "men-premium" },
-  { id: "s23", variantId: "", thumbnail: "", name: "Premium Leather Tasbih",       bangla: "প্রিমিয়াম চামড়ার তাসবিহ",   price: 320,  category: "Spiritual Essentials",  kit: "men-premium" },
-  { id: "s24", variantId: "", thumbnail: "", name: "Premium Neck Travel Pillow",   bangla: "প্রিমিয়াম নেক পিলো",         price: 280,  category: "Comfort & Bedding",     kit: "men-premium" },
-  { id: "s25", variantId: "", thumbnail: "", name: "Premium Crossbody Sling Bag",  bangla: "প্রিমিয়াম ক্রসবডি ব্যাগ",   price: 480,  category: "Bags & Accessories",    kit: "men-premium" },
-  // Women
-  { id: "s26", variantId: "", thumbnail: "", name: "Foot Socks",                   bangla: "পা মোজা",                    price: 70,   category: "Clothing & Wear",      kit: "women" },
-  { id: "s27", variantId: "", thumbnail: "", name: "Hajj Bedding",                 bangla: "হজ বেডিং",                   price: 450,  category: "Comfort & Bedding",     kit: "women" },
-  { id: "s28", variantId: "", thumbnail: "", name: "Hajji Umbrella",               bangla: "হাজী ছাতা",                   price: 400,  category: "Bags & Accessories",    kit: "women" },
-];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const getBdtPrice = (variant: any): number => {
@@ -126,10 +93,9 @@ const HajjKitDetails = () => {
     staleTime: 1000 * 60 * 5,
   });
 
-  // Map API → Item[], fall back to static if empty
+  // Map API → Item[]
   const allItems: Item[] = useMemo(() => {
     const apiProducts: any[] = data?.products ?? [];
-    if (apiProducts.length === 0) return STATIC_ITEMS;
     return apiProducts.map(medusaToItem);
   }, [data]);
 
@@ -205,14 +171,6 @@ const HajjKitDetails = () => {
         </div>
       </div>
 
-      {/* ── Loading spinner ── */}
-      {isLoading && (
-        <div className="flex items-center justify-center gap-3 py-10 text-muted-foreground">
-          <Loader2 className="w-5 h-5 animate-spin text-primary" />
-          <span className="font-body text-sm">Loading kit items…</span>
-        </div>
-      )}
-
       {/* ── Live item count + value ── */}
       {!isLoading && (
         <p className="text-center font-body text-sm text-muted-foreground mt-4">
@@ -247,7 +205,13 @@ const HajjKitDetails = () => {
       )}
 
       {/* ── Item grid ── */}
-      {!isLoading && (
+      {isLoading ? (
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {[...Array(9)].map((_, i) => (
+            <HajjKitItemSkeleton key={i} />
+          ))}
+        </div>
+      ) : (
         <TooltipProvider delayDuration={150}>
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {filtered.map((item) => (

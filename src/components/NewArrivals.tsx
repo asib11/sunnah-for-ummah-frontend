@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { storeApi } from "@/lib/api";
 import ProductCard from "@/components/ProductCard";
+import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 import { ShoppingBag } from "lucide-react";
 
 const NewArrivals = () => {
@@ -31,7 +32,7 @@ const NewArrivals = () => {
       {isLoading && (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="aspect-[4/5] rounded-xl bg-secondary animate-pulse" />
+            <ProductCardSkeleton key={i} />
           ))}
         </div>
       )}

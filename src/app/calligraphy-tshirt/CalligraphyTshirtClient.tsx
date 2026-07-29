@@ -10,13 +10,9 @@ import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
 import QuickViewDialog, { type QuickViewProduct } from "@/components/QuickViewDialog";
 import { storeApi } from "@/lib/api";
+import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 
-import { dropShoulderProducts, newArrivalsProducts } from "@/data/products";
 
-const staticProducts = [
-  ...dropShoulderProducts,
-  ...newArrivalsProducts.filter((p) => /t-?shirt|tee/i.test(p.name)),
-];
 
 function useCalligraphyTshirts() {
   return useQuery<QuickViewProduct[]>({
@@ -121,8 +117,7 @@ const CalligraphyTshirt = () => {
 
   const { data: liveProducts, isLoading } = useCalligraphyTshirts();
 
-  const displayProducts =
-    liveProducts && liveProducts.length > 0 ? liveProducts : staticProducts;
+  const displayProducts = liveProducts ?? [];
 
   const handleQuickView = (p: QuickViewProduct) => {
     setActive(p);
@@ -158,9 +153,9 @@ const CalligraphyTshirt = () => {
 
       <section className="container mx-auto px-4 py-14">
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 animate-pulse">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-muted rounded-xl aspect-[4/5]" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            {[...Array(10)].map((_, i) => (
+              <ProductCardSkeleton key={i} />
             ))}
           </div>
         ) : (

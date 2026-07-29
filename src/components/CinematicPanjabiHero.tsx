@@ -27,15 +27,7 @@ type Look = {
   swatches: string[];
 };
 
-const STATIC_LOOKS: Look[] = [
-  { id: "noor",   name: "Noor — Onyx",         word: "NOOR",   fabric: "Hand-loom Cotton Silk",     price: 3490, image: imgNoor,  swatches: ["#0d0d0d", "#1f2937", "#6b7280"] },
-  { id: "zahra",  name: "Zahra — Maroon",      word: "ZAHRA",  fabric: "Crinkle Silk · Aari Work",  price: 3690, image: imgZahra, swatches: ["#6b1f2a", "#8b2a3a", "#c9a857"] },
-  { id: "shahi",  name: "Shahi — Silver",      word: "SHAHI",  fabric: "Embroidered Pure Cotton",   price: 2990, image: imgShahi, swatches: ["#e5e7eb", "#94a3b8", "#475569"] },
-  { id: "abyad",  name: "Abyad — Ivory",       word: "ABYAD",  fabric: "Cotton · Pearl Embroidery", price: 3190, image: imgAbyad, swatches: ["#f5f0e6", "#d9c9a8", "#b89968"] },
-  { id: "rawda",  name: "Rawda — Warm Sand",   word: "RAWDA",  fabric: "Breathable Soft Cotton",    price: 2490, image: imgRawda, swatches: ["#c9b99a", "#a8896b", "#6b4f3a"] },
-  { id: "layl",   name: "Layl — Midnight",     word: "LAYL",   fabric: "Crepe · Silver Threadwork", price: 3590, image: imgLayl,  swatches: ["#0b1c3a", "#1e2a4a", "#cbd5e1"] },
-  { id: "qamar",  name: "Qamar — Moonlight",   word: "QAMAR",  fabric: "Royal Linen Blend",         price: 3290, image: imgQamar, swatches: ["#0b1c3a", "#0f3460", "#1e3a8a"] },
-];
+
 
 // Swatch palettes cycled for API products that have no colour data
 const SWATCH_PALETTE = [
@@ -182,7 +174,7 @@ const CinematicPanjabiHero = () => {
   const { addToCart, isAdding } = useCart();
 
   // Fetch live Hajj Kit products from Medusa
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["products", "category", "hajj-kit"],
     queryFn: () => storeApi.getProductsByCategoryHandle("hajj-kit"),
     staleTime: 1000 * 60 * 5,
@@ -190,7 +182,6 @@ const CinematicPanjabiHero = () => {
 
   const LOOKS = useMemo(() => {
     const apiProducts: any[] = data?.products ?? [];
-    if (apiProducts.length === 0) return STATIC_LOOKS;
     return apiProducts.slice(0, 10).map((p, i) => medusaToLook(p, i));
   }, [data]);
 
@@ -211,6 +202,75 @@ const CinematicPanjabiHero = () => {
   
 
 
+
+  if (isLoading || LOOKS.length === 0) {
+    return (
+      <section className="relative overflow-hidden bg-gradient-to-b from-[hsl(40_40%_96%)] via-[hsl(40_30%_92%)] to-[hsl(157_18%_88%)] py-10 sm:py-16 md:py-24">
+        {/* Warm golden halo */}
+        <div aria-hidden className="absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full opacity-[0.22] blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(41 70% 70%), transparent 60%)" }} />
+        {/* Soft sage glow lower-right */}
+        <div aria-hidden className="absolute -bottom-60 -right-40 w-[700px] h-[700px] rounded-full opacity-[0.18] blur-3xl"
+          style={{ background: "radial-gradient(circle, hsl(157 35% 55%), transparent 60%)" }} />
+        {/* White vignette to lift product imagery */}
+        <div aria-hidden className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse at center, hsl(40 50% 99% / 0.55) 0%, transparent 55%)" }} />
+        <div aria-hidden className="absolute inset-0 opacity-[0.05] bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22 viewBox=%220 0 120 120%22><path fill=%22none%22 stroke=%22%23b8924a%22 stroke-width=%220.5%22 d=%22M60 4 L72 48 L116 60 L72 72 L60 116 L48 72 L4 60 L48 48 Z%22/></svg>')] bg-[length:120px_120px]" />
+
+        <div className="container relative z-10 mx-auto px-4">
+          {/* Stage — cinematic browser */}
+          <div className="relative mx-auto max-w-6xl rounded-2xl sm:rounded-[28px] overflow-hidden border border-[hsl(41_50%_70%/0.4)] bg-gradient-to-br from-[hsl(40_50%_98%)] via-[hsl(40_35%_95%)] to-[hsl(157_18%_92%)] shadow-[0_40px_120px_-30px_hsl(157_40%_25%/0.35)] backdrop-blur-sm">
+            {/* fake browser top */}
+            <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-3 border-b border-[hsl(41_50%_70%/0.3)] bg-gradient-to-r from-[hsl(40_40%_96%)] via-[hsl(40_35%_94%)] to-[hsl(40_40%_96%)]">
+              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(0_60%_55%)]" />
+              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(41_64%_56%)]" />
+              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(157_60%_50%)]" />
+              <div className="no-sparkle mx-auto inline-flex items-center gap-1.5 sm:gap-2 pl-3 sm:pl-4 pr-1 py-1.5 rounded-full bg-[hsl(41_64%_56%)] text-[hsl(157_60%_8%)] opacity-50">
+                <span className="font-body text-[9px] sm:text-[11px] font-bold uppercase tracking-[0.2em] sm:tracking-[0.3em]">
+                  HAJJ MABROOR Collection
+                </span>
+                <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-[hsl(157_60%_8%)] flex items-center justify-center">
+                  <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[hsl(41_64%_56%)]" />
+                </span>
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-6 md:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch animate-pulse">
+              {/* Details — left */}
+              <div className="md:col-span-4 order-2 md:order-1 flex flex-col justify-center space-y-4">
+                <div className="h-3 w-24 bg-[hsl(41_50%_70%/0.4)] rounded" />
+                <div className="h-8 md:h-10 w-3/4 bg-[hsl(157_20%_80%)] rounded" />
+                <div className="h-16 w-full bg-[hsl(157_20%_85%)] rounded" />
+                <div className="h-6 w-32 bg-[hsl(41_50%_70%/0.4)] rounded" />
+                <div className="h-10 w-48 bg-[hsl(41_50%_70%/0.4)] rounded-full mt-2" />
+              </div>
+
+              {/* LookCard — center */}
+              <div className="md:col-span-5 order-1 md:order-2">
+                <div className="relative aspect-[4/5] sm:aspect-[3/4] rounded-2xl overflow-hidden border border-[hsl(41_64%_56%/0.2)] bg-[hsl(157_20%_85%)]">
+                   <div className="absolute inset-0 bg-gradient-to-t from-[hsl(157_60%_15%/0.1)] to-transparent pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Selector — right */}
+              <div className="md:col-span-3 order-3 space-y-2 md:max-h-[480px]">
+                <div className="h-3 w-32 bg-[hsl(41_50%_70%/0.4)] rounded mb-4" />
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="w-full flex items-center gap-2.5 p-1.5 rounded-lg border border-[hsl(41_40%_70%/0.3)] bg-[hsl(40_40%_96%)]">
+                    <div className="w-10 h-10 rounded-md bg-[hsl(157_20%_85%)] shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 w-20 bg-[hsl(157_20%_80%)] rounded" />
+                      <div className="h-2 w-16 bg-[hsl(157_20%_85%)] rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[hsl(40_40%_96%)] via-[hsl(40_30%_92%)] to-[hsl(157_18%_88%)] py-10 sm:py-16 md:py-24">

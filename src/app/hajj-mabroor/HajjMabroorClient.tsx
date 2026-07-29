@@ -34,7 +34,7 @@ const HajjMabroor = () => {
   };
 
   // Live kit stats
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: HAJJ_KIT_QUERY_KEY,
     queryFn: () => storeApi.getProductsByCategoryHandle(HAJJ_KIT_HANDLE),
     staleTime: 1000 * 60 * 5,
@@ -57,7 +57,7 @@ const HajjMabroor = () => {
       return v.prices[0]?.amount ?? 0;
     };
     const total = mens.reduce((s, p) => s + getBdt(p.variants?.[0]), 0);
-    return { kitCount: mens.length || 21, kitTotal: total || 4640 };
+    return { kitCount: mens.length, kitTotal: total };
   }, [data]);
 
   return (
@@ -81,9 +81,18 @@ const HajjMabroor = () => {
               <h3 className="font-display text-3xl md:text-4xl font-bold text-foreground">
                 What's Inside the Kit
               </h3>
-              <p className="font-body text-sm md:text-base text-muted-foreground mt-3">
-                {kitCount} premium items — Total value{" "}
-                <span className="font-bold text-primary">৳{kitTotal.toLocaleString()}</span>
+              <p className="font-body text-sm md:text-base text-muted-foreground mt-3 flex items-center justify-center gap-2 h-6">
+                {isLoading ? (
+                  <>
+                    <span className="h-4 w-6 bg-muted rounded animate-pulse inline-block" /> premium items — Total value{" "}
+                    <span className="h-4 w-12 bg-primary/20 rounded animate-pulse inline-block" />
+                  </>
+                ) : (
+                  <>
+                    {kitCount} premium items — Total value{" "}
+                    <span className="font-bold text-primary">৳{kitTotal.toLocaleString()}</span>
+                  </>
+                )}
               </p>
               <div className="w-16 h-1 bg-accent mx-auto mt-4 rounded-full" />
             </div>

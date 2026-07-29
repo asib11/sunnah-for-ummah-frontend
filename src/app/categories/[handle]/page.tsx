@@ -7,18 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 
-// Fallback images
-import product1 from "@/assets/product-1.webp";
-import product2 from "@/assets/product-2.webp";
-import product3 from "@/assets/product-3.webp";
-import product4 from "@/assets/product-4.webp";
-
-const fallbackProducts = [
-  { name: "Premium Black Embroidered Panjabi", price: 2490, image: product1.src, badge: "New" as const },
-  { name: "Classic White Thobe - Premium Cotton", price: 1990, image: product2.src },
-  { name: "Dawah T-Shirt - Calligraphy Edition", price: 590, image: product3.src, badge: "New" as const },
-  { name: "Navy Blue Embroidered Panjabi", price: 2290, originalPrice: 2790, image: product4.src },
-];
+import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 
 export default function CategoryPage({ params }: { params: Promise<{ handle: string }> }) {
   const { handle } = React.use(params);
@@ -38,10 +27,7 @@ export default function CategoryPage({ params }: { params: Promise<{ handle: str
 
   const isLoading = isCategoryLoading || (!!category?.id && isProductsLoading);
 
-  // If there's an error fetching products (like the sales channel config issue), or if empty, use fallbacks
-  const displayProducts = (!isLoading && (!productsData || productsData.products?.length === 0 || isProductsError)) 
-    ? fallbackProducts 
-    : (productsData?.products?.map((p: any) => {
+  const displayProducts = productsData?.products?.map((p: any) => {
         const variants = p.variants ?? [];
         const lowestVariant = variants[0];
         const bdtPrices = lowestVariant?.prices?.filter((pr: any) => pr.currency_code === "bdt") ?? [];
@@ -61,11 +47,11 @@ export default function CategoryPage({ params }: { params: Promise<{ handle: str
           name: p.title,
           price,
           originalPrice,
-          image: p.thumbnail || product1.src,
+          image: p.thumbnail,
           variantId: lowestVariant?.id,
           handle: p.handle,
         };
-      }) || fallbackProducts);
+      }) ?? [];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -89,17 +75,17 @@ export default function CategoryPage({ params }: { params: Promise<{ handle: str
           </div>
 
           {isLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-pulse">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-muted rounded-xl aspect-[4/5]" />
+                <ProductCardSkeleton key={i} />
               ))}
             </div>
           ) : (
             <>
               {isProductsError && (
-                <div className="mb-8 p-4 bg-yellow-500/10 border border-yellow-500/50 rounded-lg text-center max-w-2xl mx-auto">
-                  <p className="text-yellow-700 dark:text-yellow-400 font-body text-sm">
-                    <strong>Note:</strong> Showing placeholder products. To see real products, please configure your Medusa Publishable Key with a Sales Channel in the admin dashboard.
+                <div className="mb-8 p-4 bg-destructive/10 border border-destructive/50 rounded-lg text-center max-w-2xl mx-auto">
+                  <p className="text-destructive font-body text-sm">
+                    <strong>Error:</strong> Failed to load products. Please check your connection.
                   </p>
                 </div>
               )}

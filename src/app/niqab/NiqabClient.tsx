@@ -10,30 +10,9 @@ import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
 import QuickViewDialog, { type QuickViewProduct } from "@/components/QuickViewDialog";
 import { storeApi } from "@/lib/api";
+import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 
-import niqabBlack from "@/assets/niqab_black.webp";
 
-const staticProducts: QuickViewProduct[] = [
-  {
-    id: "niqab-premium-black",
-    name: "Premium Niqab - Black",
-    price: 350,
-    originalPrice: 490,
-    image: niqabBlack.src,
-    description: "Premium double-layer black niqab, ultra-soft and highly breathable material.",
-    sizes: ["Free Size"],
-    handle: "premium-niqab-black"
-  },
-  {
-    id: "niqab-soft-classic",
-    name: "Soft Classic Niqab",
-    price: 290,
-    image: niqabBlack.src,
-    description: "Breathable classic design single-layer black niqab for comfortable daily wear.",
-    sizes: ["Free Size"],
-    handle: "soft-classic-niqab"
-  }
-];
 
 function useNiqabProducts() {
   return useQuery<QuickViewProduct[]>({
@@ -132,8 +111,7 @@ const NiqabClient = () => {
 
   const { data: liveProducts, isLoading } = useNiqabProducts();
 
-  const displayProducts =
-    liveProducts && liveProducts.length > 0 ? liveProducts : staticProducts;
+  const displayProducts = liveProducts ?? [];
 
   const handleQuickView = (p: QuickViewProduct) => {
     setActive(p);
@@ -169,9 +147,9 @@ const NiqabClient = () => {
 
       <section className="container mx-auto px-4 py-14">
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 animate-pulse">
-            {[...Array(2)].map((_, i) => (
-              <div key={i} className="bg-muted rounded-xl aspect-[4/5]" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            {[...Array(5)].map((_, i) => (
+              <ProductCardSkeleton key={i} />
             ))}
           </div>
         ) : (

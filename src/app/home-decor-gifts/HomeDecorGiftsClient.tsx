@@ -10,32 +10,9 @@ import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
 import QuickViewDialog, { type QuickViewProduct } from "@/components/QuickViewDialog";
 import { storeApi } from "@/lib/api";
+import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 
-import decorPlaque from "@/assets/decor_plaque.webp";
-import decorRehal from "@/assets/decor_rehal.webp";
 
-const staticProducts: QuickViewProduct[] = [
-  {
-    id: "decor-plaque-bismillah",
-    name: "Brass Calligraphy Plaque",
-    price: 1850,
-    originalPrice: 2450,
-    image: decorPlaque.src,
-    description: "Exquisite brass plaque featuring Bismillah calligraphy on a solid walnut wood stand.",
-    sizes: ["Standard"],
-    handle: "brass-calligraphy-plaque"
-  },
-  {
-    id: "decor-wooden-rehal",
-    name: "Handcarved Rehal Quran Stand",
-    price: 1450,
-    originalPrice: 1950,
-    image: decorRehal.src,
-    description: "Premium handcarved walnut wood Rehal Quran stand with intricate geometrical engravings.",
-    sizes: ["Standard"],
-    handle: "handcarved-rehal-quran-stand"
-  }
-];
 
 function useHomeDecorProducts() {
   return useQuery<QuickViewProduct[]>({
@@ -134,8 +111,7 @@ const HomeDecorGiftsClient = () => {
 
   const { data: liveProducts, isLoading } = useHomeDecorProducts();
 
-  const displayProducts =
-    liveProducts && liveProducts.length > 0 ? liveProducts : staticProducts;
+  const displayProducts = liveProducts ?? [];
 
   const handleQuickView = (p: QuickViewProduct) => {
     setActive(p);
@@ -171,9 +147,9 @@ const HomeDecorGiftsClient = () => {
 
       <section className="container mx-auto px-4 py-14">
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 animate-pulse">
-            {[...Array(2)].map((_, i) => (
-              <div key={i} className="bg-muted rounded-xl aspect-[4/5]" />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+            {[...Array(5)].map((_, i) => (
+              <ProductCardSkeleton key={i} />
             ))}
           </div>
         ) : (

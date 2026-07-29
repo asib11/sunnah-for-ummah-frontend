@@ -44,7 +44,7 @@ const BaggySweatpants = () => {
         playsInline
         className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-[2000ms] ease-out group-hover:scale-110"
       />
-            
+
       <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/60 to-foreground/70" />
       <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/30 to-foreground/70" />
 
