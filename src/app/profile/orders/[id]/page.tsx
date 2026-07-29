@@ -36,7 +36,7 @@ export default function OrderDetailsPage() {
 
   const { data: orderData, isLoading, isError } = useQuery({
     queryKey: ["order", id],
-    queryFn: () => storeApi.getOrder(id as string),
+    queryFn: ({ signal }) => storeApi.getOrder(id as string, { signal }),
     enabled: !!id,
   });
 

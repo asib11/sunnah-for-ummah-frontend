@@ -142,7 +142,7 @@ const Header = () => {
 
   const { data: customerData } = useQuery({
     queryKey: ["customer"],
-    queryFn: () => authApi.getCustomer().then((res) => res.customer || res),
+    queryFn: ({ signal }) => authApi.getCustomer({ signal }).then((res) => res.customer || res),
     retry: false,
   });
 

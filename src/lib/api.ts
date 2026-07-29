@@ -180,11 +180,12 @@ export const authApi = {
   /**
    * Get current authenticated customer
    */
-  async getCurrentCustomer() {
-    const response = await fetch(`${BASE_URL}/store/customers/me`, {
+  async getCurrentCustomer(opts?: { signal?: AbortSignal }) {
+    const response = await fetchWithTimeout(`${BASE_URL}/store/customers/me`, {
       method: "GET",
       headers: getDefaultHeaders(),
       credentials: "include",
+      signal: opts?.signal,
     });
 
     if (!response.ok) {
@@ -198,11 +199,12 @@ export const authApi = {
   /**
    * Get current logged-in customer profile
    */
-  async getCustomer() {
-    const response = await fetch(`${BASE_URL}/store/customers/me`, {
+  async getCustomer(opts?: { signal?: AbortSignal }) {
+    const response = await fetchWithTimeout(`${BASE_URL}/store/customers/me`, {
       method: "GET",
       headers: getDefaultHeaders(),
       credentials: "include",
+      signal: opts?.signal,
     });
 
     if (!response.ok) {
@@ -332,11 +334,12 @@ export const storeApi = {
   /**
    * Fetch orders for the logged-in customer
    */
-  async getCustomerOrders() {
-    const response = await fetch(`${BASE_URL}/store/orders?fields=*items,*shipping_address,*summary`, {
+  async getCustomerOrders(opts?: { signal?: AbortSignal }) {
+    const response = await fetchWithTimeout(`${BASE_URL}/store/orders?fields=*items,*shipping_address,*summary`, {
       method: "GET",
       headers: getDefaultHeaders(),
       credentials: "include",
+      signal: opts?.signal,
     });
 
     if (!response.ok) {
@@ -347,11 +350,12 @@ export const storeApi = {
     return response.json();
   },
 
-  async getOrder(id: string) {
-    const response = await fetch(`${BASE_URL}/store/orders/${id}?fields=*items,*shipping_address,*summary,*shipping_methods,*payment_collections,*payment_collections.payments`, {
+  async getOrder(id: string, opts?: { signal?: AbortSignal }) {
+    const response = await fetchWithTimeout(`${BASE_URL}/store/orders/${id}?fields=*items,*shipping_address,*summary,*shipping_methods,*payment_collections,*payment_collections.payments`, {
       method: "GET",
       headers: getDefaultHeaders(),
       credentials: "include",
+      signal: opts?.signal,
     });
 
     if (!response.ok) {
