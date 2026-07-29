@@ -9,7 +9,7 @@ import { ShoppingBag } from "lucide-react";
 const NewArrivals = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["products", "new-arrivals"],
-    queryFn: () => storeApi.getProducts(8),
+    queryFn: ({ signal }) => storeApi.getProducts(8, { signal }),
     staleTime: 1000 * 60 * 5,
   });
 

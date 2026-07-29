@@ -34,7 +34,7 @@ export default function ProductDetailsPage() {
 
   const { data: product, isLoading, isError } = useQuery({
     queryKey: ["product", handle],
-    queryFn: () => storeApi.getProductByHandle(handle as string),
+    queryFn: ({ signal }) => storeApi.getProductByHandle(handle as string, { signal }),
     enabled: !!handle,
   });
 

@@ -17,11 +17,11 @@ import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 function useHomeDecorProducts() {
   return useQuery<QuickViewProduct[]>({
     queryKey: ["products-category", "home-decor-gifts"],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const candidateHandles = ["home-decor-gifts", "decorations", "gifts", "accessories"];
       for (const handle of candidateHandles) {
         try {
-          const data = await storeApi.getProductsByCategoryHandle(handle);
+          const data = await storeApi.getProductsByCategoryHandle(handle, { signal });
           const products: any[] = data.products ?? [];
           if (products.length > 0) {
             return mapMedusaProducts(products);

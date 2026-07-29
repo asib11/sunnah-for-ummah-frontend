@@ -27,7 +27,7 @@ const POS_STORAGE_KEY = "hajj-pkg-bubble-positions-v1";
 const HajjPackagesLayer = ({ onNavigateToKit }: Props = {}) => {
   const { data, isLoading } = useQuery({
     queryKey: ["hajj-packages"],
-    queryFn: () => storeApi.getProductsByCategoryHandle("packages"),
+    queryFn: ({ signal }) => storeApi.getProductsByCategoryHandle("packages", { signal }),
   });
 
   const packages: Pkg[] = useMemo(() => {

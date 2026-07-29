@@ -177,7 +177,7 @@ const CinematicPanjabiHero = () => {
   // Fetch live Hajj Kit products from Medusa
   const { data, isLoading } = useQuery({
     queryKey: ["products", "category", "hajj-kit"],
-    queryFn: () => storeApi.getProductsByCategoryHandle("hajj-kit"),
+    queryFn: ({ signal }) => storeApi.getProductsByCategoryHandle("hajj-kit", { signal }),
     staleTime: 1000 * 60 * 5,
   });
 

@@ -163,7 +163,7 @@ const CalligraphyProductCard = ({ product }: CalligraphyProductCardProps) => {
 const CalligraphyCollection = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["category", "front-calligraphy"],
-    queryFn: () => storeApi.getProductsByCategoryHandle("front-calligraphy"),
+    queryFn: ({ signal }) => storeApi.getProductsByCategoryHandle("front-calligraphy", { signal }),
     staleTime: 1000 * 60 * 5,
   });
 

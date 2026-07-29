@@ -17,7 +17,7 @@ import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 function useCalligraphyTshirts() {
   return useQuery<QuickViewProduct[]>({
     queryKey: ["products-category", "calligraphy-shirts"],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const candidateHandles = [
         "calligraphy-shirts",
         "calligraphy-t-shirts",
@@ -27,7 +27,7 @@ function useCalligraphyTshirts() {
 
       for (const handle of candidateHandles) {
         try {
-          const data = await storeApi.getProductsByCategoryHandle(handle);
+          const data = await storeApi.getProductsByCategoryHandle(handle, { signal });
           const products: any[] = data.products ?? [];
           if (products.length > 0) {
             return mapMedusaProducts(products);

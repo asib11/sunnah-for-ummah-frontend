@@ -18,7 +18,7 @@ import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 function useBaggySweatpantsProducts() {
   return useQuery<QuickViewProduct[]>({
     queryKey: ["products-category", "baggy-sweatpants"],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       // Try the most likely category handles in priority order
       const candidateHandles = [
         "baggy-sweatpants",
@@ -29,7 +29,7 @@ function useBaggySweatpantsProducts() {
 
       for (const handle of candidateHandles) {
         try {
-          const data = await storeApi.getProductsByCategoryHandle(handle);
+          const data = await storeApi.getProductsByCategoryHandle(handle, { signal });
           const products: any[] = data.products ?? [];
           if (products.length > 0) {
             return mapMedusaProducts(products);

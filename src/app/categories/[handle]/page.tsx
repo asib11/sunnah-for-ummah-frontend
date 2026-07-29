@@ -15,13 +15,13 @@ export default function CategoryPage({ params }: { params: Promise<{ handle: str
   // Fetch category first
   const { data: category, isLoading: isCategoryLoading } = useQuery({
     queryKey: ["category", handle],
-    queryFn: () => storeApi.getCategoryByHandle(handle),
+    queryFn: ({ signal }) => storeApi.getCategoryByHandle(handle, { signal }),
   });
 
   // Then fetch products if category ID exists
   const { data: productsData, isLoading: isProductsLoading, isError: isProductsError } = useQuery({
     queryKey: ["category_products", category?.id],
-    queryFn: () => storeApi.getProductsByCategory(category?.id as string),
+    queryFn: ({ signal }) => storeApi.getProductsByCategory(category?.id as string, { signal }),
     enabled: !!category?.id,
   });
 

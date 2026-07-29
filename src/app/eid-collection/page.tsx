@@ -62,7 +62,7 @@ export default function EidCollection() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["eid_collection_products"],
-    queryFn: () => storeApi.getProducts(100),
+    queryFn: ({ signal }) => storeApi.getProducts(100, { signal }),
     staleTime: 1000 * 60 * 5,
   });
 

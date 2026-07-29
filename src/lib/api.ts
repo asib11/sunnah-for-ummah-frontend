@@ -15,6 +15,33 @@ const BASE_URL = {
   toString: () => getBaseUrl()
 };
 
+// ---------------------------------------------------------------------------
+// fetchWithTimeout — wraps fetch with a hard timeout + caller AbortSignal.
+// Prevents hung HTTP/1.1 connections from starving browser connection pools.
+// ---------------------------------------------------------------------------
+function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeoutMs = 10_000,
+): Promise<Response> {
+  const timeoutCtrl = new AbortController();
+  const id = setTimeout(
+    () => timeoutCtrl.abort(new Error(`Request timed out after ${timeoutMs}ms`)),
+    timeoutMs,
+  );
+
+  // Merge the caller's signal (e.g. React Query cancel signal) with our timeout signal.
+  // AbortSignal.any is available in Node 20+ and all modern browsers.
+  const signal =
+    options.signal
+      ? (typeof AbortSignal.any === "function"
+          ? AbortSignal.any([options.signal as AbortSignal, timeoutCtrl.signal])
+          : timeoutCtrl.signal)
+      : timeoutCtrl.signal;
+
+  return fetch(url, { ...options, signal }).finally(() => clearTimeout(id));
+}
+
 const getDefaultHeaders = () => {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -209,10 +236,11 @@ export const storeApi = {
   /**
    * Fetch product categories
    */
-  async getCategories() {
-    const response = await fetch(`${BASE_URL}/store/product-categories`, {
+  async getCategories(opts?: { signal?: AbortSignal }) {
+    const response = await fetchWithTimeout(`${BASE_URL}/store/product-categories`, {
       method: "GET",
       headers: getDefaultHeaders(),
+      signal: opts?.signal,
     });
 
     if (!response.ok) {
@@ -226,10 +254,11 @@ export const storeApi = {
   /**
    * Fetch a category by its handle
    */
-  async getCategoryByHandle(handle: string) {
-    const response = await fetch(`${BASE_URL}/store/product-categories?handle=${handle}`, {
+  async getCategoryByHandle(handle: string, opts?: { signal?: AbortSignal }) {
+    const response = await fetchWithTimeout(`${BASE_URL}/store/product-categories?handle=${handle}`, {
       method: "GET",
       headers: getDefaultHeaders(),
+      signal: opts?.signal,
     });
 
     if (!response.ok) {
@@ -246,10 +275,11 @@ export const storeApi = {
   /**
    * Fetch products by category ID
    */
-  async getProductsByCategory(categoryId: string) {
-    const response = await fetch(`${BASE_URL}/store/products?category_id[]=${categoryId}&fields=id,title,subtitle,handle,thumbnail,metadata,*images,*variants.prices&limit=100`, {
+  async getProductsByCategory(categoryId: string, opts?: { signal?: AbortSignal }) {
+    const response = await fetchWithTimeout(`${BASE_URL}/store/products?category_id[]=${categoryId}&fields=id,title,subtitle,handle,thumbnail,metadata,*images,*variants.prices&limit=100`, {
       method: "GET",
       headers: getDefaultHeaders(),
+      signal: opts?.signal,
     });
 
     if (!response.ok) {
@@ -263,10 +293,10 @@ export const storeApi = {
   /**
    * Fetch all products (for home page / new arrivals)
    */
-  async getProducts(limit = 100) {
-    const response = await fetch(
+  async getProducts(limit = 100, opts?: { signal?: AbortSignal }) {
+    const response = await fetchWithTimeout(
       `${BASE_URL}/store/products?fields=id,title,subtitle,handle,thumbnail,metadata,*variants.prices&limit=${limit}`,
-      { method: "GET", headers: getDefaultHeaders() }
+      { method: "GET", headers: getDefaultHeaders(), signal: opts?.signal }
     );
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -275,10 +305,10 @@ export const storeApi = {
     return response.json();
   },
 
-  async getProductByHandle(handle: string) {
-    const response = await fetch(
+  async getProductByHandle(handle: string, opts?: { signal?: AbortSignal }) {
+    const response = await fetchWithTimeout(
       `${BASE_URL}/store/products?handle=${handle}&fields=id,title,subtitle,handle,description,thumbnail,metadata,*variants.prices,*variants.options,*options`,
-      { method: "GET", headers: getDefaultHeaders() }
+      { method: "GET", headers: getDefaultHeaders(), signal: opts?.signal }
     );
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -289,14 +319,15 @@ export const storeApi = {
   },
 
   /**
-   * Fetch products by category HANDLE (not ID) so it survives category recreation
+   * Fetch products by category HANDLE (not ID) so it survives category recreation.
+   * Accepts an optional AbortSignal so React Query can cancel on unmount/navigation.
    */
-  async getProductsByCategoryHandle(handle: string) {
+  async getProductsByCategoryHandle(handle: string, opts?: { signal?: AbortSignal }) {
     // Step 1: resolve handle → category ID
-    const cat = await storeApi.getCategoryByHandle(handle);
+    const cat = await storeApi.getCategoryByHandle(handle, opts);
     if (!cat?.id) throw new Error(`Category not found: ${handle}`);
-    // Step 2: fetch products
-    return storeApi.getProductsByCategory(cat.id);
+    // Step 2: fetch products (propagate signal so both legs are cancellable)
+    return storeApi.getProductsByCategory(cat.id, opts);
   },
   /**
    * Fetch orders for the logged-in customer

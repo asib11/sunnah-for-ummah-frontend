@@ -17,9 +17,9 @@ import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 function useHijabProducts() {
   return useQuery<QuickViewProduct[]>({
     queryKey: ["products-category", "hijab"],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       try {
-        const data = await storeApi.getProductsByCategoryHandle("hijab");
+        const data = await storeApi.getProductsByCategoryHandle("hijab", { signal });
         const products: any[] = data.products ?? [];
         if (products.length > 0) {
           return mapMedusaProducts(products);

@@ -8,7 +8,7 @@ import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 const CalligraphyTshirts = () => {
   const { data, isLoading } = useQuery({
     queryKey: ["products", "category", "calligraphy-tshirt"],
-    queryFn: () => storeApi.getProductsByCategoryHandle("calligraphy-tshirt"),
+    queryFn: ({ signal }) => storeApi.getProductsByCategoryHandle("calligraphy-tshirt", { signal }),
     staleTime: 1000 * 60 * 5,
   });
 

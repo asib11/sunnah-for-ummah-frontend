@@ -18,7 +18,7 @@ import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 function useDropShoulderProducts() {
   return useQuery<QuickViewProduct[]>({
     queryKey: ["products-category", "calligraphy-dropshoulder"],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       // Try the most likely category handles in priority order
       const candidateHandles = [
         "calligraphy-dropshoulder",
@@ -30,7 +30,7 @@ function useDropShoulderProducts() {
 
       for (const handle of candidateHandles) {
         try {
-          const data = await storeApi.getProductsByCategoryHandle(handle);
+          const data = await storeApi.getProductsByCategoryHandle(handle, { signal });
           const products: any[] = data.products ?? [];
           if (products.length > 0) {
             return mapMedusaProducts(products);

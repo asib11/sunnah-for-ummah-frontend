@@ -61,7 +61,7 @@ const PanjabiCollection = () => {
   // Fetch live Medusa products from 'punjabi' category
   const { data, isLoading } = useQuery({
     queryKey: ["products", "category", "punjabi"],
-    queryFn: () => storeApi.getProductsByCategoryHandle("punjabi"),
+    queryFn: ({ signal }) => storeApi.getProductsByCategoryHandle("punjabi", { signal }),
     staleTime: 1000 * 60 * 5,
   });
 

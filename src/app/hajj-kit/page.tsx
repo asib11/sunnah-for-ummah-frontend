@@ -52,7 +52,7 @@ export default function HajjKitPage() {
 
   const { data: productsData, isLoading } = useQuery({
     queryKey: HAJJ_KIT_QUERY_KEY,
-    queryFn:  () => storeApi.getProductsByCategoryHandle(HAJJ_KIT_HANDLE),
+    queryFn:  ({ signal }) => storeApi.getProductsByCategoryHandle(HAJJ_KIT_HANDLE, { signal }),
     staleTime: 1000 * 60 * 5,
   });
 

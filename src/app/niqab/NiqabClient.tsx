@@ -17,11 +17,11 @@ import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 function useNiqabProducts() {
   return useQuery<QuickViewProduct[]>({
     queryKey: ["products-category", "niqab"],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const candidateHandles = ["Nikab", "niqab", "nikab"];
       for (const handle of candidateHandles) {
         try {
-          const data = await storeApi.getProductsByCategoryHandle(handle);
+          const data = await storeApi.getProductsByCategoryHandle(handle, { signal });
           const products: any[] = data.products ?? [];
           if (products.length > 0) {
             return mapMedusaProducts(products);
