@@ -23,13 +23,18 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      INTERNAL_MEDUSA_URL: http://sfu_backend_medusa:9000
     expose:
       - "3000"
     networks:
       - sunnah-net
+      - sfu-backend-net
 
 networks:
   # Join the existing shared network so sunnah_nginx can reach this container
   sunnah-net:
     external: true
     name: sunnah_sunnah-net
+  sfu-backend-net:
+    external: true
+    name: sfu-backend_default

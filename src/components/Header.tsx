@@ -85,7 +85,7 @@ const NavLinkItem = ({
   const pathname = usePathname();
   const isActive = pathname === href;
   return (
-    <Link href={href} onClick={onClick} className={className ? className({ isActive }) : undefined}>
+    <Link href={href} prefetch={false} onClick={onClick} className={className ? className({ isActive }) : undefined}>
       {children({ isActive })}
     </Link>
   );
@@ -174,7 +174,7 @@ const Header = () => {
         </div>
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 md:gap-3 min-w-0 hover:opacity-90 transition-opacity">
+        <Link href="/" prefetch={false} className="flex items-center gap-2 md:gap-3 min-w-0 hover:opacity-90 transition-opacity">
           <img
             src={LOGO_CDN}
             alt="Sunnah For Ummah logo"
@@ -249,7 +249,7 @@ const Header = () => {
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link href="/profile">Profile</Link>
+                  <Link href="/profile" prefetch={false}>Profile</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
@@ -258,7 +258,7 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link href="/login" className="p-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all hover:scale-110 hidden md:block" aria-label="Account">
+            <Link href="/login" prefetch={false} className="p-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all hover:scale-110 hidden md:block" aria-label="Account">
               <User className="w-5 h-5" />
             </Link>
           )}
@@ -348,12 +348,12 @@ const Header = () => {
             </div>
           ))}
           <span aria-hidden className="mx-1 h-4 w-px bg-gradient-to-b from-transparent via-primary/30 to-transparent" />
-          <Link href="/hajj-mabroor" data-sparkle className="group relative inline-flex items-center gap-2 rounded-full pl-3 pr-2 py-1 bg-background border border-primary/25 hover:border-primary/60 text-primary font-body text-[11px] font-semibold uppercase tracking-[0.18em] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_14px_-4px_hsl(var(--primary)/0.35)]">
+          <Link href="/hajj-mabroor" prefetch={false} data-sparkle className="group relative inline-flex items-center gap-2 rounded-full pl-3 pr-2 py-1 bg-background border border-primary/25 hover:border-primary/60 text-primary font-body text-[11px] font-semibold uppercase tracking-[0.18em] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_4px_14px_-4px_hsl(var(--primary)/0.35)]">
             <Star className="w-3.5 h-3.5 fill-primary/70 text-primary" />
             <span>Hajj Mabroor</span>
             <span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary text-[8px] tracking-[0.15em] text-primary-foreground font-bold">NEW</span>
           </Link>
-          <Link href="/panjabi-collection"
+          <Link href="/panjabi-collection" prefetch={false}
             className="group relative inline-flex items-center gap-2 rounded-full pl-3 pr-2 py-1 bg-gradient-to-r from-primary via-emerald-light to-primary text-primary-foreground font-body text-[11px] font-semibold uppercase tracking-[0.18em] border border-gold/50 shadow-[0_2px_10px_-2px_hsl(var(--gold)/0.4)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_6px_22px_-4px_hsl(var(--gold)/0.7)] overflow-hidden"
           >
             <span aria-hidden className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-gold/40 to-transparent group-hover:translate-x-full transition-transform duration-1000 ease-out" />
@@ -387,6 +387,7 @@ const Header = () => {
                     <Link
                       key={child.label}
                       href={child.href}
+                      prefetch={false}
                       onClick={() => setMobileOpen(false)}
                       className={`flex items-center justify-between px-4 py-3 text-sm font-body rounded-lg mx-1 transition-colors ${
                         pathname === child.href
@@ -415,6 +416,7 @@ const Header = () => {
                       ? `/${item.href}`
                       : item.href
                   }
+                  prefetch={false}
                   onClick={() => setMobileOpen(false)}
                   className={`flex items-center justify-between px-3 py-3 text-sm font-body font-semibold rounded-lg mx-1 transition-colors ${
                     pathname === item.href
@@ -437,6 +439,7 @@ const Header = () => {
             {/* Hajj CTA — full width */}
             <Link
               href="/hajj-mabroor"
+              prefetch={false}
               onClick={() => setMobileOpen(false)}
               className="mx-1 flex items-center justify-center gap-2 rounded-xl px-4 py-3 bg-primary text-primary-foreground font-body text-sm font-bold hover:bg-primary/90 active:scale-[0.98] transition-all"
             >
@@ -456,6 +459,7 @@ const Header = () => {
               <span className="h-3 w-px bg-border" />
               <Link
                 href="/login"
+                prefetch={false}
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center gap-1.5 text-xs font-body text-muted-foreground hover:text-primary transition-colors"
               >
