@@ -12,10 +12,10 @@ import { storeApi } from "@/lib/api";
 import { getProductPrices } from "@/lib/utils";
 
 // Fallback image logic similar to NewArrivals
-import product1 from "@/assets/product-1.jpg";
-import product2 from "@/assets/product-2.jpg";
-import product3 from "@/assets/product-3.jpg";
-import product4 from "@/assets/product-4.jpg";
+import product1 from "@/assets/product-1.webp";
+import product2 from "@/assets/product-2.webp";
+import product3 from "@/assets/product-3.webp";
+import product4 from "@/assets/product-4.webp";
 
 const fallbackImages = [product1.src, product2.src, product3.src, product4.src];
 

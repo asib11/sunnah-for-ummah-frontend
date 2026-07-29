@@ -4,8 +4,8 @@ import { useState } from "react";
 import Link from 'next/link';
 import { ArrowUpRight, Eye, Sparkles, Star } from "lucide-react";
 import { toast } from "sonner";
-const frontImage = "/assets/calligraphy-drop-shoulder-front.png";
-const backImage = "/assets/calligraphy-drop-shoulder-back.png";
+const frontImage = "/assets/calligraphy-drop-shoulder-front.webp";
+const backImage = "/assets/calligraphy-drop-shoulder-back.webp";
 import { useSectionMedia } from "@/components/SectionMediaEditor";
 import { useCart } from "@/hooks/useCart";
 

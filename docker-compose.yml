@@ -17,6 +17,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: sunnah-frontend:latest
     container_name: sunnah-frontend-1
     restart: unless-stopped
     environment:

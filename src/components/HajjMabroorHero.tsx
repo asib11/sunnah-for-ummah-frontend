@@ -1,7 +1,7 @@
 "use client";
 
 import { Sparkles, ArrowUpRight } from "lucide-react";
-const hajjHeroBg = "/assets/hajj-hero-bg.jpg";
+const hajjHeroBg = "/assets/hajj-hero-bg.webp";
 
 const HajjMabroorHero = () => {
   return (

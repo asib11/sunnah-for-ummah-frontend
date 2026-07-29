@@ -11,8 +11,8 @@ import Seo from "@/components/Seo";
 import QuickViewDialog, { type QuickViewProduct } from "@/components/QuickViewDialog";
 import { storeApi } from "@/lib/api";
 
-import decorPlaque from "@/assets/decor_plaque.png";
-import decorRehal from "@/assets/decor_rehal.png";
+import decorPlaque from "@/assets/decor_plaque.webp";
+import decorRehal from "@/assets/decor_rehal.webp";
 
 const staticProducts: QuickViewProduct[] = [
   {

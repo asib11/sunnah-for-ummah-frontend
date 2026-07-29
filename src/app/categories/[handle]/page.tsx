@@ -8,10 +8,10 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 
 // Fallback images
-import product1 from "@/assets/product-1.jpg";
-import product2 from "@/assets/product-2.jpg";
-import product3 from "@/assets/product-3.jpg";
-import product4 from "@/assets/product-4.jpg";
+import product1 from "@/assets/product-1.webp";
+import product2 from "@/assets/product-2.webp";
+import product3 from "@/assets/product-3.webp";
+import product4 from "@/assets/product-4.webp";
 
 const fallbackProducts = [
   { name: "Premium Black Embroidered Panjabi", price: 2490, image: product1.src, badge: "New" as const },

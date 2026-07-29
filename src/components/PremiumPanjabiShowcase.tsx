@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { ArrowUpRight, Sparkles, Crown, Star } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/hooks/useCart";
-const product1 = "/assets/product-1.jpg";
-const product4 = "/assets/product-4.jpg";
-const product6 = "/assets/product-6.jpg";
-const catPanjabi = "/assets/cat-panjabi.jpg";
+const product1 = "/assets/product-1.webp";
+const product4 = "/assets/product-4.webp";
+const product6 = "/assets/product-6.webp";
+const catPanjabi = "/assets/cat-panjabi.webp";
 
 type Panjabi = {
   id: string;

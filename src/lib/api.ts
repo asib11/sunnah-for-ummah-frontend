@@ -2,10 +2,18 @@
 const NEXT_PUBLIC_MEDUSA_BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
 const NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || "";
 
-// Ensure URL does not end with a slash for consistent path concatenation
-const BASE_URL = NEXT_PUBLIC_MEDUSA_BACKEND_URL.endsWith("/")
-  ? NEXT_PUBLIC_MEDUSA_BACKEND_URL.slice(0, -1)
-  : NEXT_PUBLIC_MEDUSA_BACKEND_URL;
+// On server-side (Next.js SSR/RSC), use INTERNAL_MEDUSA_URL (http://backend:8000) for instant internal networking
+const getBaseUrl = () => {
+  const url = (typeof window === "undefined" && process.env.INTERNAL_MEDUSA_URL)
+    ? process.env.INTERNAL_MEDUSA_URL
+    : NEXT_PUBLIC_MEDUSA_BACKEND_URL;
+  return url.endsWith("/") ? url.slice(0, -1) : url;
+};
+
+// Dynamic BASE_URL that resolves getBaseUrl() when evaluated in string templates
+const BASE_URL = {
+  toString: () => getBaseUrl()
+};
 
 const getDefaultHeaders = () => {
   const headers: Record<string, string> = {

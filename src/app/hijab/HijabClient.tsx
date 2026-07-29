@@ -11,10 +11,10 @@ import Seo from "@/components/Seo";
 import QuickViewDialog, { type QuickViewProduct } from "@/components/QuickViewDialog";
 import { storeApi } from "@/lib/api";
 
-import hijabCream from "@/assets/hijab_cream.png";
-import hijabEmerald from "@/assets/hijab_emerald.png";
-import hijabPink from "@/assets/hijab_pink.png";
-import hijabCharcoal from "@/assets/hijab_charcoal.png";
+import hijabCream from "@/assets/hijab_cream.webp";
+import hijabEmerald from "@/assets/hijab_emerald.webp";
+import hijabPink from "@/assets/hijab_pink.webp";
+import hijabCharcoal from "@/assets/hijab_charcoal.webp";
 
 const staticProducts: QuickViewProduct[] = [
   {

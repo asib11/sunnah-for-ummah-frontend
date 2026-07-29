@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
-const heroMasjidHaram = "/assets/hero-masjid-haram.jpg";
-const heroMasjidNabawi = "/assets/hero-masjid-nabawi.jpg";
-const heroAlAqsa = "/assets/hero-al-aqsa.jpg";
-const heroBlueMosque = "/assets/hero-blue-mosque.jpg";
-const heroSheikhZayed = "/assets/hero-sheikh-zayed.jpg";
+const heroMasjidHaram = "/assets/hero-masjid-haram.webp";
+const heroMasjidNabawi = "/assets/hero-masjid-nabawi.webp";
+const heroAlAqsa = "/assets/hero-al-aqsa.webp";
+const heroBlueMosque = "/assets/hero-blue-mosque.webp";
+const heroSheikhZayed = "/assets/hero-sheikh-zayed.webp";
 
 const heroImages = [
   heroMasjidHaram,

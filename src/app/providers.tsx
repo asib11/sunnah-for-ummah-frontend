@@ -7,7 +7,20 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useState } from "react";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            // Cache data for 5 minutes by default to eliminate duplicate requests across components
+            staleTime: 1000 * 60 * 5,
+            gcTime: 1000 * 60 * 30,
+            refetchOnWindowFocus: false,
+            retry: 1,
+          },
+        },
+      })
+  );
 
   return (
     <QueryClientProvider client={queryClient}>

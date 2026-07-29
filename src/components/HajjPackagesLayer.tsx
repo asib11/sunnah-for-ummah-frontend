@@ -52,7 +52,7 @@ const HajjPackagesLayer = ({ onNavigateToKit }: Props = {}) => {
         price: price,
         oldPrice: p.metadata?.oldPrice ? parseInt(p.metadata.oldPrice, 10) : undefined,
         badge: p.metadata?.badge,
-        image: p.thumbnail || "/assets/pkg-hajj-combo.jpg",
+        image: p.thumbnail || "/assets/pkg-hajj-combo.webp",
       };
     });
   }, [data]);

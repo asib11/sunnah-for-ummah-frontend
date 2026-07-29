@@ -9,13 +9,13 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { storeApi } from "@/lib/api";
 
-const imgNoor  = "/assets/panjabi-white-collar.jpg";
-const imgShahi = "/assets/panjabi-white-placket.jpg";
-const imgRawda = "/assets/panjabi-blue-cuff.jpg";
-const imgQamar = "/assets/panjabi-blue-collar.jpg";
-const imgZahra = "/assets/panjabi-maroon-embroidery.jpg";
-const imgAbyad = "/assets/panjabi-white-embroidery.jpg";
-const imgLayl  = "/assets/panjabi-navy-embroidery.jpg";
+const imgNoor  = "/assets/panjabi-white-collar.webp";
+const imgShahi = "/assets/panjabi-white-placket.webp";
+const imgRawda = "/assets/panjabi-blue-cuff.webp";
+const imgQamar = "/assets/panjabi-blue-collar.webp";
+const imgZahra = "/assets/panjabi-maroon-embroidery.webp";
+const imgAbyad = "/assets/panjabi-white-embroidery.webp";
+const imgLayl  = "/assets/panjabi-navy-embroidery.webp";
 
 type Look = {
   id: string;

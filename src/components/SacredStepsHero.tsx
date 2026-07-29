@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Star, CheckCircle2, ChevronDown } from "lucide-react";
-const kaaba = "/assets/kaaba-hero.jpg";
-const nabawi = "/assets/masjid-nabawi-hero.jpg";
-const arafat = "/assets/mount-arafat.jpg";
-const mina = "/assets/mina-tents.jpg";
+const kaaba = "/assets/kaaba-hero.webp";
+const nabawi = "/assets/masjid-nabawi-hero.webp";
+const arafat = "/assets/mount-arafat.webp";
+const mina = "/assets/mina-tents.webp";
 
 const slides = [
   { image: kaaba, label: "The Holy Kaaba — Mecca" },

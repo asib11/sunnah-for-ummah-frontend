@@ -11,7 +11,7 @@ import Seo from "@/components/Seo";
 import QuickViewDialog, { type QuickViewProduct } from "@/components/QuickViewDialog";
 import { storeApi } from "@/lib/api";
 
-import niqabBlack from "@/assets/niqab_black.png";
+import niqabBlack from "@/assets/niqab_black.webp";
 
 const staticProducts: QuickViewProduct[] = [
   {

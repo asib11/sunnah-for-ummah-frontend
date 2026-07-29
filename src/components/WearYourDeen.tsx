@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { ArrowUpRight, Eye, RotateCcw, Sparkles, Star } from "lucide-react";
 import { toast } from "sonner";
-const tshirtFront = "/assets/tawakkul-tshirt.png";
-const tshirtBack = "/assets/tawakkul-tshirt-back.png";
+const tshirtFront = "/assets/tawakkul-tshirt.webp";
+const tshirtBack = "/assets/tawakkul-tshirt-back.webp";
 import { useSectionMedia } from "@/components/SectionMediaEditor";
 import { useCart } from "@/hooks/useCart";
 

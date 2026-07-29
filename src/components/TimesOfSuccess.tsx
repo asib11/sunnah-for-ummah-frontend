@@ -8,8 +8,8 @@ import { useVideoTelemetry } from "@/hooks/useVideoTelemetry";
 import { useCart } from "@/hooks/useCart";
 
 const DEFAULT_VIDEO_URL = "/__l5e/assets-v1/72f6cdb8-9660-4985-bb33-91ed29176d52/times-of-success.mp4";
-const tshirtFront = "/assets/times-of-success-tshirt.png";
-const tshirtBack = "/assets/times-of-success-tshirt-back.png";
+const tshirtFront = "/assets/times-of-success-tshirt.webp";
+const tshirtBack = "/assets/times-of-success-tshirt-back.webp";
 
 type View = "front" | "back";
 

@@ -11,11 +11,11 @@ import WhatsAppFloat from "@/components/WhatsAppFloat";
 import Seo from "@/components/Seo";
 import { storeApi } from "@/lib/api";
 import { useCart } from "@/hooks/useCart";
-const blueCollar = "/assets/panjabi-blue-collar.jpg";
-const blueCuff = "/assets/panjabi-blue-cuff.jpg";
-const whitePlacket = "/assets/panjabi-white-placket.jpg";
-const whiteDetail = "/assets/panjabi-white-detail.jpg";
-const whiteCollar = "/assets/panjabi-white-collar.jpg";
+const blueCollar = "/assets/panjabi-blue-collar.webp";
+const blueCuff = "/assets/panjabi-blue-cuff.webp";
+const whitePlacket = "/assets/panjabi-white-placket.webp";
+const whiteDetail = "/assets/panjabi-white-detail.webp";
+const whiteCollar = "/assets/panjabi-white-collar.webp";
 
 type Panjabi = {
   id: string;

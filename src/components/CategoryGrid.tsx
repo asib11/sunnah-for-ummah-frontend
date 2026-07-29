@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-const catPanjabi = "/assets/cat-panjabi.jpg";
-const catThobe = "/assets/cat-thobe.jpg";
-const catTshirt = "/assets/cat-tshirt.jpg";
-const catKifaya = "/assets/cat-kifaya.jpg";
-const catAttar = "/assets/cat-attar.jpg";
-const catAccessories = "/assets/cat-accessories.jpg";
-const catWomens = "/assets/cat-womens.jpg";
+const catPanjabi = "/assets/cat-panjabi.webp";
+const catThobe = "/assets/cat-thobe.webp";
+const catTshirt = "/assets/cat-tshirt.webp";
+const catKifaya = "/assets/cat-kifaya.webp";
+const catAttar = "/assets/cat-attar.webp";
+const catAccessories = "/assets/cat-accessories.webp";
+const catWomens = "/assets/cat-womens.webp";
 
 const categories = [
   { name: "Premium Panjabi", image: catPanjabi, desc: "Handcrafted elegance" },
