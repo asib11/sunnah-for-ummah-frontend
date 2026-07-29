@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import logoSfu from "@/assets/logo-sfu.png";
+const LOGO_CDN = "https://res.cloudinary.com/mhkmpeii/image/upload/v1785232212/Sunnah_For_Ummah_Logo_nhelr2.png";
 import { useCart } from "@/hooks/useCart";
 
 const CrescentStar = ({ className }: { className?: string }) => (
@@ -176,7 +176,7 @@ const Header = () => {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 md:gap-3 min-w-0 hover:opacity-90 transition-opacity">
           <img
-            src={logoSfu.src}
+            src={LOGO_CDN}
             alt="Sunnah For Ummah logo"
             className="w-12 h-12 md:w-14 md:h-14 rounded-full object-cover shadow-md ring-1 ring-primary/20"
           />

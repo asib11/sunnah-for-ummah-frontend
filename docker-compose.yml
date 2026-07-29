@@ -1,0 +1,34 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  Sunnah For Ummah — Frontend Deployment
+#
+#  Usage (from this folder):
+#    Build & start:   docker compose up --build -d
+#    Rebuild only:    docker compose build --no-cache
+#    Logs:            docker compose logs -f
+#    Stop:            docker compose down
+#
+#  The container joins the existing sunnah_sunnah-net so that sunnah_nginx
+#  (managed by /root/sunnah/docker-compose.prod.yml) can proxy to it.
+#  The nginx config that serves sunnahforummah.shop lives in ./nginx/nginx.conf
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sunnah-frontend-1
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+    expose:
+      - "3000"
+    networks:
+      - sunnah-net
+
+networks:
+  # Join the existing shared network so sunnah_nginx can reach this container
+  sunnah-net:
+    external: true
+    name: sunnah_sunnah-net
