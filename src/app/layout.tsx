@@ -22,7 +22,7 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
-const LOGO_CDN = "https://res.cloudinary.com/mhkmpeii/image/upload/v1785232212/Sunnah_For_Ummah_Logo_nhelr2.png";
+const LOGO_CDN = "https://res.cloudinary.com/mhkmpeii/image/upload/v1785468127/Sunnah_For_Ummah_Logo_-_fnl_ux0oyy.png";
 
 export const metadata: Metadata = {
   title: "Sunnah for Ummah - Islamic Clothing & Accessories",

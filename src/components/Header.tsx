@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-const LOGO_CDN = "https://res.cloudinary.com/mhkmpeii/image/upload/v1785232212/Sunnah_For_Ummah_Logo_nhelr2.png";
+const LOGO_CDN = "https://res.cloudinary.com/mhkmpeii/image/upload/v1785468127/Sunnah_For_Ummah_Logo_-_fnl_ux0oyy.png";
 import { useCart } from "@/hooks/useCart";
 
 const CrescentStar = ({ className }: { className?: string }) => (
