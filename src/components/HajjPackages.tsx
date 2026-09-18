@@ -6,14 +6,14 @@ import { Check, Star, CheckCircle2, Upload, X, ChevronLeft, ChevronRight, Settin
 import { toast } from "sonner";
 import { useCart } from "@/hooks/useCart";
 import HajjKitDetails from "./HajjKitDetails";
-const hajjHeroBg = "/assets/hajj-hero-bg.jpg";
-const pkgHajjCombo = "/assets/pkg-hajj-combo.jpg";
-const pkgHajjMen = "/assets/pkg-hajj-men.jpg";
-const pkgHajjMenPremium = "/assets/pkg-hajj-men-premium.jpg";
-const pkgHajjWomen = "/assets/pkg-hajj-women.jpg";
-const pkgUmrahCombo = "/assets/pkg-umrah-combo.jpg";
-const pkgUmrahMen = "/assets/pkg-umrah-men.jpg";
-const pkgUmrahWomen = "/assets/pkg-umrah-women.jpg";
+const hajjHeroBg = "/assets/hajj-hero-bg.webp";
+const pkgHajjCombo = "/assets/pkg-hajj-combo.webp";
+const pkgHajjMen = "/assets/pkg-hajj-men.webp";
+const pkgHajjMenPremium = "/assets/pkg-hajj-men-premium.webp";
+const pkgHajjWomen = "/assets/pkg-hajj-women.webp";
+const pkgUmrahCombo = "/assets/pkg-umrah-combo.webp";
+const pkgUmrahMen = "/assets/pkg-umrah-men.webp";
+const pkgUmrahWomen = "/assets/pkg-umrah-women.webp";
 
 type Package = {
   title: string;

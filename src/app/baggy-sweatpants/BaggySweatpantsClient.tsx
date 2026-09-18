@@ -10,7 +10,7 @@ import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
 import QuickViewDialog, { type QuickViewProduct } from "@/components/QuickViewDialog";
 import { storeApi } from "@/lib/api";
-import { baggyPantsProducts } from "@/data/products";
+import ProductCardSkeleton from "@/components/skeletons/ProductCardSkeleton";
 
 // ---------------------------------------------------------------------------
 // Live-data fetcher: resolves category handle → products with real variant IDs
@@ -18,7 +18,7 @@ import { baggyPantsProducts } from "@/data/products";
 function useBaggySweatpantsProducts() {
   return useQuery<QuickViewProduct[]>({
     queryKey: ["products-category", "baggy-sweatpants"],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       // Try the most likely category handles in priority order
       const candidateHandles = [
         "baggy-sweatpants",
@@ -29,7 +29,7 @@ function useBaggySweatpantsProducts() {
 
       for (const handle of candidateHandles) {
         try {
-          const data = await storeApi.getProductsByCategoryHandle(handle);
+          const data = await storeApi.getProductsByCategoryHandle(handle, { signal });
           const products: any[] = data.products ?? [];
           if (products.length > 0) {
             return mapMedusaProducts(products);
@@ -126,9 +126,8 @@ const BaggySweatpantsPage = () => {
 
   const { data: liveProducts, isLoading } = useBaggySweatpantsProducts();
 
-  // Use live products when available; fall back to static list (no variantIds)
-  const displayProducts =
-    liveProducts && liveProducts.length > 0 ? liveProducts : baggyPantsProducts;
+  // Use live products when available
+  const displayProducts = liveProducts ?? [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -159,9 +158,9 @@ const BaggySweatpantsPage = () => {
 
       <section className="container mx-auto px-4 py-14">
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-pulse">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-muted rounded-xl aspect-[4/5]" />
+              <ProductCardSkeleton key={i} />
             ))}
           </div>
         ) : (

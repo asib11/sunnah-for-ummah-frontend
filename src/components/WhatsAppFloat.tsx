@@ -7,11 +7,11 @@ const WhatsAppFloat = () => {
   const phoneNumber = "8801830663523";
   const message = encodeURIComponent("Assalamu Alaikum! I have a question about your products.");
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-  const { count } = useCart();
+  const { totalItems } = useCart();
 
   // When the sticky cart bar is visible on mobile, lift WhatsApp higher so
   // their tap targets never overlap. Includes iOS safe-area insets.
-  const mobileBottom = count > 0
+  const mobileBottom = totalItems > 0
     ? "calc(6.75rem + env(safe-area-inset-bottom))"
     : "calc(1.5rem + env(safe-area-inset-bottom))";
 

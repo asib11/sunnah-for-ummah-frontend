@@ -11,16 +11,16 @@ import SabrShowcase from "@/components/SabrShowcase";
 import BaggySweatpants from "@/components/BaggySweatpants";
 import BaggySweatpantsWhite from "@/components/BaggySweatpantsWhite";
 import BaggySweatpantsWashed from "@/components/BaggySweatpantsWashed";
-const heroMasjidHaram = "/assets/hero-masjid-haram.jpg";
-const heroMasjidNabawi = "/assets/hero-masjid-nabawi.jpg";
-const heroQubaMosque = "/assets/hero-quba-mosque.jpg";
-const heroUmayyadMosque = "/assets/hero-umayyad-mosque.jpg";
-const heroKairouanMosque = "/assets/hero-kairouan-mosque.jpg";
-const heroCordobaMezquita = "/assets/hero-cordoba-mezquita.jpg";
-const heroAlhambra = "/assets/hero-alhambra.jpg";
-const heroSamarraMinaret = "/assets/hero-samarra-minaret.jpg";
-const heroBadshahiMosque = "/assets/hero-badshahi-mosque.jpg";
-const hajjHeroBg = "/assets/hajj-hero-bg.jpg";
+const heroMasjidHaram = "/assets/hero-masjid-haram.webp";
+const heroMasjidNabawi = "/assets/hero-masjid-nabawi.webp";
+const heroQubaMosque = "/assets/hero-quba-mosque.webp";
+const heroUmayyadMosque = "/assets/hero-umayyad-mosque.webp";
+const heroKairouanMosque = "/assets/hero-kairouan-mosque.webp";
+const heroCordobaMezquita = "/assets/hero-cordoba-mezquita.webp";
+const heroAlhambra = "/assets/hero-alhambra.webp";
+const heroSamarraMinaret = "/assets/hero-samarra-minaret.webp";
+const heroBadshahiMosque = "/assets/hero-badshahi-mosque.webp";
+const hajjHeroBg = "/assets/hajj-hero-bg.webp";
 
 type Showcase = {
   eyebrow: string;
@@ -351,7 +351,7 @@ const KineticHero = () => {
               <div
                 key={i}
                 data-index={i}
-                ref={(el) => (panelRefs.current[i] = el)}
+                ref={(el) => { panelRefs.current[i] = el; }}
                 className="relative h-[55svh] sm:h-[60vh] min-h-[320px] sm:min-h-[400px] overflow-hidden rounded-2xl group"
               >
                 <img

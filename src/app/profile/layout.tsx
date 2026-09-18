@@ -16,7 +16,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
   
   const { data: customer, isLoading, isError } = useQuery({
     queryKey: ["customer"],
-    queryFn: () => authApi.getCustomer().then(res => res.customer || res),
+    queryFn: ({ signal }) => authApi.getCustomer({ signal }).then(res => res.customer || res),
     retry: false,
     staleTime: 5 * 60 * 1000, // 5 minutes
   });

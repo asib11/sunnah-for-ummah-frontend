@@ -7,7 +7,7 @@ import { useSectionMedia } from "@/components/SectionMediaEditor";
 import { useCart } from "@/hooks/useCart";
 
 const DEFAULT_VIDEO_URL = "/__l5e/assets-v1/4486d18a-d56c-414d-82b2-37bdc0cfcf73/baggy-sweatpants-black-cinematic.mp4";
-const sweatpantsImage = "/assets/baggy-sweatpants-black.png";
+const sweatpantsImage = "/assets/baggy-sweatpants-black.webp";
 
 const BAGGY_BLACK = { id: "baggy-sweatpants-black", name: "Baggy Sweatpants — Black", price: 1890 };
 
@@ -44,7 +44,7 @@ const BaggySweatpants = () => {
         playsInline
         className="absolute inset-0 w-full h-full object-cover opacity-70 transition-transform duration-[2000ms] ease-out group-hover:scale-110"
       />
-            
+
       <div className="absolute inset-0 bg-gradient-to-t from-foreground via-foreground/60 to-foreground/70" />
       <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/30 to-foreground/70" />
 

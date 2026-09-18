@@ -7,7 +7,7 @@ import { useSectionMedia } from "@/components/SectionMediaEditor";
 import { useCart } from "@/hooks/useCart";
 
 const DEFAULT_VIDEO_URL = "/__l5e/assets-v1/25c16652-f863-42f1-9f0a-7287e853718e/baggy-sweatpants-white-cinematic-v2.mp4";
-const sweatpantsImage = "/assets/baggy-sweatpants-white.png";
+const sweatpantsImage = "/assets/baggy-sweatpants-white.webp";
 
 const BAGGY_IVORY = { id: "baggy-sweatpants-ivory", name: "Baggy Sweatpants — Ivory", price: 1890 };
 

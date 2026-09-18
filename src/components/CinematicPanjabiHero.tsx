@@ -8,14 +8,15 @@ import { useCart } from "@/hooks/useCart";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { storeApi } from "@/lib/api";
+import ProductDetailSkeleton from "@/components/skeletons/ProductDetailSkeleton";
 
-const imgNoor  = "/assets/panjabi-white-collar.jpg";
-const imgShahi = "/assets/panjabi-white-placket.jpg";
-const imgRawda = "/assets/panjabi-blue-cuff.jpg";
-const imgQamar = "/assets/panjabi-blue-collar.jpg";
-const imgZahra = "/assets/panjabi-maroon-embroidery.jpg";
-const imgAbyad = "/assets/panjabi-white-embroidery.jpg";
-const imgLayl  = "/assets/panjabi-navy-embroidery.jpg";
+const imgNoor  = "/assets/panjabi-white-collar.webp";
+const imgShahi = "/assets/panjabi-white-placket.webp";
+const imgRawda = "/assets/panjabi-blue-cuff.webp";
+const imgQamar = "/assets/panjabi-blue-collar.webp";
+const imgZahra = "/assets/panjabi-maroon-embroidery.webp";
+const imgAbyad = "/assets/panjabi-white-embroidery.webp";
+const imgLayl  = "/assets/panjabi-navy-embroidery.webp";
 
 type Look = {
   id: string;
@@ -27,15 +28,7 @@ type Look = {
   swatches: string[];
 };
 
-const STATIC_LOOKS: Look[] = [
-  { id: "noor",   name: "Noor — Onyx",         word: "NOOR",   fabric: "Hand-loom Cotton Silk",     price: 3490, image: imgNoor,  swatches: ["#0d0d0d", "#1f2937", "#6b7280"] },
-  { id: "zahra",  name: "Zahra — Maroon",      word: "ZAHRA",  fabric: "Crinkle Silk · Aari Work",  price: 3690, image: imgZahra, swatches: ["#6b1f2a", "#8b2a3a", "#c9a857"] },
-  { id: "shahi",  name: "Shahi — Silver",      word: "SHAHI",  fabric: "Embroidered Pure Cotton",   price: 2990, image: imgShahi, swatches: ["#e5e7eb", "#94a3b8", "#475569"] },
-  { id: "abyad",  name: "Abyad — Ivory",       word: "ABYAD",  fabric: "Cotton · Pearl Embroidery", price: 3190, image: imgAbyad, swatches: ["#f5f0e6", "#d9c9a8", "#b89968"] },
-  { id: "rawda",  name: "Rawda — Warm Sand",   word: "RAWDA",  fabric: "Breathable Soft Cotton",    price: 2490, image: imgRawda, swatches: ["#c9b99a", "#a8896b", "#6b4f3a"] },
-  { id: "layl",   name: "Layl — Midnight",     word: "LAYL",   fabric: "Crepe · Silver Threadwork", price: 3590, image: imgLayl,  swatches: ["#0b1c3a", "#1e2a4a", "#cbd5e1"] },
-  { id: "qamar",  name: "Qamar — Moonlight",   word: "QAMAR",  fabric: "Royal Linen Blend",         price: 3290, image: imgQamar, swatches: ["#0b1c3a", "#0f3460", "#1e3a8a"] },
-];
+
 
 // Swatch palettes cycled for API products that have no colour data
 const SWATCH_PALETTE = [
@@ -181,16 +174,15 @@ const CinematicPanjabiHero = () => {
   const [active, setActive] = useState(0);
   const { addToCart, isAdding } = useCart();
 
-  // Fetch live Hajj Kit products from Medusa
-  const { data } = useQuery({
-    queryKey: ["products", "category", "hajj-kit"],
-    queryFn: () => storeApi.getProductsByCategoryHandle("hajj-kit"),
+  // Fetch live Hajj Packages from Medusa
+  const { data, isLoading } = useQuery({
+    queryKey: ["products", "category", "packages"],
+    queryFn: ({ signal }) => storeApi.getProductsByCategoryHandle("packages", { signal }),
     staleTime: 1000 * 60 * 5,
   });
 
   const LOOKS = useMemo(() => {
     const apiProducts: any[] = data?.products ?? [];
-    if (apiProducts.length === 0) return STATIC_LOOKS;
     return apiProducts.slice(0, 10).map((p, i) => medusaToLook(p, i));
   }, [data]);
 
@@ -208,10 +200,6 @@ const CinematicPanjabiHero = () => {
     }
   };
 
-  
-
-
-
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[hsl(40_40%_96%)] via-[hsl(40_30%_92%)] to-[hsl(157_18%_88%)] py-10 sm:py-16 md:py-24">
       {/* Warm golden halo */}
@@ -226,23 +214,10 @@ const CinematicPanjabiHero = () => {
       <div aria-hidden className="absolute inset-0 opacity-[0.05] bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22120%22 height=%22120%22 viewBox=%220 0 120 120%22><path fill=%22none%22 stroke=%22%23b8924a%22 stroke-width=%220.5%22 d=%22M60 4 L72 48 L116 60 L72 72 L60 116 L48 72 L4 60 L48 48 Z%22/></svg>')] bg-[length:120px_120px]" />
 
       <div className="container relative z-10 mx-auto px-4">
-        {/* Eyebrow */}
-        <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8 px-2">
-          <span className="hidden sm:block h-px w-10 bg-gradient-to-r from-transparent to-[hsl(41_64%_56%)]" />
-          <Crown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[hsl(41_64%_56%)] shrink-0" />
-          <span className="font-body text-[8px] sm:text-[10px] uppercase tracking-[0.3em] sm:tracking-[0.6em] text-[hsl(157_35%_28%)] text-center">
-            The Falling Drop · Panjabi Atelier
-          </span>
-          <Crown className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[hsl(41_64%_56%)] shrink-0" />
-          <span className="hidden sm:block h-px w-10 bg-gradient-to-l from-transparent to-[hsl(41_64%_56%)]" />
-        </div>
-
-
         {/* Stage — cinematic browser */}
         <div className="relative mx-auto max-w-6xl rounded-2xl sm:rounded-[28px] overflow-hidden border border-[hsl(41_50%_70%/0.4)] bg-gradient-to-br from-[hsl(40_50%_98%)] via-[hsl(40_35%_95%)] to-[hsl(157_18%_92%)] shadow-[0_40px_120px_-30px_hsl(157_40%_25%/0.35)] backdrop-blur-sm">
           {/* fake browser top */}
           <div className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-3 border-b border-[hsl(41_50%_70%/0.3)] bg-gradient-to-r from-[hsl(40_40%_96%)] via-[hsl(40_35%_94%)] to-[hsl(40_40%_96%)]">
-
             <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(0_60%_55%)]" />
             <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(41_64%_56%)]" />
             <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[hsl(157_60%_50%)]" />
@@ -257,10 +232,12 @@ const CinematicPanjabiHero = () => {
                 <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </span>
             </Link>
-
           </div>
 
-          <div className="p-4 sm:p-6 md:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+          {isLoading || LOOKS.length === 0 ? (
+            <ProductDetailSkeleton />
+          ) : (
+            <div className="p-4 sm:p-6 md:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
             {/* Details — left */}
             <div className="md:col-span-4 order-2 md:order-1 flex flex-col justify-center">
               <AnimatePresence mode="wait">
@@ -337,6 +314,7 @@ const CinematicPanjabiHero = () => {
               ))}
             </div>
           </div>
+          )}
         </div>
       </div>
     </section>

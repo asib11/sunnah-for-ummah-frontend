@@ -8,7 +8,7 @@ import { useVideoTelemetry } from "@/hooks/useVideoTelemetry";
 import { useCart } from "@/hooks/useCart";
 
 const DEFAULT_VIDEO_URL = "/__l5e/assets-v1/caaf452b-81a9-444d-ac95-61aed01263ff/sabr-cinematic.mp4";
-const sabrImage = "/assets/sabr-tshirt-front-back.png";
+const sabrImage = "/assets/sabr-tshirt-front-back.webp";
 
 type View = "front" | "back";
 

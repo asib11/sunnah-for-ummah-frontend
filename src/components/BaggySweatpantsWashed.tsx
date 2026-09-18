@@ -7,7 +7,7 @@ import { useSectionMedia } from "@/components/SectionMediaEditor";
 import { useCart } from "@/hooks/useCart";
 
 const DEFAULT_VIDEO_URL = "/__l5e/assets-v1/f702bbd6-3828-4cff-b3a8-b2111b186ad0/baggy-sweatpants-washed-cinematic.mp4";
-const sweatpantsImage = "/assets/baggy-sweatpants-washed.png";
+const sweatpantsImage = "/assets/baggy-sweatpants-washed.webp";
 
 const BAGGY_WASHED = { id: "baggy-sweatpants-washed", name: "Baggy Sweatpants — Washed", price: 1890 };
 

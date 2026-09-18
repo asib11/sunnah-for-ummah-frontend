@@ -27,7 +27,7 @@ const POS_STORAGE_KEY = "hajj-pkg-bubble-positions-v1";
 const HajjPackagesLayer = ({ onNavigateToKit }: Props = {}) => {
   const { data, isLoading } = useQuery({
     queryKey: ["hajj-packages"],
-    queryFn: () => storeApi.getProductsByCategoryHandle("packages"),
+    queryFn: ({ signal }) => storeApi.getProductsByCategoryHandle("packages", { signal }),
   });
 
   const packages: Pkg[] = useMemo(() => {
@@ -52,7 +52,7 @@ const HajjPackagesLayer = ({ onNavigateToKit }: Props = {}) => {
         price: price,
         oldPrice: p.metadata?.oldPrice ? parseInt(p.metadata.oldPrice, 10) : undefined,
         badge: p.metadata?.badge,
-        image: p.thumbnail || "/assets/pkg-hajj-combo.jpg",
+        image: p.thumbnail || "/assets/pkg-hajj-combo.webp",
       };
     });
   }, [data]);

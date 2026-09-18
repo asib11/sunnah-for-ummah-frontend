@@ -122,8 +122,8 @@ export function useProductsByCategory(
 ) {
   return useQuery<QuickViewProduct[]>({
     queryKey: ["products-by-category", categoryHandle],
-    queryFn: async () => {
-      const data = await storeApi.getProductsByCategoryHandle(categoryHandle);
+    queryFn: async ({ signal }) => {
+      const data = await storeApi.getProductsByCategoryHandle(categoryHandle, { signal });
       const medusaProducts: MedusaProduct[] = data.products ?? [];
       return medusaProducts.map((p) =>
         medusaProductToQuickView(p, staticFallbacks?.[p.handle] ?? {})

@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useSectionMedia } from "@/components/SectionMediaEditor";
 import { useCart } from "@/hooks/useCart";
 
-const tshirtImage = "/assets/muslim-tshirt-front-back.png";
+const tshirtImage = "/assets/muslim-tshirt-front-back.webp";
 const DEFAULT_VIDEO_URL = "/calligraphy-showcase.mp4";
 
 type View = "front" | "back";
