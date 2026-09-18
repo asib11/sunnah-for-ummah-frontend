@@ -174,10 +174,10 @@ const CinematicPanjabiHero = () => {
   const [active, setActive] = useState(0);
   const { addToCart, isAdding } = useCart();
 
-  // Fetch live Hajj Kit products from Medusa
+  // Fetch live Hajj Packages from Medusa
   const { data, isLoading } = useQuery({
-    queryKey: ["products", "category", "hajj-kit"],
-    queryFn: ({ signal }) => storeApi.getProductsByCategoryHandle("hajj-kit", { signal }),
+    queryKey: ["products", "category", "packages"],
+    queryFn: ({ signal }) => storeApi.getProductsByCategoryHandle("packages", { signal }),
     staleTime: 1000 * 60 * 5,
   });
 
